@@ -39,40 +39,100 @@ import { mulberry32 } from "./mock/rng";
 import { startLiveSession } from "./mock/live-engine";
 import { CURRENT_GAMEWEEK } from "@/lib/game/rules";
 import { latency, mockMode } from "./mock/config";
+import { createRealFeed } from "./live/feed";
+import { fetchCandles } from "./live/jupiter";
 
 export type * from "./types";
 export { DEFAULT_LEAGUE_ID };
 
+/* ---------------- Market source ----------------
+ * "real": live xStock prices from Solana mainnet (Jupiter, free, no key).
+ * "sim":  the simulated 24/7 market. Used in demo mode (fast moves for
+ *         recordings) and with `?mock=sim`. Live gameweek scoring stays on
+ *         the simulated feed until onchain settlement lands.
+ */
+export type MarketSource = "real" | "sim";
+let wantReal = true;
+const realFeed = createRealFeed(MOCK_STOCKS);
+
+export function marketSource(): MarketSource {
+  return wantReal && mockMode() !== "sim" ? "real" : "sim";
+}
+
+async function realPrices(): Promise<PriceMap | null> {
+  try {
+    return await realFeed.latest();
+  } catch {
+    return null;
+  }
+}
+
 /* ---------------- Stocks ---------------- */
 
+function withPrices(prices: PriceMap | null): Stock[] {
+  const sim = prices ? null : snapshotPrices(Date.now());
+  return MOCK_STOCKS.map((s) => {
+    const p = prices?.[s.id] ?? (prices ? { price: s.price, change24h: 0 } : sim![s.id]);
+    return { ...s, price: p.price, change24h: p.change24h };
+  });
+}
+
 export async function getStocks(): Promise<Stock[]> {
+  if (marketSource() === "real" && mockMode() === "normal") return withPrices(await realPrices());
   await latency();
-  const live = snapshotPrices(Date.now());
-  return MOCK_STOCKS.map((s) => ({ ...s, price: live[s.id].price, change24h: live[s.id].change24h }));
+  return withPrices(null);
 }
 
 export async function getStock(id: string): Promise<Stock | undefined> {
-  await latency(150);
-  const s = MOCK_STOCKS_BY_ID[id];
-  if (!s) return undefined;
-  const live = snapshotPrices(Date.now())[id];
-  return { ...s, price: live.price, change24h: live.change24h };
+  const all = await getStocks();
+  return all.find((s) => s.id === id);
 }
 
 export async function getStockChart(id: string, range: ChartRange): Promise<PricePoint[]> {
+  const s = MOCK_STOCKS_BY_ID[id];
+  if (s && marketSource() === "real" && mockMode() === "normal") return fetchCandles(s.mint, range);
   await latency(250);
   return chartSeries(id, range, Date.now());
 }
 
-/** 24h sparkline per stock, 24 points each. */
+const sparkCache: { at: number; data: Record<string, number[]> } = { at: 0, data: {} };
+
+/** 24h sparkline per stock (about 24 points each). Thin stocks may have none. */
 export async function getSparklines(): Promise<Record<string, number[]>> {
   const now = Date.now();
-  return Object.fromEntries(MOCK_STOCKS.map((s) => [s.id, chartSeries(s.id, "1D", now).filter((_, i) => i % 4 === 0).map((p) => p.price)]));
+  if (marketSource() === "sim" || mockMode() !== "normal") {
+    return Object.fromEntries(MOCK_STOCKS.map((s) => [s.id, chartSeries(s.id, "1D", now).filter((_, i) => i % 4 === 0).map((p) => p.price)]));
+  }
+  if (now - sparkCache.at < 10 * 60_000) return sparkCache.data;
+  const out: Record<string, number[]> = {};
+  const queue = [...MOCK_STOCKS];
+  // A few requests at a time to stay polite with the free API.
+  await Promise.all(
+    Array.from({ length: 6 }, async () => {
+      for (let s = queue.shift(); s; s = queue.shift()) {
+        try {
+          const pts = await fetchCandles(s.mint, "1D", now);
+          const step = Math.max(1, Math.floor(pts.length / 24));
+          const line = pts.filter((_, i) => i % step === 0).map((p) => p.price);
+          if (line.length >= 4) out[s.id] = line;
+        } catch {
+          /* no sparkline for this one */
+        }
+      }
+    }),
+  );
+  sparkCache.at = now;
+  sparkCache.data = out;
+  return out;
 }
 
 /* ---------------- Live prices ---------------- */
 
 export async function getLivePrices(): Promise<PriceMap> {
+  if (marketSource() === "real") {
+    const p = await realPrices();
+    if (p) return p;
+  }
   return snapshotPrices(Date.now());
 }
 
@@ -86,8 +146,9 @@ function emitPrices() {
   for (const l of priceListeners) l(lastPrices);
 }
 
-/** Live price feed, one update per second. Returns an unsubscribe function. */
+/** Live price feed. Real prices poll every few seconds; the simulated market ticks every second. */
 export function subscribeLivePrices(listener: (p: PriceMap) => void): () => void {
+  if (marketSource() === "real") return realFeed.subscribe(listener);
   priceListeners.add(listener);
   listener(lastPrices ?? snapshotPrices(Date.now()));
   if (priceListeners.size === 1) {
@@ -326,8 +387,9 @@ export async function getProofStats(): Promise<ProofStats> {
 /* ---------------- Demo controls ---------------- */
 
 /** Demo mode runs the simulated market fast. Real mode runs it at real speed. */
-export function configureMarket(opts: { fast: boolean }) {
+export function configureMarket(opts: { fast: boolean; real?: boolean }) {
   setMarketSpeed(opts.fast);
+  wantReal = opts.real ?? !opts.fast;
   lastPrices = null;
 }
 

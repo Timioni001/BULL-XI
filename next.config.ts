@@ -1,12 +1,13 @@
 import type { NextConfig } from "next";
 
+/**
+ * Static export: the whole site is plain files served by Cloudflare Workers
+ * Static Assets on the free plan. No server routes; all data loads client-side
+ * through lib/data/.
+ */
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-  partialPrefetching: true,
-  // The share card reads these at request time.
-  outputFileTracingIncludes: {
-    "/api/card": ["./assets/fonts/**", "./public/logo-white.png"],
-  },
+  output: "export",
+  images: { unoptimized: true },
   turbopack: {
     rules: {
       "*.css": {

@@ -9,17 +9,16 @@ export const routes = {
   lock: "/app/lock",
   live: "/app/live",
   leagues: "/app/leagues",
-  league: (id: string) => `/app/leagues/${encodeURIComponent(id)}`,
-  join: (code: string) => `/join/${encodeURIComponent(code)}`,
+  league: (id: string) => `/app/league?id=${encodeURIComponent(id)}`,
+  join: (code: string) => `/join?code=${encodeURIComponent(code)}`,
   transfers: "/app/transfers",
   chips: "/app/chips",
   history: "/app/history",
   profile: "/app/profile",
   pro: "/app/pro",
-  shareCard: "/api/card",
 } as const;
 
 export const external = {
   magicblockDocs: "https://docs.magicblock.gg",
-  solanaExplorer: (address: string) => `https://explorer.solana.com/address/${address}`,
+  solanaExplorer: (address: string) => `https://explorer.solana.com/address/${address}?cluster=devnet`,
 } as const;

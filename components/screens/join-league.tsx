@@ -16,7 +16,7 @@ import { EmptyState, ErrorState, Shimmer } from "@/components/states/states";
 
 const t = copy.leagues.joinPage;
 
-/** Landing spot for invite links: /join/CODE */
+/** Landing spot for invite links: /join?code=CODE */
 export function JoinLeague({ code }: { code: string }) {
   const router = useRouter();
   const preview = useAsync(() => getLeagueByCode(code));

@@ -21,6 +21,8 @@ export interface Stock {
   id: string;
   /** Display ticker, e.g. "NVDAx" */
   ticker: string;
+  /** Mainnet token mint of the xStock, used for live prices */
+  mint: string;
   name: string;
   sector: Sector;
   position: Position;
