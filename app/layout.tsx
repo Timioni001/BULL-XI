@@ -21,16 +21,6 @@ const archivo = localFont({
   weight: "100 900",
   display: "swap",
   declarations: [{ prop: "font-stretch", value: "62% 125%" }],
-  // Not needed for first paint on the landing page; loads as soon as CSS asks for it.
-  preload: false,
-});
-
-// Editorial serif for the landing page.
-const instrumentSerif = localFont({
-  src: "../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2",
-  weight: "400",
-  variable: "--font-instrument-serif",
-  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -53,7 +43,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${GeistSans.variable} ${geistMono.variable} ${archivo.variable} ${instrumentSerif.variable}`}>
+    <html lang="en" className={`dark ${GeistSans.variable} ${geistMono.variable} ${archivo.variable}`}>
       <body className="min-h-dvh bg-background">
         <Providers>{children}</Providers>
       </body>

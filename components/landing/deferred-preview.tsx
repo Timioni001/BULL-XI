@@ -3,13 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
-const LivePreview = dynamic(() => import("./live-preview").then((m) => m.LivePreview), { ssr: false, loading: () => <Frame /> });
+const LivePreview = dynamic(() => import("./live-preview").then((m) => m.LivePreview), { ssr: false, loading: () => <div className="h-full bg-background" /> });
 
 /**
  * Mount the live preview only when it's mostly on screen and the browser is
  * idle, so the headline paints first and phones don't pay for it until they scroll.
  */
-export function DeferredPreview() {
+export function DeferredPreview({ bare, fallback }: { bare?: boolean; fallback?: React.ReactNode } = {}) {
   const [ready, setReady] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -23,12 +23,12 @@ export function DeferredPreview() {
         if (w.requestIdleCallback) w.requestIdleCallback(() => setReady(true), { timeout: 1500 });
         else setTimeout(() => setReady(true), 300);
       },
-      { threshold: 0.6 },
+      { threshold: 0.35 },
     );
     io.observe(node);
     return () => io.disconnect();
   }, []);
-  return <div ref={ref}>{ready ? <LivePreview /> : <Frame />}</div>;
+  return <div ref={ref} className={bare ? "h-full" : undefined}>{ready ? <LivePreview bare={bare} /> : (fallback ?? (bare ? <div className="h-full bg-background" /> : <Frame />))}</div>;
 }
 
 function Frame() {
