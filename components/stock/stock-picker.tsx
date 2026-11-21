@@ -112,7 +112,7 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
         <div className="flex items-end justify-between gap-3">
           <Vaul.Title className="font-display text-[34px] font-black uppercase leading-[0.92]">
             <span className="block">{replacing ? P.replaceShort : P.choose}</span>
-            <span className="block text-[#5c5c63]">{replacing ? replacing.ticker : label}</span>
+            <span className="block text-heading-muted">{replacing ? replacing.ticker : label}</span>
           </Vaul.Title>
           <div className="pb-1 text-right">
             <p className="num font-display text-2xl font-black leading-none">{credits(budget)}</p>
@@ -307,10 +307,10 @@ function FeatureCard({ stock, change, selected, disabledReason, onPick, onInfo }
       )}
     >
       <div className="flex items-center justify-between px-2 pt-1">
-        <span className={cn("truncate text-[11px] font-semibold uppercase tracking-wide", selected ? "text-brand-foreground/70" : "text-muted-foreground")}>
+        <span className={cn("truncate text-[11px] font-semibold uppercase tracking-wide", selected ? "text-brand-foreground" : "text-muted-foreground")}>
           {stock.sector} · {copy.positions[stock.position].label}
         </span>
-        <button onClick={onInfo} aria-label={`${stock.ticker} ${copy.common.details}`} className={cn("-mr-1 grid size-8 place-items-center rounded-full", selected ? "text-brand-foreground/70" : "text-muted-foreground")}>
+        <button onClick={onInfo} aria-label={`${stock.ticker} ${copy.common.details}`} className={cn("-mr-1 grid size-8 place-items-center rounded-full", selected ? "text-brand-foreground" : "text-muted-foreground")}>
           <Info className="size-4" />
         </button>
       </div>
@@ -322,7 +322,7 @@ function FeatureCard({ stock, change, selected, disabledReason, onPick, onInfo }
         </StockArt>
         <div className="px-2 pb-1 pt-3">
           <p className="truncate font-display text-[15px] font-black uppercase leading-tight">{stock.name}</p>
-          <p className={cn("font-mono text-xs", selected ? "text-brand-foreground/70" : "text-muted-foreground")}>{stock.ticker}</p>
+          <p className={cn("font-mono text-xs", selected ? "text-brand-foreground" : "text-muted-foreground")}>{stock.ticker}</p>
           <div className="mt-2 flex items-end justify-between">
             <div>
               <p className="num font-display text-[28px] font-black leading-none">{credits(stock.credits)}</p>

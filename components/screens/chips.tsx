@@ -101,7 +101,7 @@ export function Chips() {
                   </span>
                 </div>
                 <p className="relative mt-auto pt-4 font-display text-[22px] font-bold uppercase leading-tight">{copy.chipName[c]}</p>
-                <p className={cn("relative mt-1 text-[13px]", isActive ? "text-brand-foreground/70" : "text-muted-foreground")}>{t.details[c]}</p>
+                <p className={cn("relative mt-1 text-[13px]", isActive ? "text-brand-foreground" : "text-muted-foreground")}>{t.details[c]}</p>
               </motion.button>
             );
           })}

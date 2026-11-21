@@ -33,7 +33,7 @@ export function GoPro() {
       <PageHeader eyebrow={t.eyebrow} title={t.title} back={routes.profile} />
       <main className="flex flex-1 flex-col gap-3 px-4 pb-2 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6 lg:px-0 lg:pb-10">
         <div className="flex flex-col gap-3">
-          <section className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(150deg,#3a2216,#1a1614_60%)] p-6 ring-1 ring-inset ring-brand/40">
+          <section className="theme-dark relative overflow-hidden rounded-[28px] bg-[linear-gradient(150deg,#3a2216,#1a1614_60%)] p-6 ring-1 ring-inset ring-brand/40">
             <div aria-hidden className="absolute -right-14 -top-14 size-52 rotate-45 bg-brand/20" />
             <Crown className="relative size-7 text-gold" />
             <h2 className="relative mt-3 max-w-[16ch] font-display text-[34px] font-bold uppercase leading-[0.95] tracking-tight">{t.headline}</h2>

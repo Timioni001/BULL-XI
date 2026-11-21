@@ -109,7 +109,8 @@ export function History() {
                     <span className="rounded-full bg-surface-3 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">{e.kind === "daily" ? t.daily : t.flash}</span>
                     {e.chip && (
                       <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-semibold">
-                        <Sparkles className="size-3 text-brand" /> {copy.chipName[e.chip]}
+                        <Sparkles className="size-3 text-brand" aria-label={copy.chipName[e.chip]} />
+                        <span className="hidden sm:inline">{copy.chipName[e.chip]}</span>
                       </span>
                     )}
                   </span>

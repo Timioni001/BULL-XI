@@ -39,7 +39,7 @@ export function LivePreview({ bare }: { bare?: boolean } = {}) {
           <span className="size-1.5 animate-live-dot rounded-full bg-brand-foreground" /> {copy.live.pill}
         </span>
       </div>
-      <div className="mb-3 flex items-end justify-between rounded-3xl bg-[linear-gradient(160deg,#2a1d18,#111112_60%)] px-4 py-3 ring-1 ring-inset ring-brand/30">
+      <div className="theme-dark mb-3 flex items-end justify-between rounded-3xl bg-[linear-gradient(160deg,#2a1d18,#111112_60%)] px-4 py-3 ring-1 ring-inset ring-brand/30">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{copy.live.gwPoints}</p>
           {snapshot ? <PointsTicker value={snapshot.totalPoints} className="font-display text-[44px] font-bold leading-none tracking-tighter" /> : <Shimmer className="mt-1 h-10 w-20" />}
