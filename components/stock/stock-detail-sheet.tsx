@@ -3,7 +3,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Drawer as Vaul } from "vaul";
-import { getStockChart, type ChartRange, type Stock } from "@/lib/data";
+import { getStockChart, marketSource, type ChartRange, type Stock } from "@/lib/data";
 import { CURRENT_GAMEWEEK } from "@/lib/game/rules";
 import { copy } from "@/lib/copy";
 import { credits, ownership, pct, signed, tone } from "@/lib/format";
@@ -77,6 +77,7 @@ function DetailBody({ stock, actions }: { stock: Stock; actions?: DetailAction[]
         <div className="mt-5">
           <ChartBlock key={range} id={stock.id} range={range} />
           <Segmented id="chart-range" size="sm" className="mt-3" value={range} onChange={setRange} options={[{ value: "1D", label: d.range["1D"] }, { value: "1W", label: d.range["1W"] }]} />
+          <p className="mt-2 text-[11px] text-muted-foreground">{marketSource() === "real" ? d.sourceReal : d.sourceSim}</p>
         </div>
 
         <dl className="mt-5 grid grid-cols-3 gap-2">
@@ -131,6 +132,7 @@ function ChartBlock({ id, range }: { id: string; range: ChartRange }) {
   const chart = useAsync(() => getStockChart(id, range));
   if (chart.status === "error") return <ErrorState title={copy.errors.chart.title} message={copy.errors.chart.body} onRetry={chart.retry} className="py-6" />;
   if (chart.status === "loading") return <ChartSkeleton />;
+  if (chart.data.length < 2) return <p className="grid h-56 place-items-center rounded-xl bg-surface-2 px-6 text-center text-sm text-muted-foreground">{copy.detail.noChart}</p>;
   return <TradingChart data={chart.data} />;
 }
 

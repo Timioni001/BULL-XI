@@ -155,10 +155,13 @@ export const copy = {
     last5: "Last 5 gameweeks",
     range: { "1D": "1 day", "1W": "1 week" },
     now: "Now",
+    sourceReal: "Live price from Solana mainnet. Chart from onchain trades.",
+    sourceSim: "Demo market. Prices are simulated.",
+    noChart: "Not enough trades yet to draw a chart.",
   },
 
   search: {
-    placeholder: "Search 42 stocks",
+    placeholder: "Search 41 stocks",
     empty: "No stocks match that search.",
     hint: "Jump to any stock",
   },
@@ -457,10 +460,10 @@ export const copy = {
     rating: "Free to play · No sign-up · Real market prices",
     stats: [
       { v: "24/7", l: "Live gameweeks" },
-      { v: "42", l: "Stocks to pick" },
+      { v: "41", l: "Stocks to pick" },
       { v: "1s", l: "Score updates" },
     ],
-    marquee: "Pick from 42 tokenized stocks",
+    marquee: "Pick from 41 tokenized stocks",
     featuresTitle: "Built like match day.",
     featuresBody: "Everything you love about fantasy football. The market plays the match.",
     features: [

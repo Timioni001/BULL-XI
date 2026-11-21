@@ -36,6 +36,7 @@ function stock(position: Position, credits: number, sector: Stock["sector"] = "B
   n++;
   return {
     id: id ?? `s${n}`,
+    mint: "",
     ticker: `T${n}x`,
     name: `Stock ${n}`,
     sector,

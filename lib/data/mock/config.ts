@@ -1,9 +1,10 @@
 /**
  * Review switches for designing states. Add `?mock=slow`, `?mock=error` or
- * `?mock=empty` to any URL. The choice sticks for the browser tab;
+ * `?mock=empty` to any URL. `?mock=sim` (or `?mock=on`) uses the simulated
+ * market instead of real prices. The choice sticks for the browser tab;
  * `?mock=off` clears it.
  */
-export type MockMode = "normal" | "slow" | "error" | "empty";
+export type MockMode = "normal" | "slow" | "error" | "empty" | "sim";
 
 const KEY = "bullxi:mock";
 
@@ -12,7 +13,8 @@ export function mockMode(): MockMode {
   try {
     const q = new URLSearchParams(window.location.search).get("mock");
     if (q === "off") sessionStorage.removeItem(KEY);
-    else if (q === "slow" || q === "error" || q === "empty") sessionStorage.setItem(KEY, q);
+    else if (q === "slow" || q === "error" || q === "empty" || q === "sim") sessionStorage.setItem(KEY, q);
+    else if (q === "on") sessionStorage.setItem(KEY, "sim");
     return (sessionStorage.getItem(KEY) as MockMode | null) ?? "normal";
   } catch {
     return "normal";

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import type { GameweekResult } from "@/lib/data/types";
 import { copy } from "@/lib/copy";
 import { ordinal, signed } from "@/lib/format";
-import { isBigWin, shareCardUrl } from "@/lib/share";
+import { isBigWin, renderShareCard } from "@/lib/share";
 import { Button } from "@/components/ui/button";
 import { PointsTicker } from "@/components/live/points-ticker";
 import { Shimmer } from "@/components/states/states";
@@ -29,9 +29,24 @@ export function ResultSheet({ result, open, onOpenChange, onNext }: { result: Ga
 
 function Body({ result, onNext }: { result: GameweekResult; onNext?: () => void }) {
   const r = copy.result;
-  const url = shareCardUrl(result);
   const big = isBigWin(result);
-  const [loaded, setLoaded] = useState(false);
+  const [card, setCard] = useState<{ blob: Blob; url: string } | null>(null);
+
+  useEffect(() => {
+    let url = "";
+    let cancelled = false;
+    renderShareCard(result)
+      .then((blob) => {
+        if (cancelled) return;
+        url = URL.createObjectURL(blob);
+        setCard({ blob, url });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [result]);
 
   useEffect(() => {
     if (!big || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -52,7 +67,7 @@ function Body({ result, onNext }: { result: GameweekResult; onNext?: () => void 
 
   const share = async () => {
     try {
-      const blob = await fetch(url).then((res) => res.blob());
+      const blob = card?.blob ?? (await renderShareCard(result));
       const file = new File([blob], `bull-xi-gw${result.gameweek}.png`, { type: "image/png" });
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], text: r.shareText(result.points, result.gameweek) });
@@ -78,9 +93,9 @@ function Body({ result, onNext }: { result: GameweekResult; onNext?: () => void 
       </div>
 
       <div className="relative mx-auto mt-4 w-full max-w-[300px] overflow-hidden rounded-2xl ring-1 ring-hairline" style={{ aspectRatio: "1080 / 1350" }}>
-        {!loaded && <Shimmer className="absolute inset-0 rounded-none" />}
+        {!card && <Shimmer className="absolute inset-0 rounded-none" />}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={r.title(result.gameweek)} className="size-full object-cover" onLoad={() => setLoaded(true)} />
+        {card && <img src={card.url} alt={r.title(result.gameweek)} className="size-full object-cover" />}
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2 pb-2">
@@ -88,7 +103,7 @@ function Body({ result, onNext }: { result: GameweekResult; onNext?: () => void 
           <Share2 /> {r.share}
         </Button>
         <Button asChild size="cta" variant="secondary">
-          <a href={url} download={`bull-xi-gw${result.gameweek}.png`}>
+          <a href={card?.url} download={`bull-xi-gw${result.gameweek}.png`}>
             <Download /> {r.save}
           </a>
         </Button>

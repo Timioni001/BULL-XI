@@ -69,7 +69,7 @@ const DEFS: LeagueDef[] = [
   ["office", "Office Legends", "OFC-7Q2", "private", 12, 70],
   ["sunday", "Sunday League", "SUN-4K9", "private", 8, 50],
   ["global", "BULL-XI Global", "GLOBAL", "global", 20, 110],
-  // Leagues you can join with a code (try /join/TRD-9X4)
+  // Leagues you can join with a code (try /join?code=TRD-9X4)
   ["trading-floor", "Trading Floor", "TRD-9X4", "private", 14, 80, false],
   ["uni-mates", "Uni Mates", "UNI-2P8", "private", 9, 60, false],
 ];
