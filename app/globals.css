@@ -1,0 +1,167 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------------
+   BULL-XI design tokens
+   Monochrome base. Green and red only for money moving. Gold only for
+   the captain armband and winners.
+------------------------------------------------------------------- */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-hairline: var(--hairline);
+  --color-bull: var(--bull);
+  --color-bear: var(--bear);
+  --color-gold: var(--gold);
+  --color-pitch: var(--pitch);
+  --color-pitch-stripe: var(--pitch-stripe);
+  --color-pitch-line: var(--pitch-line);
+
+  /* shadcn mapping */
+  --color-card: var(--surface-1);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface-1);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--foreground);
+  --color-primary-foreground: var(--background);
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--surface-2);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--surface-2);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--bear);
+  --color-border: var(--hairline);
+  --color-input: var(--hairline-strong);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 28px;
+
+  --text-label: 11px;
+  --text-label--letter-spacing: 0.08em;
+  --text-label--line-height: 14px;
+  --text-stat: 34px;
+  --text-stat--line-height: 1;
+  --text-mega: 64px;
+  --text-mega--line-height: 1;
+
+  --ease-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-live-dot: live-dot 1.6s var(--ease-snap) infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
+  @keyframes live-dot {
+    0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.6); }
+    70% { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+}
+
+:root {
+  --background: #fafafa;
+  --foreground: #0a0a0a;
+  --surface-1: #ffffff;
+  --surface-2: #f2f2f2;
+  --surface-3: #e8e8e8;
+  --muted-foreground: #6b6b6b;
+  --hairline: rgb(0 0 0 / 0.08);
+  --hairline-strong: rgb(0 0 0 / 0.14);
+  --ring: rgb(0 0 0 / 0.35);
+
+  --bull: #16c784;
+  --bear: #ea3943;
+  --gold: #f5c451;
+
+  --pitch: #1b1d1c;
+  --pitch-stripe: #202221;
+  --pitch-line: rgb(255 255 255 / 0.14);
+
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-slow: 250ms;
+
+  --radius: 12px;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --surface-1: #121212;
+  --surface-2: #1a1a1a;
+  --surface-3: #242424;
+  --muted-foreground: #8c8c8c;
+  --hairline: rgb(255 255 255 / 0.08);
+  --hairline-strong: rgb(255 255 255 / 0.14);
+  --ring: rgb(255 255 255 / 0.4);
+
+  --pitch: #141615;
+  --pitch-stripe: #181a19;
+  --pitch-line: rgb(255 255 255 / 0.1);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Every number in the app uses tabular figures so tickers never jitter. */
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "cv11" 1;
+    overscroll-behavior-y: none;
+  }
+  button {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 12px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .text-up {
+    color: var(--bull);
+  }
+  .text-down {
+    color: var(--bear);
+  }
+}
