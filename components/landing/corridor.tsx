@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * gallery. Transforms are written straight to the DOM each frame, so React
  * never re-renders while it runs. Pauses off screen and for reduced motion.
  */
-export function Corridor({ cards, perSide = 9, speed = 0.016, className }: { cards: React.ReactNode[]; perSide?: number; speed?: number; className?: string }) {
+export function Corridor({ cards, perSide = 5, speed = 0.014, className }: { cards: React.ReactNode[]; perSide?: number; speed?: number; className?: string }) {
   const root = useRef<HTMLDivElement>(null);
   const items = useRef<(HTMLDivElement | null)[]>([]);
   const total = perSide * 2;
@@ -27,20 +27,26 @@ export function Corridor({ cards, perSide = 9, speed = 0.016, className }: { car
       const W = el.clientWidth;
       const H = el.clientHeight;
       const mobile = W < 640;
-      const base = mobile ? Math.min(W * 0.36, 170) : Math.min(W * 0.2, 300);
+      const base = mobile ? Math.min(W * 0.44, 190) : Math.min(W * 0.21, 320);
+      // Phones show fewer cards so the tunnel stays calm.
+      const count = mobile ? Math.max(3, perSide - 1) : perSide;
       for (let i = 0; i < total; i++) {
         const node = items.current[i];
         if (!node) continue;
         const side = i % 2 === 0 ? -1 : 1;
         const k = Math.floor(i / 2);
-        const v = (((k / perSide + t + (side > 0 ? 0.5 / perSide : 0)) % 1) + 1) % 1; // 0 = far centre, 1 = near edge
+        if (k >= count) {
+          node.style.opacity = "0";
+          continue;
+        }
+        const v = (((k / count + t + (side > 0 ? 0.5 / count : 0)) % 1) + 1) % 1; // 0 = far centre, 1 = near edge
         const scale = 0.24 + 1.04 * v * v;
         const x = side * (base * 0.075 + W * (mobile ? 0.52 : 0.48) * Math.pow(v, 1.4));
         const rot = -side * 64 * Math.pow(v, 0.85);
         const y = (mobile ? 0.04 : 0) * H;
         const fade = Math.min(1, v / 0.03) * Math.min(1, (1 - v) / 0.08);
         node.style.width = `${base}px`;
-        node.style.height = `${base * 1.28}px`;
+        node.style.height = `${base * 1.25}px`;
         node.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) perspective(${(base * 3.4).toFixed(0)}px) rotateY(${rot.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
         node.style.opacity = fade.toFixed(3);
         node.style.zIndex = String(Math.round(v * 100));

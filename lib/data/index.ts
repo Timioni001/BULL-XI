@@ -269,7 +269,7 @@ export async function getBadges(locks: number): Promise<Badge[]> {
 
 /** A fixed set of stocks for marketing art. Synchronous and deterministic so it prerenders. */
 export function getShowcaseStocks(): Stock[] {
-  const ids = ["nvdax", "tslax", "aaplx", "coinx", "pltrx", "spyx", "metax", "mstrx", "llyx", "amznx", "hoodx", "avgox"];
+  const ids = ["nvdax", "tslax", "aaplx", "coinx", "amznx", "metax", "nflxx", "gldx", "llyx", "msftx", "pltrx", "spyx"];
   return ids.map((id) => MOCK_STOCKS_BY_ID[id]).filter(Boolean);
 }
 

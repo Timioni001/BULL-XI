@@ -1,5 +1,6 @@
 import type { Sector } from "@/lib/data/types";
 import { sectorArt } from "@/lib/sectors";
+import { logoFor } from "@/lib/data/media";
 import { cn } from "@/lib/utils";
 
 /**
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 export function StockArt({ ticker, sector, className, children }: { ticker: string; sector: Sector; className?: string; children?: React.ReactNode }) {
   const [hi, mid, base] = sectorArt(sector);
   const letters = ticker.replace(/x$/, "").slice(0, 4);
+  const logo = logoFor(ticker);
   return (
     <div
       className={cn("relative isolate overflow-hidden", className)}
@@ -17,9 +19,14 @@ export function StockArt({ ticker, sector, className, children }: { ticker: stri
       }}
     >
       <div aria-hidden className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "var(--noise)" }} />
-      <div aria-hidden className="absolute -bottom-6 -right-4 select-none font-display text-[120px] font-black leading-none text-white/15">
-        {letters}
-      </div>
+      {logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img aria-hidden src={logo.src} alt="" className="absolute -bottom-6 -right-6 size-32 rotate-[-12deg] object-contain opacity-20 grayscale brightness-[3]" />
+      ) : (
+        <div aria-hidden className="absolute -bottom-6 -right-4 select-none font-display text-[120px] font-black leading-none text-white/15">
+          {letters}
+        </div>
+      )}
       <div className="relative h-full">{children}</div>
     </div>
   );
