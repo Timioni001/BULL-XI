@@ -66,7 +66,7 @@ function StockSearch({ open, onOpenChange, onSelect }: { open: boolean; onOpenCh
       onOpenChange={onOpenChange}
       label={copy.nav.search}
       overlayClassName="fixed inset-0 z-50 bg-black/70 backdrop-blur-[2px]"
-      contentClassName="noise fixed inset-x-3 top-[max(env(safe-area-inset-top),12px)] z-50 mx-auto max-w-[560px] overflow-hidden rounded-3xl bg-surface-1 shadow-2xl ring-1 ring-hairline lg:top-[12vh]"
+      contentClassName="fixed inset-x-3 top-[max(env(safe-area-inset-top),12px)] z-50 mx-auto max-w-[560px] overflow-hidden rounded-3xl bg-surface-1 shadow-2xl ring-1 ring-hairline lg:top-[12vh]"
     >
       <div className="flex items-center gap-3 border-b border-hairline px-4">
         <Search className="size-4 text-muted-foreground" />

@@ -126,7 +126,7 @@ export function Transfers() {
   const replacing = picker ? byId.get(current[picker.pos][picker.idx]!) ?? null : null;
 
   const summary = (
-    <div className="noise rounded-3xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline">
+    <div className="rounded-3xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline">
       <div className="flex items-center justify-between">
         <p className="font-display text-[17px] font-bold uppercase">{t.pending}</p>
         {pending.length > 0 && (
@@ -201,7 +201,7 @@ export function Transfers() {
                         position={pos}
                         stock={s}
                         sub={s ? credits(s.credits) : undefined}
-                        badge={s && inIds.has(s.id) ? <span className="grid size-[18px] place-items-center rounded-full bg-brand text-[10px] font-bold text-white">{t.in[0]}</span> : undefined}
+                        badge={s && inIds.has(s.id) ? <span className="grid size-[18px] place-items-center rounded-full bg-brand text-[10px] font-bold text-brand-foreground">{t.in[0]}</span> : undefined}
                         onClick={() => setPicker({ pos, idx })}
                       />
                     );

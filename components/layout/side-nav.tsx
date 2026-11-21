@@ -30,7 +30,7 @@ export function SideNav() {
   return (
     <aside className="sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col border-r border-hairline px-4 py-6 lg:flex">
       <Link href={routes.landing} className="flex items-center gap-2.5 px-2">
-        <Logo size={30} />
+        <Logo size={30} decorative />
         <Wordmark />
       </Link>
 
@@ -52,7 +52,7 @@ export function SideNav() {
               key={it.href}
               href={it.href}
               aria-current={active ? "page" : undefined}
-              className={cn("relative flex h-11 items-center gap-3 rounded-full px-4 text-[14px] font-semibold transition-colors", active ? "text-white" : "text-muted-foreground hover:text-foreground")}
+              className={cn("relative flex h-11 items-center gap-3 rounded-full px-4 text-[14px] font-semibold transition-colors", active ? "text-brand-foreground" : "text-muted-foreground hover:text-foreground")}
             >
               {active && <motion.span layoutId="side-pill" transition={spring} className="absolute inset-0 rounded-full bg-brand shadow-[0_8px_24px_-10px_var(--brand-glow)]" />}
               <Icon className="relative size-[18px]" />
@@ -62,7 +62,7 @@ export function SideNav() {
         })}
       </nav>
 
-      <Link href={routes.pro} className="noise cut-tr mt-auto block rounded-2xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline">
+      <Link href={routes.pro} className="mt-auto block rounded-2xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline">
         <span className="flex items-center gap-2 text-sm font-semibold">
           <Crown className="size-4 text-gold" /> {copy.profile.pro.title}
         </span>

@@ -76,3 +76,12 @@ Phase 2 swaps `lib/data/mock/*` for MagicBlock implementations behind the same `
 - Routes: landing at `/`, the game at `/app/*`, `/proof` for judges, `/join/[code]` for invites, `/api/card` share images.
 - Desktop (1024px+): side nav, main column, sticky aside. Phones keep the floating pill tab bar.
 - All copy lives in `lib/copy.ts`.
+
+## Visual refresh (after step 4)
+
+- App: charcoal surfaces (#161618 / #212124 / #2B2B2F), orange accent #FF5B1F with near-black text on orange (AA 7.6:1).
+- Display: Archivo at 125% width, black weight, uppercase two-tone page titles (white over grey).
+- Header on phones: avatar, search, notifications. Big rounded cards, icon chips, uppercase full-width CTA.
+- Stock picker: "Choose a" poster cards in a snap carousel (StockArt), then the full list.
+- Landing: light editorial theme (`.theme-light`), Instrument Serif headline, a CSS 3D corridor of cards, dark nav pill and a typing prompt pill.
+- Green and red still only mean gains and losses. Gold still only means captain and winners.

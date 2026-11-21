@@ -76,4 +76,4 @@ Program addresses: BULL-XI game program deploys in step 6. Real-time pricing ora
 
 ## Stack
 
-Next.js 16 (App Router, strict TS), Tailwind v4, shadcn/ui, Motion, Zustand, NumberFlow, vaul, sonner, cmdk, dnd-kit, TradingView Lightweight Charts, canvas-confetti, `next/og`.
+Next.js 16 (App Router, strict TS), Tailwind v4, shadcn/ui, Motion, Zustand, NumberFlow, vaul, sonner, cmdk, dnd-kit, TradingView Lightweight Charts, canvas-confetti, `next/og`. Fonts: Archivo (extended display), Instrument Serif (landing), Geist and Geist Mono.

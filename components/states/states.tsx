@@ -9,7 +9,7 @@ import { copy } from "@/lib/copy";
 export function EmptyState({ title, body, action, icon, className }: { title: string; body?: string; action?: React.ReactNode; icon?: React.ReactNode; className?: string }) {
   return (
     <div className={cn("flex flex-col items-center px-8 py-12 text-center", className)}>
-      <div className="noise cut-tr mb-5 grid size-16 place-items-center rounded-2xl bg-surface-1 ring-1 ring-inset ring-hairline">{icon ?? <Logo size={30} className="opacity-60" />}</div>
+      <div className="mb-5 grid size-16 place-items-center rounded-2xl bg-surface-1 ring-1 ring-inset ring-hairline">{icon ?? <Logo size={30} className="opacity-60" />}</div>
       <h2 className="font-display text-xl font-bold tracking-tight">{title}</h2>
       {body && <p className="mt-1.5 max-w-[30ch] text-sm text-muted-foreground">{body}</p>}
       {action && <div className="mt-6 w-full max-w-[280px]">{action}</div>}

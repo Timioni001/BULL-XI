@@ -53,7 +53,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           classNames: {
             toast: "!bg-surface-2 !border-hairline !text-foreground !rounded-2xl !shadow-2xl !font-sans",
             description: "!text-muted-foreground",
-            actionButton: "!bg-brand !text-white !rounded-full !font-semibold",
+            actionButton: "!bg-brand !text-[#161618] !rounded-full !font-semibold",
           },
         }}
       />

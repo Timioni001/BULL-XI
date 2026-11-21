@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-brand text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.22),0_10px_28px_-10px_var(--brand-glow)] hover:bg-[var(--brand-hover)] disabled:bg-surface-3 disabled:text-muted-foreground disabled:shadow-none disabled:opacity-100",
+          "bg-brand text-brand-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.22),0_10px_28px_-10px_var(--brand-glow)] hover:bg-[var(--brand-hover)] disabled:bg-surface-3 disabled:text-muted-foreground disabled:shadow-none disabled:opacity-100",
         light: "bg-foreground text-background hover:bg-foreground/90",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
@@ -34,8 +34,8 @@ const buttonVariants = cva(
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
         /* Mobile CTA sizes */
-        cta: "h-14 gap-2 rounded-full px-6 text-[15px] font-semibold [&_svg:not([class*='size-'])]:size-5",
-        "cta-sm": "h-12 gap-2 rounded-full px-5 text-sm font-semibold",
+        cta: "h-14 gap-2 rounded-2xl px-5 font-display text-[13px] font-extrabold uppercase [&_svg:not([class*='size-'])]:size-5",
+        "cta-sm": "h-12 gap-2 rounded-2xl px-5 text-sm font-semibold",
         "icon-cta": "size-11 rounded-full [&_svg:not([class*='size-'])]:size-5",
       },
     },

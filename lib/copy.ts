@@ -41,6 +41,9 @@ export const copy = {
   },
 
   nav: {
+    notifications: "Notifications",
+    noNotifications: "You're all caught up.",
+    profileShort: "Your profile",
     live: "Live",
     team: "Team",
     transfers: "Transfers",
@@ -112,6 +115,11 @@ export const copy = {
   },
 
   picker: {
+    choose: "Choose a",
+    stock: "Stock",
+    replaceShort: "Replace",
+    topPicks: "Top picks",
+    sortedBy: (k: string) => `By ${k.toLowerCase()}`,
     add: (label: string) => `Add a ${label}`,
     replace: (ticker: string) => `Replace ${ticker}`,
     playsLike: (label: string, football: string) => `${label} plays in ${football.toLowerCase()}.`,
@@ -435,7 +443,19 @@ export const copy = {
   },
 
   landing: {
-    nav: { how: "How it works", live: "Live", tech: "Tech", faq: "FAQ", open: "Open app" },
+    heroTop: "One squad.",
+    heroBottom: "Every market move.",
+    heroBody: "Be the manager. Let the market play. Pick 15 stocks, wear the armband and watch your points tick live, 24/7.",
+    prompts: [
+      "Captain NVDAx for the daily gameweek",
+      "Build a squad under 100 credits",
+      "Join Office Legends with code OFC-7Q2",
+      "Play Bench Boost this Friday",
+      "Hedge TSLAx before kickoff",
+    ],
+    promptLabel: "Open BULL-XI",
+    liveBody: "A real lineup, scoring against the market right now. Points move every second.",
+    nav: { how: "How it works", live: "Live", tech: "Tech", faq: "FAQ", open: "Play for free" },
     pill: "Live 24/7",
     cta: "Build your squad",
     secondary: "See it live",

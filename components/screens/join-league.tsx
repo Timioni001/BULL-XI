@@ -40,7 +40,7 @@ export function JoinLeague({ code }: { code: string }) {
     <div className="mx-auto flex min-h-dvh w-full max-w-[440px] flex-col px-5">
       <header className="pt-safe flex h-16 items-center">
         <Link href={routes.landing} className="flex items-center gap-2.5">
-          <Logo size={28} />
+          <Logo size={28} decorative />
           <Wordmark />
         </Link>
       </header>
@@ -59,7 +59,7 @@ export function JoinLeague({ code }: { code: string }) {
           />
         )}
         {preview.status === "success" && preview.data && (
-          <div className="noise cut-tr overflow-hidden rounded-[28px] bg-surface-1 p-6 ring-1 ring-inset ring-hairline">
+          <div className="overflow-hidden rounded-[28px] bg-surface-1 p-6 ring-1 ring-inset ring-hairline">
             <p className="text-sm font-medium text-muted-foreground">{t.eyebrow}</p>
             <h1 className="mt-1 font-display text-[40px] font-bold uppercase leading-[0.95] tracking-tight">{preview.data.name}</h1>
             <div className="mt-6 grid grid-cols-2 gap-2">

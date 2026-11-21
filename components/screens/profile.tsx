@@ -55,9 +55,9 @@ export function Profile() {
       <PageHeader eyebrow={t.eyebrow} title={t.title} />
       <main className="flex flex-1 flex-col gap-3 px-4 pb-[calc(104px+env(safe-area-inset-bottom))] lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6 lg:px-0 lg:pb-10">
         <div className="flex flex-col gap-3">
-          <section className="noise cut-tr relative overflow-hidden rounded-[28px] bg-surface-1 p-5 ring-1 ring-inset ring-hairline">
+          <section className="relative overflow-hidden rounded-[28px] bg-surface-1 p-5 ring-1 ring-inset ring-hairline">
             <div className="flex items-center gap-4">
-              <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-[linear-gradient(135deg,#7d6fff,#4a3bd6)] font-display text-2xl font-bold text-white shadow-[0_12px_32px_-12px_var(--brand-glow)]">
+              <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-[linear-gradient(135deg,#ff8a5c,#ff5b1f)] font-display text-2xl font-black text-[#161618] shadow-[0_12px_32px_-12px_var(--brand-glow)]">
                 {hydrated ? initials : ""}
               </span>
               <div className="min-w-0 flex-1">
@@ -85,7 +85,7 @@ export function Profile() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: dur.base, ease, delay: i * 0.04 }}
-                    className={cn("noise flex flex-col items-center rounded-3xl bg-surface-1 px-2 py-4 text-center ring-1 ring-inset", b.earned ? "ring-gold/40" : "ring-hairline")}
+                    className={cn("flex flex-col items-center rounded-3xl bg-surface-1 px-2 py-4 text-center ring-1 ring-inset", b.earned ? "ring-gold/40" : "ring-hairline")}
                   >
                     <BadgeIcon id={b.id} earned={b.earned} />
                     <p className={cn("mt-2 text-[12px] font-semibold leading-tight", !b.earned && "text-muted-foreground")}>{copy.badges[b.id].name}</p>
@@ -100,21 +100,21 @@ export function Profile() {
         </div>
 
         <aside className="flex flex-col gap-3">
-          <Link href={routes.pro} className="cut-tr noise relative block overflow-hidden rounded-[28px] bg-brand p-5 text-white shadow-[0_24px_48px_-24px_var(--brand-glow)]">
-            <div aria-hidden className="absolute -right-10 -top-10 size-40 rotate-45 bg-white/10" />
+          <Link href={routes.pro} className="relative block overflow-hidden rounded-[28px] bg-brand p-5 text-brand-foreground shadow-[0_24px_48px_-24px_var(--brand-glow)]">
+            <div aria-hidden className="absolute -right-10 -top-10 size-40 rotate-45 bg-black/10" />
             <Crown className="relative size-6 text-gold" />
             <p className="relative mt-3 font-display text-2xl font-bold uppercase">{t.pro.title}</p>
-            <p className="relative mt-1 text-sm text-white/80">{t.pro.body}</p>
+            <p className="relative mt-1 text-sm text-brand-foreground/70">{t.pro.body}</p>
           </Link>
 
-          <div className="noise overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
+          <div className="overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
             <Row href={routes.history} icon={History} label={copy.nav.history} />
             <Row href={routes.leagues} icon={Trophy} label={copy.nav.leagues} />
             <Row onClick={() => setHow(true)} icon={Info} label={t.howItWorks} />
           </div>
 
           <SectionTitle title={t.settings} />
-          <div className="noise overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
+          <div className="overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
             <label className="flex min-h-14 cursor-pointer items-center gap-3 border-b border-hairline px-4 py-3">
               <Play className="size-4 text-muted-foreground" />
               <span className="flex-1">

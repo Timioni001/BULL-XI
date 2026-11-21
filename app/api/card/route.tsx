@@ -40,8 +40,8 @@ export async function GET(req: NextRequest) {
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#0A0A0A", color: "#fff", fontFamily: "Geist", position: "relative", overflow: "hidden", padding: 80 }}>
         {/* angled light, from the logo's triangle */}
-        <div style={{ position: "absolute", top: -420, right: -360, width: 1000, height: 1000, transform: "rotate(45deg)", background: "linear-gradient(180deg, rgba(108,92,255,0.45), rgba(108,92,255,0))", display: "flex" }} />
-        <div style={{ position: "absolute", bottom: -200, left: -200, width: 700, height: 700, borderRadius: 9999, background: "radial-gradient(circle, rgba(108,92,255,0.18), rgba(10,10,10,0) 70%)", display: "flex" }} />
+        <div style={{ position: "absolute", top: -420, right: -360, width: 1000, height: 1000, transform: "rotate(45deg)", background: "linear-gradient(180deg, rgba(255,91,31,0.45), rgba(255,91,31,0))", display: "flex" }} />
+        <div style={{ position: "absolute", bottom: -200, left: -200, width: 700, height: 700, borderRadius: 9999, background: "radial-gradient(circle, rgba(255,91,31,0.18), rgba(10,10,10,0) 70%)", display: "flex" }} />
         {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
           <div key={i} style={{ position: "absolute", left: -400 + i * 220, top: 0, width: 110, height: 1700, background: "rgba(255,255,255,0.018)", transform: "rotate(35deg)", display: "flex" }} />
         ))}
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
             <img src={logoSrc} width={84} height={84} alt="" />
             <span style={{ fontFamily: "Space Grotesk", fontSize: 40, letterSpacing: 8 }}>BULL-XI</span>
           </div>
-          <div style={{ display: "flex", padding: "14px 26px", borderRadius: 999, background: "#6C5CFF", fontFamily: "Space Grotesk", fontSize: 30, letterSpacing: 4 }}>FULL TIME</div>
+          <div style={{ display: "flex", padding: "14px 26px", borderRadius: 999, background: "#FF5B1F", fontFamily: "Space Grotesk", fontSize: 30, letterSpacing: 4 }}>FULL TIME</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", marginTop: 110 }}>

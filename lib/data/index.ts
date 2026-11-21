@@ -267,6 +267,12 @@ export async function getBadges(locks: number): Promise<Badge[]> {
   return computeBadges(mockMode() === "empty" ? [] : MOCK_HISTORY, locks);
 }
 
+/** A fixed set of stocks for marketing art. Synchronous and deterministic so it prerenders. */
+export function getShowcaseStocks(): Stock[] {
+  const ids = ["nvdax", "tslax", "aaplx", "coinx", "pltrx", "spyx", "metax", "mstrx", "llyx", "amznx", "hoodx", "avgox"];
+  return ids.map((id) => MOCK_STOCKS_BY_ID[id]).filter(Boolean);
+}
+
 /** Headline numbers for the landing page. Mock until mainnet. */
 export async function getGameweekStats(): Promise<GameweekStats> {
   const top = [...MOCK_STOCKS].sort((a, b) => b.ownership - a.ownership).slice(0, 3);

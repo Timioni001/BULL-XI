@@ -89,7 +89,7 @@ export function LeagueDetail({ id }: { id: string }) {
           <>
             <Segmented id="league-tab" value={tab} onChange={setTab} options={[{ value: "table", label: t.tabs.table }, { value: "fixtures", label: t.tabs.fixtures }]} />
             {tab === "table" ? (
-              <div className="noise overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
+              <div className="overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
                 <div className="grid grid-cols-[36px_1fr_64px] gap-2 border-b border-hairline px-4 py-2.5 text-[11px] font-medium text-muted-foreground">
                   <span>{copy.live.table.rank}</span>
                   <span>{copy.live.table.manager}</span>
@@ -153,7 +153,7 @@ function FixtureCard({ f, you }: { f: Fixture; you: string }) {
     </div>
   );
   return (
-    <div className={cn("noise flex items-center gap-3 rounded-3xl bg-surface-1 px-4 py-3.5 ring-1 ring-inset ring-hairline", mine && "glow-brand")}>
+    <div className={cn("flex items-center gap-3 rounded-3xl bg-surface-1 px-4 py-3.5 ring-1 ring-inset ring-hairline", mine && "glow-brand")}>
       {side(f.home, homeWin, "left")}
       <div className="flex shrink-0 items-center gap-2 font-display">
         {played ? (

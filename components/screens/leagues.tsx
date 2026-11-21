@@ -58,13 +58,13 @@ export function Leagues() {
     body = (
       <div className="flex flex-col gap-3">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: dur.slow, ease }}>
-          <Link href={routes.league(best.id)} className="cut-tr noise relative block overflow-hidden rounded-[28px] bg-brand p-5 text-white shadow-[0_24px_48px_-24px_var(--brand-glow)]">
-            <div aria-hidden className="absolute -right-10 -top-10 size-44 rotate-45 bg-white/10" />
-            <p className="relative text-xs font-semibold uppercase tracking-wider text-white/75">{best.kind === "global" ? t.global : t.private}</p>
+          <Link href={routes.league(best.id)} className="relative block overflow-hidden rounded-[28px] bg-brand p-5 text-brand-foreground shadow-[0_24px_48px_-24px_var(--brand-glow)]">
+            <div aria-hidden className="absolute -right-10 -top-10 size-44 rotate-45 bg-black/10" />
+            <p className="relative text-xs font-semibold uppercase tracking-wider text-brand-foreground/70">{best.kind === "global" ? t.global : t.private}</p>
             <p className="relative mt-1 font-display text-[28px] font-bold uppercase leading-tight">{best.name}</p>
             <div className="relative mt-5 flex items-end justify-between">
               <div>
-                <p className="text-xs text-white/75">{t.yourRank}</p>
+                <p className="text-xs text-brand-foreground/70">{t.yourRank}</p>
                 <p className="num font-display text-[56px] font-bold leading-none">{ordinal(best.yourRank)}</p>
               </div>
               <div className="text-right">
@@ -74,7 +74,7 @@ export function Leagues() {
                     e.preventDefault();
                     void invite(best.name, best.code);
                   }}
-                  className="mt-2 inline-flex h-11 items-center gap-1.5 rounded-full bg-white px-4 text-[13px] font-semibold text-black"
+                  className="mt-2 inline-flex h-11 items-center gap-1.5 rounded-full bg-brand-foreground px-4 text-[13px] font-semibold text-white"
                 >
                   <Share2 className="size-4" /> {t.invite}
                 </button>
@@ -131,12 +131,12 @@ export function Leagues() {
 
 function LeagueRow({ league }: { league: LeagueSummary }) {
   return (
-    <Link href={routes.league(league.id)} className="noise flex items-center gap-4 rounded-3xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline transition-colors hover:bg-surface-2">
+    <Link href={routes.league(league.id)} className="flex items-center gap-4 rounded-3xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline transition-colors hover:bg-surface-2">
       <span className="grid size-12 place-items-center rounded-2xl bg-surface-2 ring-1 ring-inset ring-hairline">
         {league.kind === "global" ? <Globe2 className="size-5 text-muted-foreground" /> : <Trophy className="size-5 text-muted-foreground" />}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-display text-[17px] font-bold uppercase">{league.name}</span>
+        <span className="line-clamp-2 block font-display text-[14px] font-black uppercase leading-tight">{league.name}</span>
         <span className="block text-xs text-muted-foreground">
           {t.managers(league.size)} · {t.code} <span className="font-mono">{league.code}</span>
         </span>

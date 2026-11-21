@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { copy } from "@/lib/copy";
 import { cn } from "@/lib/utils";
+import { AppHeader } from "./app-header";
 
 interface TopBarProps {
   title?: React.ReactNode;
@@ -16,7 +17,7 @@ interface TopBarProps {
 
 export function TopBar({ title, subtitle, back, right, className }: TopBarProps) {
   const router = useRouter();
-  const btn = "-ml-2 grid size-11 place-items-center rounded-full active:bg-surface-2 hover:bg-surface-1";
+  const btn = "mr-1 grid size-11 shrink-0 place-items-center rounded-full bg-surface-1 ring-1 ring-inset ring-hairline active:bg-surface-2";
   const backBtn =
     back === true ? (
       <button aria-label={copy.common.back} onClick={() => router.back()} className={btn}>
@@ -33,7 +34,7 @@ export function TopBar({ title, subtitle, back, right, className }: TopBarProps)
       <div className="flex h-14 items-center gap-2 px-4 lg:h-24 lg:px-0">
         {backBtn}
         <div className="min-w-0 flex-1">
-          {title && <h1 className="truncate font-display text-[19px] font-bold leading-tight tracking-tight lg:text-[34px] lg:uppercase">{title}</h1>}
+          {title && <h1 className="truncate font-display text-[15px] font-black uppercase leading-tight lg:text-[34px]">{title}</h1>}
           {subtitle && <p className="truncate text-xs text-muted-foreground lg:mt-1 lg:text-sm">{subtitle}</p>}
         </div>
         {right && <div className="flex shrink-0 items-center gap-1">{right}</div>}
@@ -42,24 +43,29 @@ export function TopBar({ title, subtitle, back, right, className }: TopBarProps)
   );
 }
 
-/** Big broadcast-style page header: small eyebrow over a giant uppercase title. */
+/**
+ * Big two-tone page header, like a match programme: first line white,
+ * second line grey. Avatar, search and notifications sit above it on phones.
+ */
 export function PageHeader({ eyebrow, title, right, back, className }: { eyebrow: string; title: string; right?: React.ReactNode; back?: string; className?: string }) {
   return (
-    <header className={cn("pt-safe px-4 pb-4 pt-4 lg:px-0 lg:pt-8", className)}>
-      {back && (
-        <Link aria-label={copy.common.back} href={back} className="-ml-2 mb-1 grid size-11 place-items-center rounded-full active:bg-surface-2 lg:hidden">
-          <ChevronLeft className="size-5" />
-        </Link>
-      )}
-      <div className="flex items-end justify-between gap-3">
-        <div>
-          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span aria-hidden className="inline-block size-0 border-x-[5px] border-t-[7px] border-x-transparent border-t-brand" />
-            {eyebrow}
-          </p>
-          <h1 className="mt-1 font-display text-giant font-bold uppercase lg:text-[64px]">{title}</h1>
+    <header className={cn("lg:pt-8", className)}>
+      {back ? (
+        <div className="pt-safe flex h-16 items-center justify-between px-4 lg:hidden">
+          <Link aria-label={copy.common.back} href={back} className="grid size-11 place-items-center rounded-full bg-surface-1 ring-1 ring-inset ring-hairline">
+            <ChevronLeft className="size-5" />
+          </Link>
+          {right}
         </div>
-        {right && <div className="flex shrink-0 items-center gap-2 pb-1">{right}</div>}
+      ) : (
+        <AppHeader />
+      )}
+      <div className="flex items-end justify-between gap-3 px-4 pb-4 pt-1 lg:px-0">
+        <h1 className="font-display text-[42px] font-black uppercase leading-[0.92] lg:text-[64px]">
+          <span className="block text-foreground">{eyebrow}</span>
+          <span className="block text-[#5c5c63]">{title}</span>
+        </h1>
+        {right && <div className={cn("shrink-0 items-center gap-2 pb-1", back ? "hidden lg:flex" : "flex")}>{right}</div>}
       </div>
     </header>
   );
@@ -78,7 +84,7 @@ export function ScreenGrid({ main, aside, className }: { main: React.ReactNode; 
 export function SectionTitle({ title, right, className }: { title: string; right?: React.ReactNode; className?: string }) {
   return (
     <div className={cn("mb-2 mt-2 flex items-center justify-between px-1", className)}>
-      <h2 className="font-display text-[17px] font-bold uppercase tracking-tight">{title}</h2>
+      <h2 className="font-display text-[16px] font-black uppercase">{title}</h2>
       {right && <span className="text-xs text-muted-foreground">{right}</span>}
     </div>
   );

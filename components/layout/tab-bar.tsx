@@ -21,7 +21,7 @@ export function TabBar() {
   const path = usePathname();
   return (
     <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(env(safe-area-inset-bottom),12px)] lg:hidden">
-      <ul className="noise mx-auto flex h-16 max-w-[408px] items-center justify-between rounded-full bg-surface-1/90 px-2 shadow-[0_18px_40px_-12px_rgb(0_0_0/0.9)] ring-1 ring-inset ring-hairline backdrop-blur-xl">
+      <ul className="mx-auto flex h-16 max-w-[408px] items-center justify-between rounded-full bg-surface-1/90 px-2 shadow-[0_18px_40px_-12px_rgb(0_0_0/0.9)] ring-1 ring-inset ring-hairline backdrop-blur-xl">
         {MOBILE_TABS.map((t) => {
           const active = (t.match ?? [t.href]).some((m) => path.startsWith(m));
           const Icon = t.icon;
@@ -30,7 +30,7 @@ export function TabBar() {
               <Link
                 href={t.href}
                 aria-current={active ? "page" : undefined}
-                className={cn("relative flex h-12 items-center justify-center gap-2 rounded-full text-[13px] font-semibold", active ? "text-white" : "text-muted-foreground")}
+                className={cn("relative flex h-12 items-center justify-center gap-2 rounded-full text-[13px] font-semibold", active ? "text-brand-foreground" : "text-muted-foreground")}
               >
                 {active && <motion.span layoutId="tab-pill" transition={spring} className="absolute inset-0 rounded-full bg-brand shadow-[0_8px_24px_-8px_var(--brand-glow)]" />}
                 <Icon className="relative size-[21px]" strokeWidth={active ? 2.3 : 1.9} />

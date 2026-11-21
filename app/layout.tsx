@@ -14,10 +14,22 @@ const geistMono = localFont({
   preload: false,
 });
 
-const spaceGrotesk = localFont({
-  src: "../node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2",
-  variable: "--font-space-grotesk",
-  weight: "300 700",
+// Extended heavy grotesk for headings and big numbers (width axis 62-125%).
+const archivo = localFont({
+  src: "../node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2",
+  variable: "--font-archivo",
+  weight: "100 900",
+  display: "swap",
+  declarations: [{ prop: "font-stretch", value: "62% 125%" }],
+  // Not needed for first paint on the landing page; loads as soon as CSS asks for it.
+  preload: false,
+});
+
+// Editorial serif for the landing page.
+const instrumentSerif = localFont({
+  src: "../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2",
+  weight: "400",
+  variable: "--font-instrument-serif",
   display: "swap",
 });
 
@@ -32,7 +44,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0A0A0A",
+  themeColor: "#161618",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -41,7 +53,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${GeistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en" className={`dark ${GeistSans.variable} ${geistMono.variable} ${archivo.variable} ${instrumentSerif.variable}`}>
       <body className="min-h-dvh bg-background">
         <Providers>{children}</Providers>
       </body>
