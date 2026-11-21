@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  // The share card reads these at request time.
+  outputFileTracingIncludes: {
+    "/api/card": ["./assets/fonts/**", "./public/logo-white.png"],
+  },
   turbopack: {
     rules: {
       "*.css": {

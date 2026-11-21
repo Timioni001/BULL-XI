@@ -5,7 +5,10 @@ import { Drawer as Vaul } from "vaul";
 import { Search, X } from "lucide-react";
 import { toast } from "sonner";
 import type { Position, Sector, Stock } from "@/lib/data/types";
-import { POSITIONS, POSITION_META, canAddToSquad } from "@/lib/game/rules";
+import { POSITIONS, canAddToSquad } from "@/lib/game/rules";
+import { copy } from "@/lib/copy";
+import { getSparklines } from "@/lib/data";
+import { useAsync } from "@/lib/hooks/use-async";
 import { credits } from "@/lib/format";
 import { useStocks } from "@/lib/hooks/use-stocks";
 import { useLivePrices } from "@/lib/hooks/use-live-prices";
@@ -35,8 +38,8 @@ export function StockPicker(props: StockPickerProps) {
   return (
     <Vaul.Root open={props.open} onOpenChange={props.onOpenChange}>
       <Vaul.Portal>
-        <Vaul.Overlay className="fixed inset-0 z-50 bg-black/60" />
-        <Vaul.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto flex h-[92dvh] max-w-[440px] flex-col rounded-t-3xl bg-surface-1 outline-none ring-1 ring-hairline">
+        <Vaul.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-[2px]" />
+        <Vaul.Content className="noise fixed inset-x-0 bottom-0 z-50 mx-auto flex h-[92dvh] max-w-[480px] flex-col rounded-t-[28px] bg-surface-1 outline-none ring-1 ring-hairline">
           <div className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-surface-3" />
           {/* Remount per open so filters start from the tapped slot */}
           {props.open && <PickerBody {...props} />}
@@ -55,6 +58,8 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
   const [query, setQuery] = useState("");
   const q = useDeferredValue(query.trim().toLowerCase());
   const [detail, setDetail] = useState<Stock | null>(null);
+  const sparks = useAsync(getSparklines);
+  const P = copy.picker;
 
   const sectors = useMemo(() => {
     const set = new Set<Sector>();
@@ -84,8 +89,8 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
     const c = check(s);
     if (!c.ok) {
       haptic(20);
-      toast(c.code === "in_squad" ? `${s.ticker} is already in your squad` : c.code === "over_budget" ? `Not enough credits for ${s.ticker}` : c.reason, {
-        description: c.code === "over_budget" ? `You have ${credits(budget)} to spend here.` : c.code === "sector_full" ? "Max 3 stocks from one sector." : undefined,
+      toast(c.code === "in_squad" ? P.alreadyIn(s.ticker) : c.code === "over_budget" ? P.cantAfford(s.ticker) : c.reason, {
+        description: c.code === "over_budget" ? P.youHave(credits(budget)) : c.code === "sector_full" ? copy.squad.rules : undefined,
       });
       return;
     }
@@ -97,15 +102,15 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
     <>
       <div className="shrink-0 px-4 pb-2 pt-3">
         <div className="flex items-baseline justify-between">
-          <Vaul.Title className="text-[17px] font-semibold tracking-tight">
-            {replacing ? `Replace ${replacing.ticker}` : `Add a ${POSITION_META[position].label}`}
+          <Vaul.Title className="font-display text-xl font-bold uppercase tracking-tight">
+            {replacing ? P.replace(replacing.ticker) : P.add(copy.positions[position].label)}
           </Vaul.Title>
           <span className="text-xs text-muted-foreground">
-            <span className="num font-semibold text-foreground">{credits(budget)}</span> credits to spend
+            <span className="num font-semibold text-foreground">{credits(budget)}</span> {P.toSpend}
           </span>
         </div>
         <Vaul.Description className="mt-0.5 text-xs text-muted-foreground">
-          {POSITION_META[position].label} plays like a {POSITION_META[position].football.toLowerCase()}.
+          {P.playsLike(copy.positions[position].label, copy.positions[position].football)}
         </Vaul.Description>
 
         <label className="mt-3 flex h-11 items-center gap-2 rounded-xl bg-surface-2 px-3 ring-1 ring-inset ring-hairline focus-within:ring-foreground/40">
@@ -113,7 +118,7 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search ticker or company"
+            placeholder={P.search}
             className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
             inputMode="search"
             autoCorrect="off"
@@ -121,7 +126,7 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
             spellCheck={false}
           />
           {query && (
-            <button onClick={() => setQuery("")} aria-label="Clear search" className="grid size-6 place-items-center rounded-full bg-surface-3">
+            <button onClick={() => setQuery("")} aria-label={P.clearSearch} className="grid size-6 place-items-center rounded-full bg-surface-3">
               <X className="size-3.5" />
             </button>
           )}
@@ -130,13 +135,13 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
         <div className="no-scrollbar -mx-4 mt-3 flex gap-1.5 overflow-x-auto px-4">
           {(["ALL", ...POSITIONS] as const).map((p) => (
             <Chip key={p} active={pos === p} onClick={() => setPos(p)}>
-              {p === "ALL" ? "All" : POSITION_META[p].label}
+              {p === "ALL" ? P.all : copy.positions[p].label}
             </Chip>
           ))}
         </div>
         <div className="no-scrollbar -mx-4 mt-2 flex gap-1.5 overflow-x-auto px-4">
           <Chip subtle active={effectiveSector === "ALL"} onClick={() => setSector("ALL")}>
-            All sectors
+            {P.allSectors}
           </Chip>
           {sectors.map((s) => (
             <Chip subtle key={s} active={effectiveSector === s} onClick={() => setSector(s)}>
@@ -147,7 +152,7 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
 
         <div className="mt-3 flex items-center justify-between gap-3">
           <span className="text-xs text-muted-foreground">
-            <span className="num">{list.length}</span> stocks
+            <span className="num">{P.count(list.length)}</span>
           </span>
           <Segmented
             id="picker-sort"
@@ -156,9 +161,9 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
             value={sort}
             onChange={setSort}
             options={[
-              { value: "credits", label: "Credits" },
-              { value: "form", label: "Form" },
-              { value: "ownership", label: "Picked %" },
+              { value: "credits", label: P.sort.credits },
+              { value: "form", label: P.sort.form },
+              { value: "ownership", label: P.sort.ownership },
             ]}
           />
         </div>
@@ -166,22 +171,22 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain border-t border-hairline pb-[max(env(safe-area-inset-bottom),16px)]" data-vaul-no-drag>
         {stocks.status === "loading" && Array.from({ length: 8 }).map((_, i) => <StockRowSkeleton key={i} />)}
-        {stocks.status === "error" && <ErrorState title="Stocks didn't load" message={stocks.error.message} onRetry={stocks.retry} />}
+        {stocks.status === "error" && <ErrorState title={copy.errors.stocks.title} message={copy.errors.stocks.body} onRetry={stocks.retry} />}
         {stocks.status === "success" && list.length === 0 && (
           <EmptyState
-            title="No stocks match"
-            body={q ? `Nothing for "${query.trim()}".` : "Try another sector."}
+            title={P.emptyTitle}
+            body={q ? P.emptySearch(query.trim()) : P.emptyFilter}
             icon={<Search className="size-6 text-muted-foreground" />}
             action={
               <button
-                className="h-11 w-full rounded-xl bg-surface-2 text-sm font-semibold"
+                className="h-11 w-full rounded-full bg-surface-2 text-sm font-semibold ring-1 ring-inset ring-hairline"
                 onClick={() => {
                   setQuery("");
                   setSector("ALL");
                   setPos("ALL");
                 }}
               >
-                Clear filters
+                {P.clearFilters}
               </button>
             }
           />
@@ -199,6 +204,7 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
                 showPosition={pos === "ALL"}
                 onSelect={() => pick(s)}
                 onInfo={() => setDetail(s)}
+                spark={sparks.data?.[s.id]}
               />
             );
           })}
@@ -213,8 +219,8 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
           detail
             ? [
                 {
-                  label: replacing && detail.position === replacing.position ? `Swap in for ${replacing.ticker}` : "Add to squad",
-                  disabledReason: squadIds.has(detail.id) ? "In your squad" : (() => {
+                  label: replacing && detail.position === replacing.position ? P.swapIn(replacing.ticker) : P.addToSquad,
+                  disabledReason: squadIds.has(detail.id) ? P.inSquad : (() => {
                     const c = check(detail);
                     return c.ok ? undefined : c.reason;
                   })(),
@@ -238,8 +244,8 @@ function Chip({ active, subtle, onClick, children }: { active: boolean; subtle?:
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "h-8 shrink-0 whitespace-nowrap rounded-full px-3 text-[13px] font-medium transition-colors duration-150",
-        active ? (subtle ? "bg-surface-3 text-foreground ring-1 ring-inset ring-foreground/30" : "bg-foreground text-background") : "bg-surface-2 text-muted-foreground",
+        "h-9 shrink-0 whitespace-nowrap rounded-full px-3.5 text-[13px] font-medium transition-colors duration-150",
+        active ? (subtle ? "bg-surface-3 text-foreground ring-1 ring-inset ring-foreground/30" : "bg-brand text-white") : "bg-surface-2 text-muted-foreground",
       )}
     >
       {children}

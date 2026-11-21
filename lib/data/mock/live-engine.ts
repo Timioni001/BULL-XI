@@ -2,7 +2,7 @@ import type { ChipId, Gameweek, Lineup, LiveEvent, LiveGameweekSnapshot, LiveSta
 import { percentChange, scoreGameweek } from "@/lib/game/rules";
 import { BENCHMARK_ID, MOCK_STOCKS_BY_ID } from "./stocks";
 import { priceAt } from "./market";
-import { MOCK_LEAGUES, YOUR_SEASON_POINTS, YOU_ID, rankManagers } from "./leagues";
+import { DEFAULT_LEAGUE_ID, YOUR_SEASON_POINTS, YOU_ID, mockLeague, rankManagers } from "./leagues";
 
 export interface LiveSessionInput {
   gameweek: Gameweek;
@@ -12,6 +12,7 @@ export interface LiveSessionInput {
   leagueId: string;
   kickoffAt: number;
   teamName?: string;
+  transferHit?: number;
 }
 
 const posOf = (id: string) => MOCK_STOCKS_BY_ID[id]?.position;
@@ -29,7 +30,7 @@ const ordinal = (n: number) => {
  * uses TWAP (see rules.twap).
  */
 export function startLiveSession(input: LiveSessionInput, onSnapshot: (s: LiveGameweekSnapshot) => void): () => void {
-  const league = MOCK_LEAGUES.find((l) => l.id === input.leagueId) ?? MOCK_LEAGUES[0];
+  const league = mockLeague(input.leagueId) ?? mockLeague(DEFAULT_LEAGUE_ID)!;
   const you: Manager = {
     id: YOU_ID,
     name: "You",
@@ -83,6 +84,7 @@ export function startLiveSession(input: LiveSessionInput, onSnapshot: (s: LiveGa
         topGainerId,
         chip: m.isYou ? input.chip : null,
         hedgeId: m.isYou ? input.hedgeId : null,
+        transferHit: m.isYou ? input.transferHit : 0,
       });
       return { m, r };
     });

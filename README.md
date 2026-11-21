@@ -1,26 +1,42 @@
 # BULL-XI
 
-Fantasy football for tokenized stocks. Pick a 15-stock squad, wear the captain's armband and compete in live leagues 24/7.
+**Fantasy football for onchain stocks.** Pick 15 tokenized stocks, wear the captain's armband and win your league, 24/7. Built for MagicBlock Solana Blitz v10 (Entertainment Finance).
 
-**Phase 1: UX prototype on mock data.** No blockchain code yet. See [CLAUDE.md](CLAUDE.md) for the product brief and [docs/PLAN.md](docs/PLAN.md) for structure and design tokens.
+> Status: step 4 of the build plan. A complete, polished product on simulated market data. Live Solana prices (step 5) and the onchain game (step 6) come next. See [CLAUDE.md](CLAUDE.md) for the brief and [docs/PLAN.md](docs/PLAN.md) for structure.
 
 ## Run it
 
 ```bash
 npm install
 npm run dev            # http://localhost:3000
-npm run check          # lint + typecheck + tests + build
+npm run check          # lint + typecheck + tests + production build
 ```
 
-Open it on your phone: run `npm run dev -- -H 0.0.0.0` and visit `http://<your-computer-ip>:3000`, or deploy the branch to Vercel.
+On your phone: `npm run dev -- -H 0.0.0.0`, then open `http://<your-computer-ip>:3000`.
 
-## Hero flow
+## Tour
 
-`/` Onboarding → `/squad` Squad Builder (Auto-pick, Stock Picker, Stock Detail) → `/pick` Pick Team → `/lock` Deadline / Lock → `/live` Live Gameweek.
+| URL | What |
+|---|---|
+| `/` | Landing page with a live mini-pitch |
+| `/app` | Onboarding, then the game |
+| `/app/squad` → `/app/pick` → `/app/lock` → `/app/live` | Build, pick, lock, watch live |
+| `/app/leagues`, `/app/leagues/office` | Leagues, tables, head-to-head |
+| `/join/TRD-9X4` | Invite link landing (try it) |
+| `/app/transfers`, `/app/chips`, `/app/history`, `/app/profile`, `/app/pro` | The rest of the game |
+| `/proof` | For judges: where each piece runs, counters, explorer links |
+| `/api/card?gw=13&pts=73&rank=1&of=12&league=Office%20Legends&team=Your%20XI&best=NVDAx:34&cap=COINx:46` | 1080x1350 share card |
+
+## Demo mode (for recording)
+
+Add `?demo=1` to any URL (or toggle it in Profile). Demo mode:
+- runs the simulated market 10x faster so points move on camera,
+- shows **Demo: start now** on the deadline screen (skip the countdown),
+- shows **Demo: blow the whistle** on the live screen (jump to the result and share card).
+
+`?demo=0` turns it off. Without demo mode, gameweeks start and end on their real schedule.
 
 ## Review switches
-
-Add to any URL to see other states. The setting sticks for the tab.
 
 | Param | Effect |
 |---|---|
@@ -28,12 +44,36 @@ Add to any URL to see other states. The setting sticks for the tab.
 | `?mock=error` | every data call fails (error states) |
 | `?mock=empty` | empty leagues and history |
 | `?mock=off` | back to normal |
-| `/?intro` | replay onboarding |
+| `/app?intro` | replay onboarding |
 
-Profile tab → **Reset demo** clears your saved squad.
+Profile → **Reset demo** clears your saved squad and leagues.
 
 ## Architecture
 
-- `lib/data/` is the only thing the UI calls. Phase 1 returns seeded mock data and a simulated 24/7 market. Phase 2 swaps the bodies for MagicBlock without touching UI code.
-- `lib/game/rules.ts` holds every game rule as pure functions, with unit tests in `rules.test.ts`.
-- `lib/store/game.ts` is the Zustand store (squad, lineup, lock), persisted to localStorage.
+```
+UI (app/, components/)  ──►  lib/data/index.ts  ──►  Phase 1: lib/data/mock/*  (seeded, simulated 24/7 market)
+        │                                         └►  Phase 2: MagicBlock ER + Pyth Lazer oracle, Solana program
+        └──►  lib/game/rules.ts   pure rules: squads, scoring, captain, chips, transfers (unit tested)
+        └──►  lib/store/game.ts   Zustand, persisted locally
+        └──►  lib/copy.ts         every user-facing string
+```
+
+## MagicBlock map (planned)
+
+| UX moment | MagicBlock tech |
+|---|---|
+| Squad hidden until kickoff | Private Ephemeral Rollup |
+| Live points every second | Ephemeral Rollup + Pyth Lazer oracle |
+| Deadline lock and settlement | Cranks |
+| Final standings | Commit / Undelegate |
+| Prize payouts | Magic Actions |
+| Entry fees and prize pool | Ephemeral SPL Token |
+| No pop-ups for captain and transfers | Session Keys |
+| Head-to-head draws | VRF |
+| Season rank and badges | SOAR |
+
+Program addresses: BULL-XI game program deploys in step 6. Real-time pricing oracle: `PriCems5tHihc6UDXDjzjeawomAwBduWMGAi8ZUjppd`.
+
+## Stack
+
+Next.js 16 (App Router, strict TS), Tailwind v4, shadcn/ui, Motion, Zustand, NumberFlow, vaul, sonner, cmdk, dnd-kit, TradingView Lightweight Charts, canvas-confetti, `next/og`.

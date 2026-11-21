@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { Plus } from "lucide-react";
 import type { Position, Stock } from "@/lib/data/types";
 import { POSITION_META } from "@/lib/game/rules";
@@ -57,7 +57,7 @@ export function PitchSlot({ stock, position, role, sub, subTone = "neutral", fla
             transition={{ ...spring, delay }}
             className="block"
           >
-            <StockAvatar ticker={stock.ticker} size={tile} inverted />
+            <StockAvatar ticker={stock.ticker} sector={stock.sector} size={tile} inverted />
           </motion.span>
         ) : (
           <span
@@ -67,12 +67,12 @@ export function PitchSlot({ stock, position, role, sub, subTone = "neutral", fla
             <Plus className="size-5" strokeWidth={1.8} />
           </span>
         )}
-        {role && <CaptainBadge role={role} className="absolute -right-2 -top-1.5" />}
+        {role && <CaptainBadge role={role} shineKey={stock ? `${stock.id}-${role}` : undefined} className="absolute -right-2 -top-1.5" />}
         {badge && <span className="absolute -left-2 -top-1.5">{badge}</span>}
         {state === "selected" && (
-          <motion.span layoutId="slot-select" transition={spring} className="absolute -inset-1.5 rounded-[16px] ring-2 ring-white" />
+          <motion.span layoutId="slot-select" transition={spring} className="absolute -inset-1.5 rounded-[16px] ring-2 ring-brand shadow-[0_0_20px_var(--brand-glow)]" />
         )}
-        {state === "target" && <span className="absolute -inset-1.5 animate-pulse rounded-[16px] border-2 border-dashed border-white/70" />}
+        {state === "target" && <span className="absolute -inset-1.5 animate-pulse rounded-[16px] border-2 border-dashed border-brand" />}
       </span>
 
       <span className="flex w-full flex-col items-stretch overflow-hidden rounded-md text-center shadow-[0_4px_10px_-4px_rgb(0_0_0/0.8)]">
@@ -96,7 +96,7 @@ export function PitchSlot({ stock, position, role, sub, subTone = "neutral", fla
                   key={flash.key}
                   initial={{ opacity: 0.95 }}
                   animate={{ opacity: 0 }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                   className={cn("absolute inset-0", flash.dir > 0 ? "bg-bull" : "bg-bear")}
                 />
               )}

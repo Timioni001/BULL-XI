@@ -260,18 +260,25 @@ describe("scoring", () => {
     expect(twap([{ t: 5, price: 42 }])).toBe(42);
   });
 
-  it("adds +3 for beating SPYx and +2 for league top gainer", () => {
-    expect(scoreStock({ pct: 1.2, benchmarkPct: 0.5 })).toEqual({ base: 12, bonus: 3, points: 15 });
-    expect(scoreStock({ pct: 1.2, benchmarkPct: 0.5, isTopGainer: true })).toEqual({ base: 12, bonus: 5, points: 17 });
+  it("adds +2 for beating SPYx by 0.5 points or more", () => {
+    expect(scoreStock({ pct: 1.2, benchmarkPct: 0.5 })).toEqual({ base: 12, bonus: 2, points: 14 });
+    expect(scoreStock({ pct: 1.0, benchmarkPct: 0.5 })).toEqual({ base: 10, bonus: 2, points: 12 });
+    // beating the market by less than 0.5 points earns nothing
+    expect(scoreStock({ pct: 0.9, benchmarkPct: 0.5 })).toEqual({ base: 9, bonus: 0, points: 9 });
     expect(scoreStock({ pct: 0.5, benchmarkPct: 0.5 })).toEqual({ base: 5, bonus: 0, points: 5 });
     // a falling stock still beats a falling-harder market
-    expect(scoreStock({ pct: -0.5, benchmarkPct: -1.5 })).toEqual({ base: -5, bonus: 3, points: -2 });
-    expect(scoreStock({ pct: 1, benchmarkPct: 1, isBenchmark: true }).bonus).toBe(0);
+    expect(scoreStock({ pct: -0.5, benchmarkPct: -1.5 })).toEqual({ base: -5, bonus: 2, points: -3 });
+    expect(scoreStock({ pct: 3, benchmarkPct: 1, isBenchmark: true }).bonus).toBe(0);
+  });
+
+  it("adds +2 for the mini-league top gainer, on top of the market bonus", () => {
+    expect(scoreStock({ pct: 1.2, benchmarkPct: 0.5, isTopGainer: true })).toEqual({ base: 12, bonus: 4, points: 16 });
+    expect(scoreStock({ pct: 0.6, benchmarkPct: 0.5, isTopGainer: true })).toEqual({ base: 6, bonus: 2, points: 8 });
   });
 
   it("hedge turns negative points into 0 but keeps gains", () => {
     expect(scoreStock({ pct: -3, benchmarkPct: 0, hedged: true }).points).toBe(0);
-    expect(scoreStock({ pct: 2, benchmarkPct: 0, hedged: true }).points).toBe(23);
+    expect(scoreStock({ pct: 2, benchmarkPct: 0, hedged: true }).points).toBe(22);
   });
 });
 
@@ -286,20 +293,20 @@ describe("scoreGameweek", () => {
 
   it("doubles the captain and ignores the bench", () => {
     const r = scoreGameweek({ lineup, posOf, pct, benchmarkId: "etf1" });
-    // 9 normal starters x (10 + 3) = 117, etf1 = 5, captain (20+3) x2 = 46
-    expect(r.total).toBe(117 + 5 + 46);
-    expect(r.perStock.g1).toMatchObject({ multiplier: 2, counted: 46 });
+    // 9 normal starters x (10 + 2) = 108, etf1 = 5, captain (20 + 2) x2 = 44
+    expect(r.total).toBe(108 + 5 + 44);
+    expect(r.perStock.g1).toMatchObject({ multiplier: 2, counted: 44 });
     expect(r.perStock.b5.counted).toBe(0);
   });
 
   it("triple captain scores 3x", () => {
     const r = scoreGameweek({ lineup, posOf, pct, benchmarkId: "etf1", chip: "tripleCaptain" });
-    expect(r.perStock.g1.counted).toBe(69);
+    expect(r.perStock.g1.counted).toBe(66);
   });
 
   it("bench boost counts the bench", () => {
     const r = scoreGameweek({ lineup, posOf, pct, benchmarkId: "etf1", chip: "benchBoost" });
-    expect(r.total).toBe(117 + 5 + 46 + 4 * 13);
+    expect(r.total).toBe(108 + 5 + 44 + 4 * 12);
   });
 
   it("hedge protects one stock", () => {
@@ -320,7 +327,7 @@ describe("scoreGameweek", () => {
 
   it("subtracts transfer hits", () => {
     const r = scoreGameweek({ lineup, posOf, pct, benchmarkId: "etf1", transferHit: 8 });
-    expect(r.total).toBe(117 + 5 + 46 - 8);
+    expect(r.total).toBe(108 + 5 + 44 - 8);
   });
 
   it("auto-subs skip bench stocks that would break the formation", () => {

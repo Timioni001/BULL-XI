@@ -1,8 +1,9 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { AlertCircle, Check } from "lucide-react";
 import { dur, ease } from "@/lib/motion";
+import { copy } from "@/lib/copy";
 
 /** Validation hints. Neutral, never red: red only means a price fell. */
 export function SquadHints({ hints, complete }: { hints: string[]; complete: boolean }) {
@@ -19,7 +20,7 @@ export function SquadHints({ hints, complete }: { hints: string[]; complete: boo
             transition={{ duration: dur.base, ease }}
             className="inline-flex h-7 items-center gap-1.5 rounded-full bg-foreground px-3 text-xs font-semibold text-background"
           >
-            <Check className="size-3.5" strokeWidth={3} /> Squad complete
+            <Check className="size-3.5" strokeWidth={3} /> {copy.squad.complete}
           </motion.span>
         ) : (
           items.map((h) => (

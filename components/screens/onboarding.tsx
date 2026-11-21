@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion, type PanInfo } from "framer-motion";
+import { AnimatePresence, motion, type PanInfo } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { useGame } from "@/lib/store/game";
+import { copy } from "@/lib/copy";
+import { routes } from "@/lib/routes";
 import { haptic } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { dur, ease, spring } from "@/lib/motion";
@@ -14,24 +16,10 @@ import { Pitch } from "@/components/pitch/pitch";
 import { StockAvatar } from "@/components/stock/stock-avatar";
 import { CaptainBadge } from "@/components/game/captain-badge";
 import { RankDelta } from "@/components/live/rank-delta";
+import type { Sector } from "@/lib/data/types";
 
-const CARDS = [
-  {
-    title: "Pick stocks, not players",
-    body: "Build a 15-stock squad with 100 credits. ETFs in goal, Blue Chips at the back, Growth in midfield, High Risk up front.",
-    art: <SquadArt />,
-  },
-  {
-    title: "Wear the armband",
-    body: "Points come from real price moves. Up 1% is 10 points. Your captain scores double.",
-    art: <ArmbandArt />,
-  },
-  {
-    title: "Win your league",
-    body: "Scores update every second. Beat your mates in mini-leagues that never close.",
-    art: <LeagueArt />,
-  },
-];
+const ART = [<SquadArt key="squad" />, <ArmbandArt key="armband" />, <LeagueArt key="league" />];
+const CARDS = copy.onboarding.cards.map((c, i) => ({ ...c, art: ART[i] }));
 
 export function Onboarding() {
   const router = useRouter();
@@ -52,7 +40,7 @@ export function Onboarding() {
   const returning = hydrated && forceIntro === false && onboarded;
   useEffect(() => {
     if (!returning) return;
-    router.replace(locked?.kickoffAt ? "/live" : locked ? "/lock" : lineup ? "/pick" : "/squad");
+    router.replace(locked ? routes.live : lineup ? routes.pick : routes.squad);
   }, [returning, locked, lineup, router]);
 
   if (!hydrated || forceIntro === null || returning) {
@@ -81,7 +69,7 @@ export function Onboarding() {
   const card = CARDS[i];
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col lg:mx-auto lg:w-full lg:max-w-[440px] lg:py-6">
       <header className="pt-safe flex h-16 items-center justify-between px-5">
         <span className="flex items-center gap-2.5">
           <Logo size={30} />
@@ -89,7 +77,7 @@ export function Onboarding() {
         </span>
         {!last && (
           <button onClick={() => go(CARDS.length - 1)} className="h-10 px-2 text-[13px] font-medium text-muted-foreground">
-            Skip
+            {copy.onboarding.skip}
           </button>
         )}
       </header>
@@ -119,7 +107,7 @@ export function Onboarding() {
               <p className="num text-label font-semibold uppercase text-muted-foreground">
                 {i + 1} / {CARDS.length}
               </p>
-              <h1 className="mt-2 text-[30px] font-semibold leading-[1.08] tracking-tight">{card.title}</h1>
+              <h1 className="mt-2 font-display text-[38px] font-bold uppercase leading-[0.95] tracking-tight">{card.title}</h1>
               <p className="mt-3 max-w-[34ch] text-[15px] leading-relaxed text-muted-foreground">{card.body}</p>
             </div>
           </motion.section>
@@ -131,7 +119,7 @@ export function Onboarding() {
           {CARDS.map((c, n) => (
             <button key={c.title} role="tab" aria-selected={n === i} aria-label={c.title} onClick={() => go(n)} className="h-6 flex-1">
               <span className="block h-1 overflow-hidden rounded-full bg-surface-3">
-                <motion.span className="block h-full bg-foreground" initial={false} animate={{ width: n <= i ? "100%" : "0%" }} transition={{ duration: dur.slow, ease }} />
+                <motion.span className="block h-full bg-brand" initial={false} animate={{ width: n <= i ? "100%" : "0%" }} transition={{ duration: dur.slow, ease }} />
               </span>
             </button>
           ))}
@@ -142,13 +130,13 @@ export function Onboarding() {
           onClick={() => {
             if (last) {
               haptic(12);
-              router.push("/squad");
+              router.push(routes.squad);
             } else go(i + 1);
           }}
         >
-          {last ? "Build your squad" : "Next"} <ArrowRight />
+          {last ? copy.onboarding.start : copy.onboarding.next} <ArrowRight />
         </Button>
-        <p className="mt-3 text-center text-xs text-muted-foreground">Free to play. No sign-up.</p>
+        <p className="mt-3 text-center text-xs text-muted-foreground">{copy.onboarding.free}</p>
       </footer>
     </div>
   );
@@ -157,8 +145,13 @@ export function Onboarding() {
 /* ------------------------------ Art ------------------------------ */
 
 function SquadArt() {
-  const rows = [["SPYx"], ["AAPLx", "MSFTx", "JPMx", "WMTx"], ["NVDAx", "PLTRx", "AMDx"], ["TSLAx", "COINx"]];
-  const labels = ["ETF", "Blue Chip", "Growth", "High Risk"];
+  const rows: [string, Sector][][] = [
+    [["SPYx", "Index"]],
+    [["AAPLx", "Big Tech"], ["MSFTx", "Big Tech"], ["JPMx", "Finance"], ["WMTx", "Consumer"]],
+    [["NVDAx", "Chips"], ["PLTRx", "Software"], ["LLYx", "Health"]],
+    [["TSLAx", "Mobility"], ["COINx", "Crypto"]],
+  ];
+  const labels = [copy.positions.ETF.label, copy.positions.BLUE.label, copy.positions.GROWTH.label, copy.positions.RISK.label];
   let n = 0;
   return (
     <Pitch className="w-full max-w-[320px]">
@@ -167,9 +160,9 @@ function SquadArt() {
           <div key={ri} className="flex flex-col items-center gap-1.5">
             <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">{labels[ri]}</span>
             <div className="flex gap-2.5">
-              {r.map((t) => (
+              {r.map(([t, sector]) => (
                 <motion.div key={t} initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ ...spring, delay: 0.08 + n++ * 0.05 }} className="flex flex-col items-center gap-1">
-                  <StockAvatar ticker={t} size={38} inverted />
+                  <StockAvatar ticker={t} sector={sector} size={38} inverted />
                   <span className="rounded bg-black/80 px-1 font-mono text-[9px] font-semibold text-white">{t}</span>
                 </motion.div>
               ))}
@@ -183,16 +176,16 @@ function SquadArt() {
 
 function ArmbandArt() {
   const steps = [
-    { k: "move", node: <span className="text-bull">+1.8%</span>, label: "price move" },
-    { k: "pts", node: <span>18 pts</span>, label: "x10" },
-    { k: "cap", node: <span className="text-gold">36 pts</span>, label: "captain x2" },
+    { k: "move", node: <span className="text-bull">+1.8%</span>, label: copy.onboarding.armband.move },
+    { k: "pts", node: <span>18 pts</span>, label: copy.onboarding.armband.x10 },
+    { k: "cap", node: <span className="text-gold">36 pts</span>, label: copy.onboarding.armband.captain },
   ];
   return (
     <div className="flex w-full max-w-[320px] flex-col items-center">
       <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={spring} className="relative">
-        <StockAvatar ticker="NVDAx" size={112} inverted />
+        <StockAvatar ticker="NVDAx" sector="Chips" size={112} inverted />
         <motion.span initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ ...spring, delay: 0.35 }} className="absolute -right-4 -top-3">
-          <CaptainBadge role="C" size={40} className="shadow-[0_0_0_4px_var(--background),0_0_28px_rgb(245_196_81/0.5)]" />
+          <CaptainBadge role="C" size={40} shineKey="intro" className="shadow-[0_0_0_4px_var(--background),0_0_28px_rgb(245_196_81/0.5)]" />
         </motion.span>
       </motion.div>
       <p className="mt-4 font-mono text-sm font-semibold">NVDAx</p>
@@ -205,7 +198,7 @@ function ArmbandArt() {
             transition={{ delay: 0.5 + n * 0.25, duration: dur.slow, ease }}
             className={cn("flex flex-1 flex-col items-center rounded-2xl bg-surface-1 py-3 ring-1 ring-inset ring-hairline", n === 2 && "ring-gold/50")}
           >
-            <span className="num text-lg font-semibold">{s.node}</span>
+            <span className="num font-display text-xl font-bold">{s.node}</span>
             <span className="mt-0.5 text-[11px] text-muted-foreground">{s.label}</span>
           </motion.div>
         ))}
@@ -231,7 +224,7 @@ function LeagueArt() {
   return (
     <div className="w-full max-w-[320px] overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
       <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
-        <span className="text-sm font-semibold">Office Legends</span>
+        <span className="font-display text-sm font-bold uppercase">Office Legends</span>
         <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <span className="size-1.5 animate-live-dot rounded-full bg-foreground" /> Live
         </span>

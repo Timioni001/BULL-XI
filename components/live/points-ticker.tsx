@@ -1,39 +1,33 @@
 "use client";
 
-import { motion } from "framer-motion";
+import NumberFlow from "@number-flow/react";
 import { cn } from "@/lib/utils";
-import { spring } from "@/lib/motion";
 
-const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-/**
- * Rolling number, like a stadium scoreboard. Each digit is a column that
- * slides to its value. Tabular numerals keep the width fixed.
- */
-export function PointsTicker({ value, className, signed = false }: { value: number; className?: string; signed?: boolean }) {
-  const negative = value < 0;
-  const digits = String(Math.abs(Math.trunc(value))).split("").map(Number);
-  const sign = negative ? "−" : signed && value > 0 ? "+" : "";
+/** Rolling number, like a stadium scoreboard. Digits roll, never fade. */
+export function PointsTicker({ value, className, signed = false, suffix }: { value: number; className?: string; signed?: boolean; suffix?: string }) {
   return (
-    <span className={cn("num relative inline-flex overflow-hidden leading-none", className)} aria-label={String(value)} role="text">
-      {sign && <span aria-hidden>{sign}</span>}
-      {digits.map((d, i) => (
-        <Digit key={digits.length - i} d={d} />
-      ))}
-    </span>
+    <NumberFlow
+      value={value}
+      className={cn("num", className)}
+      format={{ signDisplay: signed ? "exceptZero" : "auto", maximumFractionDigits: 0 }}
+      suffix={suffix}
+      spinTiming={{ duration: 450, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }}
+      transformTiming={{ duration: 450, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }}
+      willChange
+    />
   );
 }
 
-function Digit({ d }: { d: number }) {
+/** Rolling decimal, for credits and prices. */
+export function NumberRoll({ value, className, decimals = 1, prefix, suffix, signed }: { value: number; className?: string; decimals?: number; prefix?: string; suffix?: string; signed?: boolean }) {
   return (
-    <span aria-hidden className="relative inline-block h-[1em] overflow-hidden" style={{ width: "0.62em" }}>
-      <motion.span className="absolute inset-x-0 top-0 flex flex-col items-center" initial={false} animate={{ y: `${-d}em` }} transition={spring}>
-        {DIGITS.map((n) => (
-          <span key={n} className="block h-[1em] leading-none">
-            {n}
-          </span>
-        ))}
-      </motion.span>
-    </span>
+    <NumberFlow
+      value={value}
+      className={cn("num", className)}
+      prefix={prefix}
+      suffix={suffix}
+      format={{ minimumFractionDigits: decimals, maximumFractionDigits: decimals, signDisplay: signed ? "exceptZero" : "auto" }}
+      spinTiming={{ duration: 400, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }}
+    />
   );
 }
