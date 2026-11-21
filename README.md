@@ -74,6 +74,10 @@ UI (app/, components/)  ──►  lib/data/index.ts  ──►  Phase 1: lib/da
 
 Program addresses: BULL-XI game program deploys in step 6. Real-time pricing oracle: `PriCems5tHihc6UDXDjzjeawomAwBduWMGAi8ZUjppd`.
 
+## Media
+
+Company logos live in `public/logos/` and photos in `public/photos/` (Unsplash License, credits in `public/photos/CREDITS.md`). Everything is served locally, so no image link can break. Access goes through `lib/data/media.ts`.
+
 ## Stack
 
 Next.js 16 (App Router, strict TS), Tailwind v4, shadcn/ui, Motion, Zustand, NumberFlow, vaul, sonner, cmdk, dnd-kit, TradingView Lightweight Charts, canvas-confetti, `next/og`. Fonts: Archivo (extended display), Instrument Serif (landing), Geist and Geist Mono.

@@ -9,6 +9,7 @@ import type { Position, Sector, Stock } from "@/lib/data/types";
 import { POSITIONS, canAddToSquad } from "@/lib/game/rules";
 import { copy } from "@/lib/copy";
 import { getSparklines } from "@/lib/data";
+import { photoFor } from "@/lib/data/media";
 import { useAsync } from "@/lib/hooks/use-async";
 import { credits, pct, tone } from "@/lib/format";
 import { useStocks } from "@/lib/hooks/use-stocks";
@@ -297,6 +298,7 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
 /** Big poster card, like a fantasy player card. Orange when it's in your squad. */
 function FeatureCard({ stock, change, selected, disabledReason, onPick, onInfo }: { stock: Stock; change: number; selected: boolean; disabledReason?: string; onPick: () => void; onInfo: () => void }) {
   const disabled = !!disabledReason && !selected;
+  const photo = photoFor(stock.id);
   return (
     <motion.div
       whileTap={{ scale: 0.97 }}
@@ -315,11 +317,22 @@ function FeatureCard({ stock, change, selected, disabledReason, onPick, onInfo }
         </button>
       </div>
       <button onClick={onPick} className="text-left" aria-label={`${stock.ticker}, ${credits(stock.credits)} ${copy.common.credits}`}>
-        <StockArt ticker={stock.ticker} sector={stock.sector} className="mt-1 h-[124px] rounded-[20px]">
-          <div className="flex h-full items-center justify-center">
-            <StockAvatar ticker={stock.ticker} sector={stock.sector} size={64} inverted />
+        {photo ? (
+          <div className="relative mt-1 h-[124px] overflow-hidden rounded-[20px] bg-surface-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo} alt="" width={480} height={600} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="absolute bottom-2.5 left-2.5">
+              <StockAvatar ticker={stock.ticker} sector={stock.sector} size={40} />
+            </div>
           </div>
-        </StockArt>
+        ) : (
+          <StockArt ticker={stock.ticker} sector={stock.sector} className="mt-1 h-[124px] rounded-[20px]">
+            <div className="flex h-full items-center justify-center">
+              <StockAvatar ticker={stock.ticker} sector={stock.sector} size={64} />
+            </div>
+          </StockArt>
+        )}
         <div className="px-2 pb-1 pt-3">
           <p className="truncate font-display text-[15px] font-black uppercase leading-tight">{stock.name}</p>
           <p className={cn("font-mono text-xs", selected ? "text-brand-foreground/70" : "text-muted-foreground")}>{stock.ticker}</p>
