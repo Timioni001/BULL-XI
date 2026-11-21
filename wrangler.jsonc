@@ -1,0 +1,13 @@
+{
+  // BULL-XI web app: Next.js static export served by Workers Static Assets.
+  // Deploy: npm run deploy:web
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bullxi",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./out",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}

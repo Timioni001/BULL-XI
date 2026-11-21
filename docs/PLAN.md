@@ -34,11 +34,11 @@ lib/
   format.ts, motion.ts   Number formatting, motion tokens
 ```
 
-Phase 2 swaps `lib/data/mock/*` for MagicBlock implementations behind the same `lib/data/index.ts` signatures.
+Phase 2 swaps `lib/data/mock/*` for real implementations behind the same `lib/data/index.ts` signatures. Done so far: live prices and charts (`lib/data/live/*`), the onchain price book client (`lib/onchain/*`). Hosting: Cloudflare static export plus one pusher Worker (`worker/`).
 
 ## Design tokens
 
-| Token | Dark (default) | Light |
+| Token | Dark | Light (default) |
 |---|---|---|
 | background | #0A0A0A | #FAFAFA |
 | surface-1 / 2 / 3 | #121212 / #1A1A1A / #242424 | #FFFFFF / #F2F2F2 / #E8E8E8 |
@@ -73,7 +73,7 @@ Phase 2 swaps `lib/data/mock/*` for MagicBlock implementations behind the same `
 - Sector rings (low saturation) on monogram tiles: tech, finance, energy, consumer, health, industrial, crypto, index.
 - Display type: Space Grotesk. UI: Geist. Tickers and clocks: Geist Mono.
 - Texture: diagonal pitch stripes, angled card cuts, faint noise, inner glows.
-- Routes: landing at `/`, the game at `/app/*`, `/proof` for judges, `/join/[code]` for invites, `/api/card` share images.
+- Routes: landing at `/`, the game at `/app/*`, `/proof` for judges, `/join?code=` for invites, `/app/league?id=` for a league. The share card is drawn in the browser with canvas (`lib/share.ts`). Static export: no server routes.
 - Desktop (1024px+): side nav, main column, sticky aside. Phones keep the floating pill tab bar.
 - All copy lives in `lib/copy.ts`.
 

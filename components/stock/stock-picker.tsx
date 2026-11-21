@@ -295,7 +295,7 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
 }
 
 /** Big poster card, like a fantasy player card. Orange when it's in your squad. */
-function FeatureCard({ stock, change, selected, disabledReason, onPick, onInfo }: { stock: Stock; change: number; selected: boolean; disabledReason?: string; onPick: () => void; onInfo: () => void }) {
+function FeatureCard({ stock, change, selected, disabledReason, onPick, onInfo }: { stock: Stock; change: number | null; selected: boolean; disabledReason?: string; onPick: () => void; onInfo: () => void }) {
   const disabled = !!disabledReason && !selected;
   return (
     <motion.div

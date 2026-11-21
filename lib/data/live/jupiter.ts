@@ -11,8 +11,11 @@ import { PRICE_SOURCE } from "@/lib/config";
 
 export interface Quote {
   price: number;
-  /** 24h % move of the onchain price, e.g. 1.84 */
-  change24h: number;
+  /**
+   * 24h % move, e.g. 1.84. Jupiter reports it for the DEX price, so it is only
+   * used when that price tracks the reference price (within 3%). Otherwise null.
+   */
+  change24h: number | null;
   /** When the reference price was last updated (ms) */
   updatedAt: number;
 }
@@ -36,10 +39,12 @@ export async function fetchQuotes(mints: string[], signal?: AbortSignal): Promis
     for (const [mint, p] of Object.entries(body)) {
       const price = p?.stockData?.price ?? p?.usdPrice;
       if (!p || !price || !Number.isFinite(price)) continue;
-      const change = p.priceChange24h ?? 0;
+      const ref = p.stockData?.price;
+      const tracks = !ref || (p.usdPrice !== undefined && Math.abs(p.usdPrice / ref - 1) <= 0.03);
+      const change = tracks && typeof p.priceChange24h === "number" && Number.isFinite(p.priceChange24h) ? Math.round(p.priceChange24h * 100) / 100 : null;
       out[mint] = {
         price,
-        change24h: Math.round(Math.max(-30, Math.min(30, change)) * 100) / 100,
+        change24h: change,
         updatedAt: p.stockData?.updatedAt ? Date.parse(p.stockData.updatedAt) : Date.now(),
       };
     }

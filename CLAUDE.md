@@ -4,7 +4,15 @@
 
 Built for MagicBlock Solana Blitz v10 (theme: Entertainment Finance). Deadline: Nov 27 2026.
 
-**Current phase: UX FIRST.** Build a polished, clickable, mobile-first prototype on mock data. No blockchain code yet. Every data call goes through a typed data layer so MagicBlock and Solana can be swapped in later without touching UI code.
+**Current phase: PHASE 2 on devnet, $0 budget.** Phase 1 (the UX prototype) is done. Phase 2 makes it real on Solana devnet and MagicBlock devnet (ER and TEE), checkpoint by checkpoint. Every data call still goes through the typed data layer in `lib/data/`.
+
+### Phase 2 hard rules
+- **Budget $0.** No paid services, APIs or domains. If something would cost money, stop and ask first
+- **Network lives in one value:** `NETWORK` in `lib/config.ts`. Mainnet is a one-line change, only if MagicBlock sponsors it
+- **Every claim on the landing page and /proof must be true on devnet**, with devnet explorer links. Test tokens are labelled "Devnet preview with test tokens priced from real market data."
+- **Hosting is Cloudflare only.** Next.js static export (`output: "export"`) served by Workers Static Assets (`wrangler.jsonc`, free workers.dev). No SSR adapter, no server routes, no server actions. Dynamic pages use query params. Do not set `run_worker_first`
+- **One small Worker** (`worker/`) runs the price pusher cron every minute and tiny read APIs. Secrets via `wrangler secret put`
+- **Prices:** the browser polls the free Jupiter Price API (xStocks reference price) every 5s. The Worker writes the same prices to our price book on the Ephemeral Rollup every minute, which builds the onchain TWAP
 
 ---
 
@@ -101,7 +109,7 @@ Starting XI = 11 stocks. Bench = 4 (ordered, auto-sub only if a stock is halted)
 - **Feel:** premium sports broadcast meets trading terminal. Sharp, confident, fast. No cartoon or casino vibes
 - **Motion:** quick (150 to 250ms), purposeful. Number tickers, rank arrows sliding, a subtle pitch glow on the live screen
 
-## 7. Tech stack (Phase 1)
+## 7. Tech stack
 
 - Next.js (App Router) + TypeScript (strict)
 - Tailwind CSS + shadcn/ui primitives
@@ -109,21 +117,23 @@ Starting XI = 11 stocks. Bench = 4 (ordered, auto-sub only if a stock is halted)
 - Zustand for client state (squad, picks, chips)
 - Recharts or lightweight-charts for stock charts
 - PWA-ready (installable on phones)
-- **Mock data layer:** `lib/data/` exposes typed async functions (`getStocks()`, `getLivePrices()`, `getLeague()`, `lockSquad()` etc.). Phase 1 returns mock data with a simulated live price feed (random walk every second). Phase 2 swaps implementations for MagicBlock without UI changes
+- Hosting: Cloudflare Workers Static Assets (`npm run deploy:web`) plus the pusher Worker (`npm run deploy:worker`)
+- Onchain: Anchor 1.x program in `onchain/` (`bullxi`), ephemeral-rollups-sdk 0.17.x (devnet ERs run validator v1), clients with `@solana/kit` in `lib/onchain/`
+- **Data layer:** `lib/data/` exposes typed async functions (`getStocks()`, `getLivePrices()`, `getLeague()`, `lockSquad()` etc.). Phase 1 returns mock data with a simulated live price feed (random walk every second). Phase 2 swaps implementations for real prices and MagicBlock without UI changes. Demo mode and `?mock=sim` keep the simulated market
 
 ### Mock data to create
 - ~40 xStocks across 4 positions and ~8 sectors, each with ticker, name, sector, position, credits, price, 24h change, ownership %
 - 3 mini-leagues with 8 to 20 fake managers each
 - 5 past gameweeks of history
 
-## 8. Phase 2 (not now): MagicBlock integration map
+## 8. Phase 2: MagicBlock integration map
 
-Reference only. Do not build until the UX is approved.
+Every piece must be load-bearing. Built so far: the price book on the Ephemeral Rollup (checkpoint 1).
 
 | UX moment | MagicBlock tech |
 |---|---|
 | Squad hidden until deadline | Private Ephemeral Rollup |
-| Live points and ranks every second | Ephemeral Rollup + Price Oracle (Pyth Lazer) |
+| Live points and ranks every second | Ephemeral Rollup + our own price book (MagicBlock's oracle only accepts its own signer, and its public Pyth Lazer list has only crypto feeds) |
 | Deadline lock and gameweek settlement | Cranks |
 | Final standings onchain | Commit / Undelegate |
 | Prize payout at settlement | Magic Actions |

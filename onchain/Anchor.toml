@@ -1,0 +1,13 @@
+[toolchain]
+anchor_version = "1.0.2"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.devnet]
+bullxi = "EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/bullxi/deployer.json"

@@ -4,7 +4,8 @@ export const credits = (n: number) => n.toFixed(1);
 
 export const signed = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : "0");
 
-export const pct = (n: number, dp = 2) => {
+export const pct = (n: number | null, dp = 2) => {
+  if (n === null || !Number.isFinite(n)) return "–";
   const v = Math.abs(n).toFixed(dp);
   if (Number(v) === 0) return `${(0).toFixed(dp)}%`;
   return `${n > 0 ? "+" : "−"}${v}%`;
@@ -32,7 +33,8 @@ export function clock(ms: number): { d: number; h: string; m: string; s: string 
 }
 
 /** Colour for a signed number. Values that round to zero at `dp` are neutral. */
-export const tone = (n: number, dp = 2) => {
+export const tone = (n: number | null, dp = 2) => {
+  if (n === null || !Number.isFinite(n)) return "text-muted-foreground";
   const r = Number(n.toFixed(dp));
   return r > 0 ? "text-bull" : r < 0 ? "text-bear" : "text-muted-foreground";
 };

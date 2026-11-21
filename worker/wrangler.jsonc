@@ -1,0 +1,16 @@
+{
+  // BULL-XI price pusher. Deploy: npm run deploy:worker
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "bullxi-pusher",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "triggers": { "crons": ["* * * * *"] },
+  "observability": { "enabled": true },
+  "vars": {
+    "NETWORK": "devnet",
+    "ER_RPC": "https://devnet-as.magicblock.app",
+    "PRICE_URL": "https://lite-api.jup.ag/price/v3"
+  }
+  // Secret (not in this file): wrangler secret put PUSHER_KEY --config worker/wrangler.jsonc
+}
