@@ -86,22 +86,22 @@ export function Chips() {
                   setOpen(c);
                 }}
                 className={cn(
-                  "noise cut-tr relative flex min-h-[148px] flex-col overflow-hidden rounded-[28px] p-5 text-left ring-1 ring-inset transition-colors",
-                  isActive ? "bg-brand text-white ring-transparent shadow-[0_24px_48px_-24px_var(--brand-glow)]" : "bg-surface-1 ring-hairline hover:bg-surface-2",
+                  "relative flex min-h-[148px] flex-col overflow-hidden rounded-[28px] p-5 text-left ring-1 ring-inset transition-colors",
+                  isActive ? "bg-brand text-brand-foreground ring-transparent shadow-[0_24px_48px_-24px_var(--brand-glow)]" : "bg-surface-1 ring-hairline hover:bg-surface-2",
                   (isUsed || (blocked && !locked)) && "opacity-55",
                 )}
               >
-                {isActive && <div aria-hidden className="absolute -right-8 -top-8 size-32 rotate-45 bg-white/10" />}
+                {isActive && <div aria-hidden className="absolute -right-8 -top-8 size-32 rotate-45 bg-black/10" />}
                 <div className="relative flex items-start justify-between">
-                  <span className={cn("grid size-11 place-items-center rounded-2xl", isActive ? "bg-white/15" : c === "tripleCaptain" ? "bg-gold/15 text-gold" : "bg-surface-3")}>
+                  <span className={cn("grid size-11 place-items-center rounded-2xl", isActive ? "bg-black/10" : c === "tripleCaptain" ? "bg-gold/15 text-gold" : "bg-surface-3")}>
                     <Icon className="size-5" />
                   </span>
-                  <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-semibold", isActive ? "bg-white text-black" : isUsed ? "bg-surface-3 text-muted-foreground" : "bg-brand-soft text-foreground")}>
+                  <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-semibold", isActive ? "bg-brand-foreground text-white" : isUsed ? "bg-surface-3 text-muted-foreground" : "bg-brand-soft text-foreground")}>
                     {isActive ? t.active : isUsed ? t.used(gw) : blocked ? t.blocked : t.available}
                   </span>
                 </div>
                 <p className="relative mt-auto pt-4 font-display text-[22px] font-bold uppercase leading-tight">{copy.chipName[c]}</p>
-                <p className={cn("relative mt-1 text-[13px]", isActive ? "text-white/80" : "text-muted-foreground")}>{t.details[c]}</p>
+                <p className={cn("relative mt-1 text-[13px]", isActive ? "text-brand-foreground/70" : "text-muted-foreground")}>{t.details[c]}</p>
               </motion.button>
             );
           })}
@@ -128,7 +128,7 @@ export function Chips() {
                     <StockAvatar ticker={s.ticker} sector={s.sector} size={36} />
                     <span className="font-mono text-[11px] font-semibold">{s.ticker}</span>
                     {on && (
-                      <span className="absolute right-1.5 top-1.5 grid size-4 place-items-center rounded-full bg-brand text-white">
+                      <span className="absolute right-1.5 top-1.5 grid size-4 place-items-center rounded-full bg-brand text-brand-foreground">
                         <Check className="size-3" strokeWidth={3} />
                       </span>
                     )}

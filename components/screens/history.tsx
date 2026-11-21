@@ -65,7 +65,7 @@ export function History() {
   } else {
     body = (
       <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-6">
-        <section className="noise cut-tr rounded-[28px] bg-surface-1 p-5 ring-1 ring-inset ring-hairline lg:sticky lg:top-6">
+        <section className="rounded-[28px] bg-surface-1 p-5 ring-1 ring-inset ring-hairline lg:sticky lg:top-6">
           <p className="text-label font-semibold uppercase text-muted-foreground">{t.season}</p>
           <PointsTicker value={total} className="mt-1 block font-display text-mega font-bold tracking-tighter" />
           <div className="mt-4 grid grid-cols-2 gap-2">
@@ -98,7 +98,7 @@ export function History() {
         <ol className="flex flex-col gap-2">
           {entries.map((e, i) => (
             <motion.li key={`${e.gameweek}-${e.finishedAt}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: dur.base, ease, delay: i * 0.03 }}>
-              <button onClick={() => setOpen(e)} className="noise flex w-full items-center gap-4 rounded-3xl bg-surface-1 p-4 text-left ring-1 ring-inset ring-hairline transition-colors hover:bg-surface-2">
+              <button onClick={() => setOpen(e)} className="flex w-full items-center gap-4 rounded-3xl bg-surface-1 p-4 text-left ring-1 ring-inset ring-hairline transition-colors hover:bg-surface-2">
                 <span className="grid w-12 shrink-0 text-center">
                   <span className="font-display text-xs font-bold uppercase text-muted-foreground">GW</span>
                   <span className="num font-display text-2xl font-bold leading-none">{e.gameweek}</span>

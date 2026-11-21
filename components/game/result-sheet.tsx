@@ -18,7 +18,7 @@ export function ResultSheet({ result, open, onOpenChange, onNext }: { result: Ga
     <Vaul.Root open={open} onOpenChange={onOpenChange}>
       <Vaul.Portal>
         <Vaul.Overlay className="fixed inset-0 z-50 bg-black/75 backdrop-blur-[2px]" />
-        <Vaul.Content className="noise fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[94dvh] max-w-[480px] flex-col rounded-t-[28px] bg-surface-1 outline-none ring-1 ring-hairline">
+        <Vaul.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[94dvh] max-w-[480px] flex-col rounded-t-[28px] bg-surface-1 outline-none ring-1 ring-hairline">
           <div className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-surface-3" />
           {result && <Body key={result.finishedAt} result={result} onNext={onNext} />}
         </Vaul.Content>
@@ -39,7 +39,7 @@ function Body({ result, onNext }: { result: GameweekResult; onNext?: () => void 
     const id = setTimeout(() => {
       void import("canvas-confetti").then(({ default: confetti }) => {
         if (cancelled) return;
-        const colors = ["#F5C451", "#6C5CFF", "#FFFFFF"];
+        const colors = ["#F5C451", "#FF5B1F", "#FFFFFF"];
         confetti({ particleCount: 90, spread: 70, startVelocity: 42, origin: { y: 0.7 }, colors, zIndex: 60, disableForReducedMotion: true });
         setTimeout(() => confetti({ particleCount: 60, spread: 100, origin: { y: 0.6 }, colors, zIndex: 60, disableForReducedMotion: true }), 250);
       });

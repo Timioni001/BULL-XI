@@ -159,7 +159,7 @@ export function PickTeam() {
   const panel = (
     <AnimatePresence mode="wait" initial={false}>
       {sel ? (
-        <motion.div key="sel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: dur.base, ease }} className="noise rounded-3xl bg-surface-1 p-3 ring-1 ring-inset ring-hairline">
+        <motion.div key="sel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: dur.base, ease }} className="rounded-3xl bg-surface-1 p-3 ring-1 ring-inset ring-hairline">
           <div className="flex items-center gap-3">
             <StockAvatar ticker={sel.ticker} sector={sel.sector} size={38} />
             <div className="min-w-0 flex-1">

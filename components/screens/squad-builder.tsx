@@ -95,7 +95,7 @@ export function SquadBuilder() {
 
   const actions = (
     <div className="flex gap-2">
-      <Button size="cta" variant={filled === 0 ? "default" : "secondary"} className={filled === 0 ? "flex-1" : "px-5"} onClick={runAutoPick}>
+      <Button size="cta" variant={filled === 0 ? "default" : "secondary"} className={filled === 0 ? "flex-1" : "px-4"} onClick={runAutoPick}>
         {filled === 15 ? <Shuffle /> : <Sparkles />}
         {filled === 15 ? t.shuffle : filled === 0 ? t.autoPickAll : t.autoPickRest(empty)}
       </Button>

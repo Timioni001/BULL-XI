@@ -39,7 +39,7 @@ export function StockDetailSheet({ stock, open, onOpenChange, actions, nested }:
     <Root open={open} onOpenChange={onOpenChange}>
       <Vaul.Portal>
         <Vaul.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-[2px]" />
-        <Vaul.Content className="noise fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92dvh] max-w-[480px] flex-col rounded-t-[28px] bg-surface-1 outline-none ring-1 ring-hairline">
+        <Vaul.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92dvh] max-w-[480px] flex-col rounded-t-[28px] bg-surface-1 outline-none ring-1 ring-hairline">
           <div className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-surface-3" />
           {stock && <DetailBody key={stock.id} stock={stock} actions={actions} />}
         </Vaul.Content>

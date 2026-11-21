@@ -16,7 +16,7 @@ export function MiniTable({ standings, window = 2 }: { standings: LiveStanding[]
   const showLeader = from > 0;
 
   return (
-    <div className="noise overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
+    <div className="overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
       <div className="grid grid-cols-[32px_1fr_52px_56px] items-center gap-2 border-b border-hairline px-3 py-2 text-[11px] font-medium text-muted-foreground">
         <span>{copy.live.table.rank}</span>
         <span>{copy.live.table.manager}</span>

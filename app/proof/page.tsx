@@ -24,7 +24,7 @@ export default async function ProofPage() {
       <div aria-hidden className="pointer-events-none absolute -right-[30vw] -top-[40vw] size-[90vw] max-h-[1000px] max-w-[1000px] rotate-45 bg-gradient-to-b from-brand/20 to-transparent" />
       <header className="pt-safe relative mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5 lg:px-8">
         <Link href={routes.landing} className="flex items-center gap-2.5">
-          <Logo size={28} />
+          <Logo size={28} decorative />
           <Wordmark />
         </Link>
         <Link href={routes.app} className="inline-flex h-11 items-center gap-1.5 rounded-full bg-surface-1 px-4 text-sm font-semibold ring-1 ring-inset ring-hairline hover:bg-surface-2">

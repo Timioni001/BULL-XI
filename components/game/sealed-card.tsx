@@ -21,7 +21,7 @@ export function SealedCard({ rows, captain, sealId, animate = true, className }:
       transition={{ duration: 0.5, delay: 1.0, times: [0, 0.1, 0.35, 0.7, 1] }}
     >
       <div className="relative">
-      <div className="noise glow-brand relative aspect-[1.55] overflow-hidden rounded-[26px] bg-surface-2">
+      <div className="glow-brand relative aspect-[1.55] overflow-hidden rounded-[26px] bg-surface-2">
         <motion.div
           className="absolute inset-0 flex flex-col justify-center gap-1.5 px-4 pt-2"
           initial={false}
@@ -48,7 +48,7 @@ export function SealedCard({ rows, captain, sealId, animate = true, className }:
         <motion.div
           aria-hidden
           className="absolute inset-x-0 top-0 h-[64%] origin-top [backface-visibility:hidden]"
-          style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)", background: "linear-gradient(180deg, #7d6fff, #5446e0)" }}
+          style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)", background: "linear-gradient(180deg, #ff7a45, #e04812)" }}
           initial={animate ? { rotateX: -178 } : false}
           animate={{ rotateX: 0 }}
           transition={{ delay: d(0.55), duration: 0.45, ease: [0.5, 0, 0.2, 1] }}
@@ -57,7 +57,7 @@ export function SealedCard({ rows, captain, sealId, animate = true, className }:
       </div>
 
       <motion.div
-        className="absolute left-1/2 top-[64%] grid size-[76px] place-items-center rounded-full bg-[#0e0d1a] ring-2 ring-brand shadow-[0_0_0_6px_rgb(108_92_255/0.18),0_0_40px_var(--brand-glow)]"
+        className="absolute left-1/2 top-[64%] grid size-[76px] place-items-center rounded-full bg-[#1a1210] ring-2 ring-brand shadow-[0_0_0_6px_rgb(255_91_31/0.18),0_0_40px_var(--brand-glow)]"
         style={{ x: "-50%", y: "-50%" }}
         initial={animate ? { scale: 2.4, rotate: -24, opacity: 0 } : false}
         animate={{ scale: 1, rotate: -8, opacity: 1 }}

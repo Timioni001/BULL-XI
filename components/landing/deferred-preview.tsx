@@ -35,7 +35,7 @@ function Frame() {
   return (
     <div aria-hidden className="noise relative mx-auto w-full max-w-[380px] rounded-[36px] bg-surface-1 p-3 ring-1 ring-inset ring-hairline">
       <div className="h-[52px]" />
-      <div className="mb-3 h-[84px] rounded-3xl bg-[linear-gradient(160deg,#16142a,#111112_60%)] ring-1 ring-inset ring-brand/30" />
+      <div className="mb-3 h-[84px] rounded-3xl bg-[linear-gradient(160deg,#2a1d18,#111112_60%)] ring-1 ring-inset ring-brand/30" />
       <div className="pitch-diagonal h-[388px] rounded-[28px] ring-1 ring-inset ring-hairline" />
     </div>
   );

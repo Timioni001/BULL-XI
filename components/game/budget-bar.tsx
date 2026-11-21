@@ -12,7 +12,7 @@ export function BudgetBar({ creditsLeft, size, className }: { creditsLeft: numbe
   const used = Math.min(1, Math.max(0, (BUDGET - creditsLeft) / BUDGET));
   const over = creditsLeft < 0;
   return (
-    <div className={cn("noise cut-tr rounded-2xl bg-surface-1 px-4 py-3.5 ring-1 ring-inset ring-hairline", className)}>
+    <div className={cn("rounded-2xl bg-surface-1 px-4 py-3.5 ring-1 ring-inset ring-hairline", className)}>
       <div className="flex items-end justify-between">
         <div>
           <p className="text-label font-semibold uppercase text-muted-foreground">{copy.squad.creditsLeft}</p>

@@ -180,7 +180,7 @@ function LiveView({ snapshot, locked, byId, onResult, resultSheet }: { snapshot:
     <>
       <section>
         <SectionTitle title={t.matchCentre} right={<span className="flex items-center gap-1.5"><span className="size-1.5 animate-live-dot rounded-full bg-foreground" /> {copy.common.live}</span>} />
-        <div className="noise rounded-3xl bg-surface-1 px-4 ring-1 ring-inset ring-hairline">
+        <div className="rounded-3xl bg-surface-1 px-4 ring-1 ring-inset ring-hairline">
           {snapshot.events.length <= 1 ? <p className="py-4 text-center text-[13px] text-muted-foreground">{t.kickedOff}</p> : <EventFeed events={snapshot.events} startedAt={snapshot.startedAt} />}
         </div>
       </section>
@@ -285,7 +285,7 @@ function LiveHeader({ gameweek, endsAt, startedAt, ended, right }: { gameweek?: 
             )}
           </span>
           {endsAt && (
-            <span className={cn("inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-bold tracking-[0.14em]", ended ? "bg-surface-3 text-foreground" : "bg-brand text-white shadow-[0_0_16px_var(--brand-glow)]")}>
+            <span className={cn("inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-bold tracking-[0.14em]", ended ? "bg-surface-3 text-foreground" : "bg-brand text-brand-foreground shadow-[0_0_16px_var(--brand-glow)]")}>
               {!ended && <span className="size-1.5 animate-live-dot rounded-full bg-white" />}
               {ended ? t.fullTime : t.pill}
             </span>
@@ -344,7 +344,7 @@ function Scoreboard({ snapshot, flash }: { snapshot: LiveGameweekSnapshot; flash
   const total = snapshot.totalPoints;
   const cap = snapshot.scores[snapshot.effectiveCaptainId];
   return (
-    <section className="noise cut-tr glow-brand relative overflow-hidden rounded-[28px] bg-[linear-gradient(160deg,#16142a_0%,#111112_55%)]">
+    <section className="glow-brand relative overflow-hidden rounded-[28px] bg-[linear-gradient(160deg,#2a1d18_0%,#111112_55%)]">
       <div className="grid grid-cols-[1fr_auto] gap-4 px-5 pb-4 pt-5">
         <div className="min-w-0">
           <p className="text-label font-semibold uppercase text-muted-foreground">{t.gwPoints}</p>

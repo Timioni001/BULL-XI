@@ -154,7 +154,7 @@ export function DeadlineLock() {
                 {kickoffAt ? (
                   <p className="rounded-3xl bg-surface-1 px-4 py-5 text-center text-sm text-muted-foreground ring-1 ring-inset ring-hairline">{t.isLive}</p>
                 ) : (
-                  <div className="noise rounded-3xl bg-surface-1 px-4 py-5 text-center ring-1 ring-inset ring-hairline">
+                  <div className="rounded-3xl bg-surface-1 px-4 py-5 text-center ring-1 ring-inset ring-hairline">
                     <p className="mb-3 text-label font-semibold uppercase text-muted-foreground">{t.kicksOffIn}</p>
                     <Countdown to={start} brand />
                     <p className="mt-3 text-xs text-muted-foreground">{t.runs(fmtTime(locked.start), fmtTime(locked.end))}</p>
@@ -204,7 +204,7 @@ export function DeadlineLock() {
                   { value: "flash", label: t.flash },
                 ]}
               />
-              <section className="noise cut-tr rounded-3xl bg-surface-1 px-4 py-6 text-center ring-1 ring-inset ring-hairline">
+              <section className="rounded-3xl bg-surface-1 px-4 py-6 text-center ring-1 ring-inset ring-hairline">
                 <AnimatePresence mode="wait" initial={false}>
                   {gw.error ? (
                     <ErrorState key="err" title={copy.errors.gameweek.title} message={copy.errors.gameweek.body} onRetry={gw.retry} className="py-2" />
@@ -265,7 +265,7 @@ function LineupSummary({
 }) {
   const rows = POSITIONS.map((p) => starters.filter((id) => posOf(id) === p));
   return (
-    <section className="noise w-full rounded-3xl bg-surface-1 p-4 text-left ring-1 ring-inset ring-hairline">
+    <section className="w-full rounded-3xl bg-surface-1 p-4 text-left ring-1 ring-inset ring-hairline">
       <div className="flex items-center justify-between">
         <p className="font-display text-[17px] font-bold uppercase">
           {t.yourXI} <span className="num ml-1 text-muted-foreground">{formation(starters, posOf)}</span>

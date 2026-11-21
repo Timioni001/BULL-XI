@@ -33,7 +33,7 @@ export function GoPro() {
       <PageHeader eyebrow={t.eyebrow} title={t.title} back={routes.profile} />
       <main className="flex flex-1 flex-col gap-3 px-4 pb-2 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6 lg:px-0 lg:pb-10">
         <div className="flex flex-col gap-3">
-          <section className="cut-tr noise relative overflow-hidden rounded-[28px] bg-[linear-gradient(150deg,#2a2160,#121019_60%)] p-6 ring-1 ring-inset ring-brand/40">
+          <section className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(150deg,#3a2216,#1a1614_60%)] p-6 ring-1 ring-inset ring-brand/40">
             <div aria-hidden className="absolute -right-14 -top-14 size-52 rotate-45 bg-brand/20" />
             <Crown className="relative size-7 text-gold" />
             <h2 className="relative mt-3 max-w-[16ch] font-display text-[34px] font-bold uppercase leading-[0.95] tracking-tight">{t.headline}</h2>
@@ -50,7 +50,7 @@ export function GoPro() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: dur.slow, ease, delay: i * 0.05 }}
-                className="noise flex gap-3 rounded-3xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline"
+                className="flex gap-3 rounded-3xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline"
               >
                 <span className="num grid size-9 shrink-0 place-items-center rounded-full bg-brand-soft font-display text-sm font-bold text-brand">{i + 1}</span>
                 <span>
@@ -68,7 +68,7 @@ export function GoPro() {
           {leagues.status === "error" && <ErrorState onRetry={leagues.retry} />}
           {leagues.status === "success" &&
             leagues.data.map((l) => (
-              <div key={l.id} className="noise rounded-3xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline">
+              <div key={l.id} className="rounded-3xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline">
                 <div className="flex items-center justify-between">
                   <p className="font-display text-lg font-bold uppercase">{l.name}</p>
                   <span className="rounded-full bg-surface-3 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{l.kind === "daily" ? copy.lock.daily : copy.lock.flash}</span>

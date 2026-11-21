@@ -72,7 +72,7 @@ export function Onboarding() {
     <div className="flex min-h-dvh flex-col lg:mx-auto lg:w-full lg:max-w-[440px] lg:py-6">
       <header className="pt-safe flex h-16 items-center justify-between px-5">
         <span className="flex items-center gap-2.5">
-          <Logo size={30} />
+          <Logo size={30} decorative />
           <Wordmark />
         </span>
         {!last && (
