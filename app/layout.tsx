@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { GeistSans } from "geist/font/sans";
 import { Providers } from "@/components/providers/providers";
 import { copy } from "@/lib/copy";
+import { themeBootScript } from "@/lib/theme-boot";
 import "./globals.css";
 
 // Mono is only used for tickers, so it isn't preloaded.
@@ -43,7 +44,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${geistMono.variable} ${archivo.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${geistMono.variable} ${archivo.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+      </head>
       <body className="min-h-dvh bg-background">
         <Providers>{children}</Providers>
       </body>

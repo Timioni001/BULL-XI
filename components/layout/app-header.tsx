@@ -24,7 +24,7 @@ export function AppHeader({ className }: { className?: string }) {
   return (
     <div className={cn("pt-safe flex h-16 items-center justify-between px-4 lg:hidden", className)}>
       <Link href={routes.profile} aria-label={copy.nav.profileShort} className="relative">
-        <span className="grid size-11 place-items-center rounded-full bg-ink font-display text-[12px] font-black text-white">{hydrated ? initials : ""}</span>
+        <span className="grid size-11 place-items-center rounded-full bg-ink font-display text-[12px] font-black text-ink-foreground">{hydrated ? initials : ""}</span>
         <span aria-hidden className="absolute -bottom-0.5 -right-0.5 grid size-[18px] place-items-center rounded-full bg-brand text-[13px] font-bold leading-none text-brand-foreground ring-2 ring-background">
           +
         </span>
