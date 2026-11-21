@@ -10,7 +10,7 @@ export function Logo({ size = 28, className, priority, decorative, light }: { si
       width={size}
       height={size}
       priority={priority}
-      className={cn("select-none", light && "invert", className)}
+      className={cn("select-none", light ? "invert" : "logo-mark", className)}
       draggable={false}
     />
   );

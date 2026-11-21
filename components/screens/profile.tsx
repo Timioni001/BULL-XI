@@ -4,7 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { Award, ChevronRight, Crown, Flame, History, Info, Lock, Medal, Pencil, Play, RotateCcw, Shield, Star, Trophy, type LucideIcon } from "lucide-react";
+import { Award, ChevronRight, Crown, Flame, History, Info, Lock, Medal, Moon, Pencil, Play, RotateCcw, Shield, Star, Sun, Trophy, type LucideIcon } from "lucide-react";
+import { setTheme, useTheme, type Theme } from "@/lib/theme";
+import { Segmented } from "@/components/ui/segmented";
 import { toast } from "sonner";
 import type { BadgeId } from "@/lib/data/types";
 import { getBadges, getHistory, getLeagues, resetLocalData } from "@/lib/data";
@@ -26,6 +28,7 @@ const t = copy.profile;
 const BADGE_ICON: Record<BadgeId, LucideIcon> = { lockedIn: Shield, captainsCall: Star, podium: Medal, ironXI: Flame, centurion: Award, champion: Crown };
 
 export function Profile() {
+  const theme = useTheme();
   const router = useRouter();
   const managerName = useGame((s) => s.managerName);
   const teamName = useGame((s) => s.teamName);
@@ -115,6 +118,24 @@ export function Profile() {
 
           <SectionTitle title={t.settings} />
           <div className="overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">
+            <div className="flex min-h-14 items-center gap-3 border-b border-hairline px-4 py-3">
+              {theme === "dark" ? <Moon className="size-4 text-muted-foreground" /> : <Sun className="size-4 text-muted-foreground" />}
+              <span className="flex-1">
+                <span className="block text-sm font-semibold">{t.appearance}</span>
+                <span className="block text-xs text-muted-foreground">{t.appearanceBody}</span>
+              </span>
+              <Segmented<Theme>
+                id="theme"
+                size="sm"
+                className="w-[132px]"
+                value={theme}
+                onChange={setTheme}
+                options={[
+                  { value: "light", label: t.light },
+                  { value: "dark", label: t.dark },
+                ]}
+              />
+            </div>
             <label className="flex min-h-14 cursor-pointer items-center gap-3 border-b border-hairline px-4 py-3">
               <Play className="size-4 text-muted-foreground" />
               <span className="flex-1">

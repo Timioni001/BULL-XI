@@ -4,6 +4,7 @@ import { Suspense, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Toaster, toast } from "sonner";
 import { useGame } from "@/lib/store/game";
+import { useTheme } from "@/lib/theme";
 
 /** Effects that depend on the URL. Kept in their own Suspense boundary so pages stay prerenderable. */
 function RouteEffects() {
@@ -28,6 +29,7 @@ function RouteEffects() {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const demoMode = useGame((s) => s.demoMode);
+  const theme = useTheme();
 
   useEffect(() => {
     void useGame.persist.rehydrate();
@@ -46,14 +48,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {children}
       <Toaster
         position="bottom-center"
-        theme="light"
+        theme={theme}
         offset={132}
         mobileOffset={{ bottom: 132, left: 16, right: 16 }}
         toastOptions={{
           classNames: {
-            toast: "!bg-white !border-hairline !text-foreground !rounded-2xl !shadow-[0_18px_40px_-16px_rgb(0_0_0/0.3)] !font-sans",
+            toast: "!bg-surface-1 !border-hairline !text-foreground !rounded-2xl !shadow-[0_18px_40px_-16px_rgb(0_0_0/0.3)] !font-sans",
             description: "!text-muted-foreground",
-            actionButton: "!bg-[#111] !text-white !rounded-full !font-semibold",
+            actionButton: "!bg-ink !text-ink-foreground !rounded-full !font-semibold",
           },
         }}
       />

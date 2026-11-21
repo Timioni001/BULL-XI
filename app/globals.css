@@ -19,6 +19,7 @@
   --color-surface-3: var(--surface-3);
   --color-hairline: var(--hairline);
   --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
   --color-heading-muted: var(--heading-muted);
   --color-bull: var(--bull);
   --color-bear: var(--bear);
@@ -107,6 +108,7 @@
   }
 }
 
+@layer base {
 :root {
   /* Light, sharp app palette. Dark is used for "stages": pitch, scoreboard, seal. */
   --background: #f4f4f2;
@@ -118,6 +120,7 @@
   --hairline: rgb(0 0 0 / 0.08);
   --hairline-strong: rgb(0 0 0 / 0.14);
   --ink: #111111;
+  --ink-foreground: #ffffff;
   --heading-muted: #8a8a8a;
 
   --bull: #16c784;
@@ -151,10 +154,14 @@
   --dur-slow: 250ms;
   --radius: 12px;
 }
+}
 
 @layer components {
 /* Light editorial theme for marketing pages (landing). The app stays dark. */
 .theme-light {
+  --ink: #111111;
+  --ink-foreground: #ffffff;
+  --heading-muted: #8a8a8a;
   --background: #ececeb;
   --foreground: #111111;
   --surface-1: #ffffff;
@@ -171,6 +178,8 @@
 /* Restores the dark app palette inside light pages (phone mockups). */
 .theme-dark {
   --heading-muted: #5c5c63;
+  --ink: #ffffff;
+  --ink-foreground: #111111;
   --background: #161618;
   --foreground: #ffffff;
   --surface-1: #212124;
@@ -189,6 +198,14 @@
   background-image: radial-gradient(rgb(0 0 0 / 0.12) 1px, transparent 1.2px);
   background-size: 22px 22px;
 }
+}
+
+/* Logo mark: black on light, white on dark. Nested light pages win. */
+.theme-dark .logo-mark {
+  filter: invert(1);
+}
+.theme-light .logo-mark {
+  filter: none;
 }
 
 @layer base {
