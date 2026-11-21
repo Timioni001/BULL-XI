@@ -2,15 +2,17 @@
 
 **Fantasy football for onchain stocks.** Pick 15 tokenized stocks, wear the captain's armband and win your league, 24/7. Built for MagicBlock Solana Blitz v10 (Entertainment Finance).
 
-> Status: step 4 of the build plan. A complete, polished product on simulated market data. Live Solana prices (step 5) and the onchain game (step 6) come next. See [CLAUDE.md](CLAUDE.md) for the brief and [docs/PLAN.md](docs/PLAN.md) for structure.
+> Status: Phase 2, checkpoint 1 (devnet). Real xStock prices in the app, the `bullxi` price book program, a Cloudflare price pusher and a static Cloudflare deploy. Devnet preview with test tokens priced from real market data. See [CLAUDE.md](CLAUDE.md) for the brief, [docs/PLAN.md](docs/PLAN.md) for structure and [docs/STOCKS.md](docs/STOCKS.md) for the stock universe.
 
 ## Run it
 
 ```bash
 npm install
 npm run dev            # http://localhost:3000
-npm run check          # lint + typecheck + tests + production build
+npm run check          # lint + typecheck + tests + production build (static export to out/)
 ```
+
+Preview the static build like production: `npm run build && npx serve out`.
 
 On your phone: `npm run dev -- -H 0.0.0.0`, then open `http://<your-computer-ip>:3000`.
 
@@ -21,16 +23,15 @@ On your phone: `npm run dev -- -H 0.0.0.0`, then open `http://<your-computer-ip>
 | `/` | Landing page with a live mini-pitch |
 | `/app` | Onboarding, then the game |
 | `/app/squad` → `/app/pick` → `/app/lock` → `/app/live` | Build, pick, lock, watch live |
-| `/app/leagues`, `/app/leagues/office` | Leagues, tables, head-to-head |
-| `/join/TRD-9X4` | Invite link landing (try it) |
+| `/app/leagues`, `/app/league?id=office` | Leagues, tables, head-to-head |
+| `/join?code=TRD-9X4` | Invite link landing (try it) |
 | `/app/transfers`, `/app/chips`, `/app/history`, `/app/profile`, `/app/pro` | The rest of the game |
 | `/proof` | For judges: where each piece runs, counters, explorer links |
-| `/api/card?gw=13&pts=73&rank=1&of=12&league=Office%20Legends&team=Your%20XI&best=NVDAx:34&cap=COINx:46` | 1080x1350 share card |
 
 ## Demo mode (for recording)
 
 Add `?demo=1` to any URL (or toggle it in Profile). Demo mode:
-- runs the simulated market 10x faster so points move on camera,
+- uses the simulated market, 10x faster, so points move on camera (real prices barely move on weekends),
 - shows **Demo: start now** on the deadline screen (skip the countdown),
 - shows **Demo: blow the whistle** on the live screen (jump to the result and share card).
 
@@ -43,6 +44,7 @@ Add `?demo=1` to any URL (or toggle it in Profile). Demo mode:
 | `?mock=slow` | 2.5s latency on every data call (loading states) |
 | `?mock=error` | every data call fails (error states) |
 | `?mock=empty` | empty leagues and history |
+| `?mock=sim` | simulated market instead of real prices |
 | `?mock=off` | back to normal |
 | `/app?intro` | replay onboarding |
 
@@ -51,19 +53,50 @@ Profile → **Reset demo** clears your saved squad and leagues.
 ## Architecture
 
 ```
-UI (app/, components/)  ──►  lib/data/index.ts  ──►  Phase 1: lib/data/mock/*  (seeded, simulated 24/7 market)
-        │                                         └►  Phase 2: MagicBlock ER + Pyth Lazer oracle, Solana program
+UI (app/, components/)  ──►  lib/data/index.ts  ──►  lib/data/live/*   real xStock prices (Jupiter, free, no key)
+        │                                         ├►  lib/data/mock/*   leagues, history, simulated market for demo mode
+        │                                         └►  lib/onchain/*     price book client (@solana/kit)
+        │
+        │   worker/  (Cloudflare cron, every minute)  ──►  push_prices on the MagicBlock Ephemeral Rollup
+        │   onchain/programs/bullxi                    ──►  price book + onchain TWAP, delegated to the devnet ER
         └──►  lib/game/rules.ts   pure rules: squads, scoring, captain, chips, transfers (unit tested)
         └──►  lib/store/game.ts   Zustand, persisted locally
         └──►  lib/copy.ts         every user-facing string
 ```
 
-## MagicBlock map (planned)
+## Deploy (Cloudflare, free plan)
+
+Everything runs on Cloudflare. No Vercel.
+
+```bash
+npx wrangler login                 # once, opens the browser
+npm run deploy:web                 # next build (static export) + Workers Static Assets -> bullxi.<you>.workers.dev
+npx wrangler secret put PUSHER_KEY --config worker/wrangler.jsonc   # paste the devnet-only pusher key (JSON byte array)
+npm run deploy:worker              # price pusher cron (every minute) + /health and /price-book
+```
+
+`wrangler.jsonc` serves `out/` as static assets. `worker/wrangler.jsonc` is the pusher. The pusher key is a dedicated devnet-only key and only ever lives in `wrangler secret`, never in the repo.
+
+## Onchain (devnet)
+
+```bash
+npm run onchain:test               # Rust unit tests for the price book math
+npm run onchain:build              # cargo build-sbf --arch v0 -> onchain/target/deploy/bullxi.so
+solana program deploy onchain/target/deploy/bullxi.so --program-id <program keypair> -u devnet
+npm run onchain:setup              # create the price book and delegate it to the devnet ER
+npm run onchain:push               # local fallback pusher (add -- --loop to run every minute)
+```
+
+Keys live outside the repo in `~/.config/solana/bullxi/` (`deployer.json`, `pusher.json`, `program.json`). Program ID: `EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN`.
+
+The price book holds the latest price of all 41 stocks (micro-USD) plus a running price x time sum per stock, so any gameweek TWAP is `(cum_end - cum_start) / (t_end - t_start)`. Pushes on the rollup are free. It is committed to Solana once a day: with a plain payer the ER allows 10 commits per delegation.
+
+## MagicBlock map
 
 | UX moment | MagicBlock tech |
 |---|---|
 | Squad hidden until kickoff | Private Ephemeral Rollup |
-| Live points every second | Ephemeral Rollup + Pyth Lazer oracle |
+| Live prices and TWAP | Ephemeral Rollup price book, written every minute (built) |
 | Deadline lock and settlement | Cranks |
 | Final standings | Commit / Undelegate |
 | Prize payouts | Magic Actions |
@@ -72,7 +105,7 @@ UI (app/, components/)  ──►  lib/data/index.ts  ──►  Phase 1: lib/da
 | Head-to-head draws | VRF |
 | Season rank and badges | SOAR |
 
-Program addresses: BULL-XI game program deploys in step 6. Real-time pricing oracle: `PriCems5tHihc6UDXDjzjeawomAwBduWMGAi8ZUjppd`.
+Why our own price book: MagicBlock's real-time pricing oracle only accepts updates signed by MagicBlock's oracle key, and its feed list has no stocks.
 
 ## Media
 
@@ -80,4 +113,4 @@ Company logos live in `public/logos/` (WebP, served locally so no image link can
 
 ## Stack
 
-Next.js 16 (App Router, strict TS), Tailwind v4, shadcn/ui, Motion, Zustand, NumberFlow, vaul, sonner, cmdk, dnd-kit, TradingView Lightweight Charts, canvas-confetti, `next/og`. Fonts: Archivo (extended display), Instrument Serif (landing), Geist and Geist Mono.
+Next.js 16 (App Router, strict TS), Tailwind v4, shadcn/ui, Motion, Zustand, NumberFlow, vaul, sonner, cmdk, dnd-kit, TradingView Lightweight Charts, canvas-confetti, `@solana/kit`, Anchor, Wrangler. The share card is drawn in the browser with canvas. Fonts: Archivo (extended display), Instrument Serif (landing), Geist and Geist Mono.

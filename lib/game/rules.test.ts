@@ -424,3 +424,14 @@ describe("autoPick", () => {
     expect(autoPick(MOCK_STOCKS, emptySquad(), mulberry32(42))).toEqual(autoPick(MOCK_STOCKS, emptySquad(), mulberry32(42)));
   });
 });
+
+describe("real stock universe", () => {
+  it("auto-pick builds a valid squad from the 41 live stocks", () => {
+    expect(MOCK_STOCKS).toHaveLength(41);
+    for (let seed = 1; seed <= 50; seed++) {
+      const slots = autoPick(MOCK_STOCKS, emptySquad(), mulberry32(seed));
+      const picked = squadIds(slots).map((id) => MOCK_STOCKS.find((s) => s.id === id)!);
+      expect(validateSquad(picked).valid).toBe(true);
+    }
+  });
+});

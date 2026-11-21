@@ -1,0 +1,696 @@
+{
+  "address": "EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN",
+  "metadata": {
+    "name": "bullxi",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "BULL-XI: fantasy league for onchain stocks"
+  },
+  "instructions": [
+    {
+      "name": "commit_price_book",
+      "docs": [
+        "Commits the current price book from the rollup to Solana."
+      ],
+      "discriminator": [
+        236,
+        171,
+        222,
+        12,
+        41,
+        181,
+        219,
+        67
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "price_book",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        },
+        {
+          "name": "magic_context",
+          "writable": true,
+          "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "configure",
+      "docs": [
+        "Admin can rotate the pusher key (and grow the list of stocks)."
+      ],
+      "discriminator": [
+        245,
+        7,
+        108,
+        117,
+        95,
+        196,
+        54,
+        217
+      ],
+      "accounts": [
+        {
+          "name": "price_book",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true,
+          "relations": [
+            "price_book"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "pusher",
+          "type": "pubkey"
+        },
+        {
+          "name": "count",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "delegate_price_book",
+      "docs": [
+        "Delegates the price book to an Ephemeral Rollup validator",
+        "(pass the validator identity as the first remaining account)."
+      ],
+      "discriminator": [
+        188,
+        142,
+        157,
+        218,
+        56,
+        237,
+        107,
+        10
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "signer": true
+        },
+        {
+          "name": "buffer_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                201,
+                136,
+                231,
+                12,
+                208,
+                242,
+                9,
+                62,
+                12,
+                157,
+                21,
+                208,
+                113,
+                107,
+                163,
+                110,
+                224,
+                141,
+                169,
+                89,
+                158,
+                216,
+                178,
+                220,
+                222,
+                57,
+                252,
+                28,
+                156,
+                199,
+                205,
+                241
+              ]
+            }
+          }
+        },
+        {
+          "name": "delegation_record_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "delegation_metadata_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "pda",
+          "writable": true
+        },
+        {
+          "name": "owner_program",
+          "address": "EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN"
+        },
+        {
+          "name": "delegation_program",
+          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "init_price_book",
+      "docs": [
+        "Creates the price book on Solana. `pusher` is the only key allowed to write prices."
+      ],
+      "discriminator": [
+        157,
+        234,
+        106,
+        155,
+        13,
+        236,
+        168,
+        86
+      ],
+      "accounts": [
+        {
+          "name": "price_book",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "pusher",
+          "type": "pubkey"
+        },
+        {
+          "name": "count",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "process_undelegation",
+      "discriminator": [
+        196,
+        28,
+        41,
+        206,
+        48,
+        37,
+        51,
+        167
+      ],
+      "accounts": [
+        {
+          "name": "base_account",
+          "writable": true
+        },
+        {
+          "name": "buffer",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  110,
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  101,
+                  45,
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "base_account"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                181,
+                183,
+                0,
+                225,
+                242,
+                87,
+                58,
+                192,
+                204,
+                6,
+                34,
+                1,
+                52,
+                74,
+                207,
+                151,
+                184,
+                53,
+                6,
+                235,
+                140,
+                229,
+                25,
+                152,
+                204,
+                98,
+                126,
+                24,
+                147,
+                128,
+                167,
+                62
+              ]
+            }
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "account_seeds",
+          "type": {
+            "vec": "bytes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "push_prices",
+      "docs": [
+        "Writes the latest prices (micro-USD, 0 = no update for that stock)",
+        "and advances every stock's price x time sum. Runs on the Ephemeral Rollup."
+      ],
+      "discriminator": [
+        120,
+        246,
+        190,
+        84,
+        249,
+        75,
+        136,
+        47
+      ],
+      "accounts": [
+        {
+          "name": "price_book",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pusher",
+          "signer": true,
+          "relations": [
+            "price_book"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "prices",
+          "type": {
+            "vec": "u64"
+          }
+        }
+      ]
+    },
+    {
+      "name": "undelegate_price_book",
+      "docs": [
+        "Commits and hands the price book back to Solana (admin only)."
+      ],
+      "discriminator": [
+        185,
+        210,
+        76,
+        123,
+        126,
+        150,
+        126,
+        121
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "price_book",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        },
+        {
+          "name": "magic_context",
+          "writable": true,
+          "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "PriceBook",
+      "discriminator": [
+        58,
+        79,
+        217,
+        46,
+        6,
+        199,
+        93,
+        200
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "BadCount",
+      "msg": "Wrong number of stocks"
+    },
+    {
+      "code": 6001,
+      "name": "NotPusher",
+      "msg": "Only the price pusher can do this"
+    },
+    {
+      "code": 6002,
+      "name": "NotAdmin",
+      "msg": "Only the admin can do this"
+    },
+    {
+      "code": 6003,
+      "name": "ClockWentBack",
+      "msg": "Clock went backwards"
+    },
+    {
+      "code": 6004,
+      "name": "Overflow",
+      "msg": "Number overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "PriceBook",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "pusher",
+            "type": "pubkey"
+          },
+          {
+            "name": "count",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "updates",
+            "docs": [
+              "Number of pushes so far"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "start_ts",
+            "docs": [
+              "Unix seconds of the first and the latest push"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "last_ts",
+            "type": "i64"
+          },
+          {
+            "name": "prices",
+            "docs": [
+              "Latest price per stock, micro-USD (1 USD = 1_000_000)"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                48
+              ]
+            }
+          },
+          {
+            "name": "cum",
+            "docs": [
+              "Running sum of price x seconds since start_ts, per stock"
+            ],
+            "type": {
+              "array": [
+                "u128",
+                48
+              ]
+            }
+          },
+          {
+            "name": "first_ts",
+            "docs": [
+              "When each stock got its first price, if it joined after start_ts (else 0)"
+            ],
+            "type": {
+              "array": [
+                "i64",
+                48
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

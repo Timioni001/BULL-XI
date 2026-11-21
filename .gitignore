@@ -33,9 +33,17 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
-# vercel
-.vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# onchain build output
+/onchain/target
+/onchain/.anchor
+/onchain/test-ledger
+/worker/node_modules
+/worker/.wrangler
+/.wrangler
+.dev.vars
+worker/.dev.vars

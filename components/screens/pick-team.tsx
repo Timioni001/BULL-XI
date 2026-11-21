@@ -132,7 +132,7 @@ export function PickTeam() {
   const role = (id: string) => (id === lineup.captainId ? "C" : id === lineup.viceId ? "V" : null);
   const sub = (id: string) => {
     const c = prices?.[id]?.change24h ?? stock(id).change24h;
-    return { text: pct(c, 1), tone: c > 0 ? ("up" as const) : c < 0 ? ("down" as const) : ("muted" as const) };
+    return { text: pct(c, 1), tone: c !== null && c > 0 ? ("up" as const) : c !== null && c < 0 ? ("down" as const) : ("muted" as const) };
   };
 
   const sel = selected ? stock(selected) : null;

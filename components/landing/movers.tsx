@@ -13,7 +13,7 @@ export function Movers({ stocks }: { stocks: Stock[] }) {
   const [mode, setMode] = useState<"day" | "form">("day");
   const L = copy.landing;
   const ranked = [...stocks]
-    .sort((a, b) => (mode === "day" ? b.change24h - a.change24h : sum(b) - sum(a)))
+    .sort((a, b) => (mode === "day" ? (b.change24h ?? -999) - (a.change24h ?? -999) : sum(b) - sum(a)))
     .slice(0, 3);
   return (
     <div>
@@ -35,7 +35,7 @@ export function Movers({ stocks }: { stocks: Stock[] }) {
       </div>
       <div className="no-scrollbar -mx-5 mt-8 flex snap-x gap-4 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
         {ranked.map((s) => {
-          const value = mode === "day" ? s.change24h : sum(s);
+          const value = mode === "day" ? (s.change24h ?? 0) : sum(s);
           return (
             <article key={s.id} className="w-[78%] shrink-0 snap-start overflow-hidden rounded-[28px] bg-[#111] ring-1 ring-white/10 md:w-auto">
               <StockArt ticker={s.ticker} sector={s.sector} className="m-2 h-[230px] rounded-[22px]">

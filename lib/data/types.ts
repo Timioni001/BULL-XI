@@ -30,8 +30,8 @@ export interface Stock {
   credits: number;
   /** Reference market price in USD (shown on detail only) */
   price: number;
-  /** 24h % change, e.g. 1.84 means +1.84% */
-  change24h: number;
+  /** 24h % change, e.g. 1.84 means +1.84%. null when no trustworthy figure exists */
+  change24h: number | null;
   /** % of managers who picked this stock */
   ownership: number;
   /** Average points over the last 3 gameweeks */
@@ -43,7 +43,7 @@ export interface Stock {
 export interface PriceTick {
   id: string;
   price: number;
-  change24h: number;
+  change24h: number | null;
   /** Direction of the last tick, for flashes */
   dir: -1 | 0 | 1;
 }

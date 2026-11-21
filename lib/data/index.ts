@@ -72,7 +72,7 @@ async function realPrices(): Promise<PriceMap | null> {
 function withPrices(prices: PriceMap | null): Stock[] {
   const sim = prices ? null : snapshotPrices(Date.now());
   return MOCK_STOCKS.map((s) => {
-    const p = prices?.[s.id] ?? (prices ? { price: s.price, change24h: 0 } : sim![s.id]);
+    const p = prices?.[s.id] ?? (prices ? { price: s.price, change24h: null } : sim![s.id]);
     return { ...s, price: p.price, change24h: p.change24h };
   });
 }
@@ -95,35 +95,15 @@ export async function getStockChart(id: string, range: ChartRange): Promise<Pric
   return chartSeries(id, range, Date.now());
 }
 
-const sparkCache: { at: number; data: Record<string, number[]> } = { at: 0, data: {} };
-
-/** 24h sparkline per stock (about 24 points each). Thin stocks may have none. */
+/**
+ * 24h sparkline per stock (about 24 points each), simulated market only.
+ * With real prices the picker shows the 24h move instead: drawing 41 charts
+ * would take 41 calls and hit the free chart API's rate limit.
+ */
 export async function getSparklines(): Promise<Record<string, number[]>> {
+  if (marketSource() === "real" && mockMode() === "normal") return {};
   const now = Date.now();
-  if (marketSource() === "sim" || mockMode() !== "normal") {
-    return Object.fromEntries(MOCK_STOCKS.map((s) => [s.id, chartSeries(s.id, "1D", now).filter((_, i) => i % 4 === 0).map((p) => p.price)]));
-  }
-  if (now - sparkCache.at < 10 * 60_000) return sparkCache.data;
-  const out: Record<string, number[]> = {};
-  const queue = [...MOCK_STOCKS];
-  // A few requests at a time to stay polite with the free API.
-  await Promise.all(
-    Array.from({ length: 6 }, async () => {
-      for (let s = queue.shift(); s; s = queue.shift()) {
-        try {
-          const pts = await fetchCandles(s.mint, "1D", now);
-          const step = Math.max(1, Math.floor(pts.length / 24));
-          const line = pts.filter((_, i) => i % step === 0).map((p) => p.price);
-          if (line.length >= 4) out[s.id] = line;
-        } catch {
-          /* no sparkline for this one */
-        }
-      }
-    }),
-  );
-  sparkCache.at = now;
-  sparkCache.data = out;
-  return out;
+  return Object.fromEntries(MOCK_STOCKS.map((s) => [s.id, chartSeries(s.id, "1D", now).filter((_, i) => i % 4 === 0).map((p) => p.price)]));
 }
 
 /* ---------------- Live prices ---------------- */
