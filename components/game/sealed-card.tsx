@@ -16,7 +16,7 @@ export function SealedCard({ rows, captain, sealId, animate = true, className }:
   let n = 0;
   return (
     <motion.div
-      className={cn("relative mx-auto w-full max-w-[320px] [perspective:900px]", className)}
+      className={cn("theme-dark relative mx-auto w-full max-w-[320px] bg-transparent [perspective:900px]", className)}
       animate={animate ? { y: [0, 0, 5, -2, 0] } : undefined}
       transition={{ duration: 0.5, delay: 1.0, times: [0, 0.1, 0.35, 0.7, 1] }}
     >
@@ -63,7 +63,7 @@ export function SealedCard({ rows, captain, sealId, animate = true, className }:
         animate={{ scale: 1, rotate: -8, opacity: 1 }}
         transition={{ delay: d(1.0), type: "spring", stiffness: 520, damping: 20 }}
       >
-        <Logo size={40} />
+        <Logo size={40} light />
       </motion.div>
       {animate && (
         <motion.span

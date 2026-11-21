@@ -242,7 +242,7 @@ export default async function Landing() {
           <div className="relative mx-auto max-w-[1200px] overflow-hidden rounded-[36px] bg-[#0d0d0e] px-6 pb-16 pt-16 text-center text-white lg:pt-24">
             <div aria-hidden className="absolute inset-x-[-10%] bottom-[-260px] h-[420px] rounded-[50%] bg-[radial-gradient(closest-side,rgb(255_91_31/0.7),rgb(255_140_80/0.25)_55%,transparent_75%)] blur-2xl" />
             <div className="relative">
-              <Logo size={48} className="mx-auto" decorative />
+              <Logo size={48} className="mx-auto" decorative light />
               <h2 className="font-headline mx-auto mt-6 max-w-[14ch] text-[44px] leading-[1.02] lg:text-[72px]">{L.closingTitle}</h2>
               <p className="mx-auto mt-4 max-w-[40ch] text-white/70">{copy.brand.subline}</p>
               <Link href={routes.app} className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-[15px] font-semibold text-black hover:bg-white/90">
@@ -256,7 +256,7 @@ export default async function Landing() {
       <footer>
         <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-5 py-10 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="flex items-center gap-2.5">
-            <Logo size={24} className="!invert-0" decorative />
+            <Logo size={24} decorative />
             <span className="font-headline text-[15px]">BULL-XI</span>
           </div>
           <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#555]">
@@ -282,7 +282,7 @@ function Nav() {
     <header className="pt-safe absolute inset-x-0 top-0 z-50">
       <div className="mx-auto flex h-20 max-w-[1200px] items-center justify-between px-5 lg:px-8">
         <Link href={routes.landing} className="flex items-center gap-2.5">
-          <Logo size={28} className="!invert-0" decorative />
+          <Logo size={28} decorative />
           <span className="font-headline text-[17px]">BULL-XI</span>
         </Link>
         <nav className="hidden items-center gap-8 text-[14px] text-[#444] md:flex">

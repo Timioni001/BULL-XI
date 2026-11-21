@@ -104,7 +104,7 @@ export function Profile() {
             <div aria-hidden className="absolute -right-10 -top-10 size-40 rotate-45 bg-black/10" />
             <Crown className="relative size-6 text-gold" />
             <p className="relative mt-3 font-display text-2xl font-bold uppercase">{t.pro.title}</p>
-            <p className="relative mt-1 text-sm text-brand-foreground/70">{t.pro.body}</p>
+            <p className="relative mt-1 text-sm text-brand-foreground">{t.pro.body}</p>
           </Link>
 
           <div className="overflow-hidden rounded-3xl bg-surface-1 ring-1 ring-inset ring-hairline">

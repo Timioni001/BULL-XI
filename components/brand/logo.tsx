@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-/** BULL-XI mark. Source file: public/logo.png (black). Inverted in dark mode. */
-export function Logo({ size = 28, className, priority, decorative }: { size?: number; className?: string; priority?: boolean; decorative?: boolean }) {
+/** BULL-XI mark. Source file: public/logo.png (black). Pass `light` on dark surfaces. */
+export function Logo({ size = 28, className, priority, decorative, light }: { size?: number; className?: string; priority?: boolean; decorative?: boolean; /** White mark for dark surfaces */ light?: boolean }) {
   return (
     <Image
       src="/logo.png"
@@ -10,7 +10,7 @@ export function Logo({ size = 28, className, priority, decorative }: { size?: nu
       width={size}
       height={size}
       priority={priority}
-      className={cn("select-none dark:invert", className)}
+      className={cn("select-none", light && "invert", className)}
       draggable={false}
     />
   );

@@ -85,3 +85,11 @@ Phase 2 swaps `lib/data/mock/*` for MagicBlock implementations behind the same `
 - Stock picker: "Choose a" poster cards in a snap carousel (StockArt), then the full list.
 - Landing: light editorial theme (`.theme-light`), Instrument Serif headline, a CSS 3D corridor of cards, dark nav pill and a typing prompt pill.
 - Green and red still only mean gains and losses. Gold still only means captain and winners.
+
+## Light app (latest)
+
+- The app is now light: off-white background #F4F4F2, white cards, black (#111) primary buttons, black active tabs.
+- Orange stays for highlights: live pill, selected stock cards, the leagues hero card, budget fill, chips in play.
+- Dark "stages" keep the drama: the pitch, the live scoreboard, the lock seal and the Go Pro hero (`.theme-dark` scope).
+- Two-tone titles use `--heading-muted` (#8A8A8A, AA for large text). Small text on orange is always full-strength near-black.
+- The `Logo` component is black by default; pass `light` on dark surfaces.

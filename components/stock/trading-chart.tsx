@@ -29,14 +29,14 @@ export default function TradingChart({ data, className }: { data: PricePoint[]; 
       const color = up ? "#16C784" : "#EA3943";
       const chart = createChart(node, {
         autoSize: true,
-        layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: "#8e8e93", fontFamily: "var(--font-geist-mono)", fontSize: 10, attributionLogo: false },
-        grid: { vertLines: { visible: false }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+        layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: "#6b6b6b", fontFamily: "var(--font-geist-mono)", fontSize: 10, attributionLogo: false },
+        grid: { vertLines: { visible: false }, horzLines: { color: "rgba(0,0,0,0.06)" } },
         rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.15, bottom: 0.08 } },
         timeScale: { borderVisible: false, timeVisible: true, secondsVisible: false, fixLeftEdge: true, fixRightEdge: true },
         crosshair: {
           mode: CrosshairMode.Magnet,
-          vertLine: { color: "rgba(255,255,255,0.3)", style: LineStyle.Dashed, labelVisible: false },
-          horzLine: { color: "rgba(255,255,255,0.2)", style: LineStyle.Dashed, labelBackgroundColor: "#242427" },
+          vertLine: { color: "rgba(0,0,0,0.3)", style: LineStyle.Dashed, labelVisible: false },
+          horzLine: { color: "rgba(0,0,0,0.2)", style: LineStyle.Dashed, labelBackgroundColor: "#111111" },
         },
         handleScale: false,
         handleScroll: false,
@@ -49,7 +49,7 @@ export default function TradingChart({ data, className }: { data: PricePoint[]; 
         priceLineVisible: false,
         lastValueVisible: false,
         crosshairMarkerRadius: 4,
-        crosshairMarkerBorderColor: "#0a0a0a",
+        crosshairMarkerBorderColor: "#ffffff",
       });
       series.setData(data.map((d) => ({ time: Math.floor(d.t / 1000) as never, value: d.price })));
       chart.timeScale().fitContent();

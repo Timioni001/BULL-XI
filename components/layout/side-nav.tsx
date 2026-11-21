@@ -52,9 +52,9 @@ export function SideNav() {
               key={it.href}
               href={it.href}
               aria-current={active ? "page" : undefined}
-              className={cn("relative flex h-11 items-center gap-3 rounded-full px-4 text-[14px] font-semibold transition-colors", active ? "text-brand-foreground" : "text-muted-foreground hover:text-foreground")}
+              className={cn("relative flex h-11 items-center gap-3 rounded-full px-4 text-[14px] font-semibold transition-colors", active ? "text-white" : "text-muted-foreground hover:text-foreground")}
             >
-              {active && <motion.span layoutId="side-pill" transition={spring} className="absolute inset-0 rounded-full bg-brand shadow-[0_8px_24px_-10px_var(--brand-glow)]" />}
+              {active && <motion.span layoutId="side-pill" transition={spring} className="absolute inset-0 rounded-full bg-ink" />}
               <Icon className="relative size-[18px]" />
               <span className="relative">{it.label}</span>
             </Link>

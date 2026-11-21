@@ -60,11 +60,11 @@ export function Leagues() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: dur.slow, ease }}>
           <Link href={routes.league(best.id)} className="relative block overflow-hidden rounded-[28px] bg-brand p-5 text-brand-foreground shadow-[0_24px_48px_-24px_var(--brand-glow)]">
             <div aria-hidden className="absolute -right-10 -top-10 size-44 rotate-45 bg-black/10" />
-            <p className="relative text-xs font-semibold uppercase tracking-wider text-brand-foreground/70">{best.kind === "global" ? t.global : t.private}</p>
+            <p className="relative text-xs font-semibold uppercase tracking-wider text-brand-foreground">{best.kind === "global" ? t.global : t.private}</p>
             <p className="relative mt-1 font-display text-[28px] font-bold uppercase leading-tight">{best.name}</p>
             <div className="relative mt-5 flex items-end justify-between">
               <div>
-                <p className="text-xs text-brand-foreground/70">{t.yourRank}</p>
+                <p className="text-xs text-brand-foreground">{t.yourRank}</p>
                 <p className="num font-display text-[56px] font-bold leading-none">{ordinal(best.yourRank)}</p>
               </div>
               <div className="text-right">

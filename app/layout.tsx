@@ -34,16 +34,16 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#161618",
+  themeColor: "#F4F4F2",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  colorScheme: "dark",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${GeistSans.variable} ${geistMono.variable} ${archivo.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${geistMono.variable} ${archivo.variable}`}>
       <body className="min-h-dvh bg-background">
         <Providers>{children}</Providers>
       </body>

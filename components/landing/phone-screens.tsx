@@ -9,7 +9,7 @@ export function PickerScreen({ stocks }: { stocks: Stock[] }) {
     <div className="h-full bg-background px-4 pt-2">
       <p className="font-display text-[24px] font-black uppercase leading-[0.92]">
         <span className="block">Choose a</span>
-        <span className="block text-[#5c5c63]">stock</span>
+        <span className="block text-heading-muted">stock</span>
       </p>
       <div className="mt-3 flex h-9 items-center rounded-xl bg-surface-1 px-3 text-[12px] text-muted-foreground">Search ticker or company</div>
       <div className="mt-3 space-y-2">
@@ -44,7 +44,7 @@ export function LeagueScreen() {
     <div className="h-full bg-background px-4 pt-2">
       <p className="font-display text-[24px] font-black uppercase leading-[0.92]">
         <span className="block">Your</span>
-        <span className="block text-[#5c5c63]">leagues</span>
+        <span className="block text-heading-muted">leagues</span>
       </p>
       <div className="mt-3 rounded-2xl bg-brand p-3 text-brand-foreground">
         <p className="text-[10px] font-semibold uppercase opacity-70">Office Legends</p>
@@ -73,7 +73,7 @@ export function LiveStaticScreen({ stocks }: { stocks: Stock[] }) {
         <p className="font-display text-sm font-bold uppercase">Bulls on Parade</p>
         <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-brand px-2.5 text-[10px] font-bold tracking-[0.14em] text-brand-foreground">LIVE</span>
       </div>
-      <div className="mb-3 flex items-end justify-between rounded-3xl bg-[linear-gradient(160deg,#2a1d18,#111112_60%)] px-4 py-3 ring-1 ring-inset ring-brand/30">
+      <div className="theme-dark mb-3 flex items-end justify-between rounded-3xl bg-[linear-gradient(160deg,#2a1d18,#111112_60%)] px-4 py-3 ring-1 ring-inset ring-brand/30">
         <span className="num font-display text-[44px] font-bold leading-none">24</span>
         <span className="num font-display text-2xl font-bold">3rd</span>
       </div>

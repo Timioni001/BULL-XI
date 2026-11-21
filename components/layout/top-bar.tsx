@@ -63,7 +63,7 @@ export function PageHeader({ eyebrow, title, right, back, className }: { eyebrow
       <div className="flex items-end justify-between gap-3 px-4 pb-4 pt-1 lg:px-0">
         <h1 className="font-display text-[42px] font-black uppercase leading-[0.92] lg:text-[64px]">
           <span className="block text-foreground">{eyebrow}</span>
-          <span className="block text-[#5c5c63]">{title}</span>
+          <span className="block text-heading-muted">{title}</span>
         </h1>
         {right && <div className={cn("shrink-0 items-center gap-2 pb-1", back ? "hidden lg:flex" : "flex")}>{right}</div>}
       </div>

@@ -46,14 +46,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {children}
       <Toaster
         position="bottom-center"
-        theme="dark"
+        theme="light"
         offset={132}
         mobileOffset={{ bottom: 132, left: 16, right: 16 }}
         toastOptions={{
           classNames: {
-            toast: "!bg-surface-2 !border-hairline !text-foreground !rounded-2xl !shadow-2xl !font-sans",
+            toast: "!bg-white !border-hairline !text-foreground !rounded-2xl !shadow-[0_18px_40px_-16px_rgb(0_0_0/0.3)] !font-sans",
             description: "!text-muted-foreground",
-            actionButton: "!bg-brand !text-[#161618] !rounded-full !font-semibold",
+            actionButton: "!bg-[#111] !text-white !rounded-full !font-semibold",
           },
         }}
       />

@@ -344,7 +344,7 @@ function Scoreboard({ snapshot, flash }: { snapshot: LiveGameweekSnapshot; flash
   const total = snapshot.totalPoints;
   const cap = snapshot.scores[snapshot.effectiveCaptainId];
   return (
-    <section className="glow-brand relative overflow-hidden rounded-[28px] bg-[linear-gradient(160deg,#2a1d18_0%,#111112_55%)]">
+    <section className="theme-dark glow-brand relative overflow-hidden rounded-[28px] bg-[linear-gradient(160deg,#2a1d18_0%,#111112_55%)]">
       <div className="grid grid-cols-[1fr_auto] gap-4 px-5 pb-4 pt-5">
         <div className="min-w-0">
           <p className="text-label font-semibold uppercase text-muted-foreground">{t.gwPoints}</p>

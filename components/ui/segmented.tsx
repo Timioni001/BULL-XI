@@ -27,10 +27,10 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
             className={cn(
               "relative flex-1 whitespace-nowrap rounded-lg font-semibold transition-colors duration-150",
               size === "sm" ? "h-7 px-2 text-xs" : "h-9 px-3 text-[13px]",
-              active ? "text-brand-foreground" : "text-muted-foreground",
+              active ? "text-white" : "text-muted-foreground",
             )}
           >
-            {active && <motion.span layoutId={`seg-${id}`} transition={spring} className="absolute inset-0 rounded-lg bg-brand shadow-[0_6px_18px_-8px_var(--brand-glow)]" />}
+            {active && <motion.span layoutId={`seg-${id}`} transition={spring} className="absolute inset-0 rounded-lg bg-ink" />}
             <span className="relative">{o.label}</span>
           </button>
         );

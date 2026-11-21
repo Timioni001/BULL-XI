@@ -18,6 +18,8 @@
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
   --color-hairline: var(--hairline);
+  --color-ink: var(--ink);
+  --color-heading-muted: var(--heading-muted);
   --color-bull: var(--bull);
   --color-bear: var(--bear);
   --color-gold: var(--gold);
@@ -42,8 +44,8 @@
   --color-card-foreground: var(--foreground);
   --color-popover: var(--surface-1);
   --color-popover-foreground: var(--foreground);
-  --color-primary: var(--brand);
-  --color-primary-foreground: var(--brand-foreground);
+  --color-primary: var(--ink);
+  --color-primary-foreground: #ffffff;
   --color-secondary: var(--surface-2);
   --color-secondary-foreground: var(--foreground);
   --color-muted: var(--surface-2);
@@ -106,14 +108,17 @@
 }
 
 :root {
-  --background: #161618;
-  --foreground: #ffffff;
-  --surface-1: #212124;
-  --surface-2: #2b2b2f;
-  --surface-3: #38383d;
-  --muted-foreground: #8e8e93;
-  --hairline: rgb(255 255 255 / 0.06);
-  --hairline-strong: rgb(255 255 255 / 0.14);
+  /* Light, sharp app palette. Dark is used for "stages": pitch, scoreboard, seal. */
+  --background: #f4f4f2;
+  --foreground: #0d0d0d;
+  --surface-1: #ffffff;
+  --surface-2: #f0f0ee;
+  --surface-3: #e5e5e2;
+  --muted-foreground: #5f5f5f;
+  --hairline: rgb(0 0 0 / 0.08);
+  --hairline-strong: rgb(0 0 0 / 0.14);
+  --ink: #111111;
+  --heading-muted: #8a8a8a;
 
   --bull: #16c784;
   --bear: #ea3943;
@@ -147,6 +152,7 @@
   --radius: 12px;
 }
 
+@layer components {
 /* Light editorial theme for marketing pages (landing). The app stays dark. */
 .theme-light {
   --background: #ececeb;
@@ -164,6 +170,7 @@
 
 /* Restores the dark app palette inside light pages (phone mockups). */
 .theme-dark {
+  --heading-muted: #5c5c63;
   --background: #161618;
   --foreground: #ffffff;
   --surface-1: #212124;
@@ -182,6 +189,7 @@
   background-image: radial-gradient(rgb(0 0 0 / 0.12) 1px, transparent 1.2px);
   background-size: 22px 22px;
 }
+}
 
 @layer base {
   * {
@@ -191,7 +199,7 @@
     @apply font-sans;
     -webkit-tap-highlight-color: transparent;
     text-size-adjust: 100%;
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
     @apply bg-background text-foreground antialiased;
