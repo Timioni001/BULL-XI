@@ -5,7 +5,7 @@ import { useNow } from "@/lib/hooks/use-now";
 import { cn } from "@/lib/utils";
 
 /** Big broadcast-style countdown: HH : MM : SS. */
-export function Countdown({ to, className }: { to: number; className?: string }) {
+export function Countdown({ to, className, brand }: { to: number; className?: string; brand?: boolean }) {
   const now = useNow();
   const c = clock(now ? to - now : 0);
   const hours = c.d * 24 + Number(c.h);
@@ -19,10 +19,10 @@ export function Countdown({ to, className }: { to: number; className?: string })
       {parts.map((p, i) => (
         <div key={p.l} className="flex items-start gap-2">
           <div className="flex flex-col items-center">
-            <span className={cn("num font-mono text-[44px] font-semibold leading-none tracking-tight", !now && "opacity-30")}>{now ? p.v : "--"}</span>
+            <span className={cn("num font-display text-[52px] font-bold leading-none tracking-tight", brand && "text-brand text-glow-brand", !now && "opacity-30")}>{now ? p.v : "--"}</span>
             <span className="mt-1.5 text-label font-semibold uppercase text-muted-foreground">{p.l}</span>
           </div>
-          {i < 2 && <span className="font-mono text-[40px] leading-none text-muted-foreground/50">:</span>}
+          {i < 2 && <span className="font-display text-[44px] leading-none text-muted-foreground/40">:</span>}
         </div>
       ))}
     </div>

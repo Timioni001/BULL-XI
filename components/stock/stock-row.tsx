@@ -1,13 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Check, Info } from "lucide-react";
 import type { PriceTick, Stock } from "@/lib/data/types";
-import { POSITION_META } from "@/lib/game/rules";
+import { copy } from "@/lib/copy";
 import { credits, ownership, pct, tone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { dur, ease } from "@/lib/motion";
 import { StockAvatar } from "./stock-avatar";
+import { Sparkline } from "./sparkline";
 
 interface StockRowProps {
   stock: Stock;
@@ -17,9 +18,10 @@ interface StockRowProps {
   showPosition?: boolean;
   onSelect: () => void;
   onInfo: () => void;
+  spark?: number[];
 }
 
-export function StockRow({ stock, live, selected, disabledReason, showPosition, onSelect, onInfo }: StockRowProps) {
+export function StockRow({ stock, live, selected, disabledReason, showPosition, onSelect, onInfo, spark }: StockRowProps) {
   const change = live?.change24h ?? stock.change24h;
   const disabled = !!disabledReason && !selected;
   return (
@@ -33,7 +35,7 @@ export function StockRow({ stock, live, selected, disabledReason, showPosition, 
         className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-4 py-2.5 text-left active:bg-surface-2"
       >
         <span className="relative">
-          <StockAvatar ticker={stock.ticker} size={40} />
+          <StockAvatar ticker={stock.ticker} sector={stock.sector} size={40} />
           {selected && (
             <span className="absolute -bottom-1 -right-1 grid size-[18px] place-items-center rounded-full bg-foreground text-background ring-2 ring-background">
               <Check className="size-3" strokeWidth={3.5} />
@@ -45,15 +47,16 @@ export function StockRow({ stock, live, selected, disabledReason, showPosition, 
             <span className="font-mono text-[15px] font-semibold">{stock.ticker}</span>
             <span className="truncate text-[13px] text-muted-foreground">{stock.name}</span>
           </span>
-          <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            {showPosition && <span className="font-medium text-foreground/70">{POSITION_META[stock.position].label}</span>}
+          <span className="mt-0.5 flex items-center gap-1.5 overflow-hidden whitespace-nowrap text-xs text-muted-foreground">
+            {showPosition && <span className="font-medium text-foreground/70">{copy.positions[stock.position].label}</span>}
             {showPosition && <span aria-hidden>·</span>}
             <span>{stock.sector}</span>
             <span aria-hidden>·</span>
-            <span className="num">{ownership(stock.ownership)} picked</span>
+            <span className="num">{copy.picker.picked(ownership(stock.ownership))}</span>
           </span>
         </span>
-        <span className="flex flex-col items-end">
+        {spark && <Sparkline values={spark} width={44} className="hidden min-[380px]:block" />}
+        <span className="flex min-w-14 flex-col items-end">
           {disabled ? (
             <span className="rounded-md bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium text-foreground/80">{disabledReason}</span>
           ) : (
@@ -62,7 +65,7 @@ export function StockRow({ stock, live, selected, disabledReason, showPosition, 
           <span className={cn("num mt-0.5 text-xs font-medium", tone(change))}>{pct(change)}</span>
         </span>
       </motion.button>
-      <button type="button" onClick={onInfo} aria-label={`${stock.ticker} details`} className="grid size-10 shrink-0 place-items-center rounded-full text-muted-foreground active:bg-surface-2">
+      <button type="button" onClick={onInfo} aria-label={`${stock.ticker} ${copy.common.details}`} className="grid size-11 shrink-0 place-items-center rounded-full text-muted-foreground active:bg-surface-2">
         <Info className="size-[18px]" />
       </button>
     </div>

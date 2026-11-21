@@ -26,7 +26,12 @@ export const MOCK_HISTORY: GameweekHistoryEntry[] = [
 
 const YOUR_SEASON = MOCK_HISTORY.reduce((a, g) => a + g.points, 0);
 
-function makeManager(leagueId: string, i: number, spread: number, teamOffset: number): Manager {
+export interface MockManager extends Manager {
+  /** Points in the previous gameweek, for head-to-head results */
+  lastGwPoints: number;
+}
+
+function makeManager(leagueId: string, i: number, spread: number, teamOffset: number): MockManager {
   const seed = hashString(`${leagueId}:${i}`);
   const rng = mulberry32(seed);
   const slots = autoPick(MOCK_STOCKS, emptySquad(), rng);
@@ -43,20 +48,48 @@ function makeManager(leagueId: string, i: number, spread: number, teamOffset: nu
     seasonPoints: Math.round(YOUR_SEASON + (rng() - 0.5) * spread),
     lastRank: 0,
     lineup,
+    lastGwPoints: Math.round(30 + rng() * 50),
   };
 }
 
-function makeLeague(id: string, name: string, code: string, kind: League["kind"], size: number, spread: number): Omit<League, "managers"> & { rivals: Manager[] } {
-  const offset = hashString(id) % TEAMS.length;
-  const rivals = Array.from({ length: size - 1 }, (_, i) => makeManager(id, i, spread, offset));
-  return { id, name, code, kind, rivals };
+export interface MockLeague extends Omit<League, "managers"> {
+  rivals: MockManager[];
+  /** You are already a member */
+  member: boolean;
 }
 
-export const MOCK_LEAGUES = [
-  makeLeague("office", "Office Legends", "OFC-7Q2", "private", 12, 70),
-  makeLeague("sunday", "Sunday League", "SUN-4K9", "private", 8, 50),
-  makeLeague("global", "BULL-XI Global", "GLOBAL", "global", 20, 110),
+function makeLeague(id: string, name: string, code: string, kind: League["kind"], size: number, spread: number, member = true): MockLeague {
+  const offset = hashString(id) % TEAMS.length;
+  const rivals = Array.from({ length: size - 1 }, (_, i) => makeManager(id, i, spread, offset));
+  return { id, name, code, kind, rivals, member };
+}
+
+type LeagueDef = Parameters<typeof makeLeague>;
+const DEFS: LeagueDef[] = [
+  ["office", "Office Legends", "OFC-7Q2", "private", 12, 70],
+  ["sunday", "Sunday League", "SUN-4K9", "private", 8, 50],
+  ["global", "BULL-XI Global", "GLOBAL", "global", 20, 110],
+  // Leagues you can join with a code (try /join/TRD-9X4)
+  ["trading-floor", "Trading Floor", "TRD-9X4", "private", 14, 80, false],
+  ["uni-mates", "Uni Mates", "UNI-2P8", "private", 9, 60, false],
 ];
+const built = new Map<string, MockLeague>();
+
+/** One league, built on first use so pages only pay for what they show. */
+export function mockLeague(id: string): MockLeague | undefined {
+  const def = DEFS.find((d) => d[0] === id);
+  if (!def) return undefined;
+  let l = built.get(id);
+  if (!l) {
+    l = makeLeague(...def);
+    built.set(id, l);
+  }
+  return l;
+}
+
+export function mockLeagues(): MockLeague[] {
+  return DEFS.map((d) => mockLeague(d[0])!);
+}
 
 export const DEFAULT_LEAGUE_ID = "office";
 export const YOUR_SEASON_POINTS = YOUR_SEASON;

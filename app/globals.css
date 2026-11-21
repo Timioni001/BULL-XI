@@ -6,8 +6,9 @@
 
 /* ------------------------------------------------------------------
    BULL-XI design tokens
-   Monochrome base. Green and red only for money moving. Gold only for
-   the captain armband and winners.
+   Meaning first: green = gains, red = losses, gold = captain and
+   winners. Indigo is the one brand accent: buttons, active tabs,
+   countdown, seal. It never shows a price move.
 ------------------------------------------------------------------- */
 
 @theme inline {
@@ -20,17 +21,28 @@
   --color-bull: var(--bull);
   --color-bear: var(--bear);
   --color-gold: var(--gold);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
   --color-pitch: var(--pitch);
   --color-pitch-stripe: var(--pitch-stripe);
   --color-pitch-line: var(--pitch-line);
+
+  --color-sector-tech: var(--sector-tech);
+  --color-sector-finance: var(--sector-finance);
+  --color-sector-energy: var(--sector-energy);
+  --color-sector-consumer: var(--sector-consumer);
+  --color-sector-health: var(--sector-health);
+  --color-sector-industrial: var(--sector-industrial);
+  --color-sector-crypto: var(--sector-crypto);
+  --color-sector-index: var(--sector-index);
 
   /* shadcn mapping */
   --color-card: var(--surface-1);
   --color-card-foreground: var(--foreground);
   --color-popover: var(--surface-1);
   --color-popover-foreground: var(--foreground);
-  --color-primary: var(--foreground);
-  --color-primary-foreground: var(--background);
+  --color-primary: var(--brand);
+  --color-primary-foreground: #ffffff;
   --color-secondary: var(--surface-2);
   --color-secondary-foreground: var(--foreground);
   --color-muted: var(--surface-2);
@@ -40,11 +52,12 @@
   --color-destructive: var(--bear);
   --color-border: var(--hairline);
   --color-input: var(--hairline-strong);
-  --color-ring: var(--ring);
+  --color-ring: var(--brand);
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-heading: var(--font-sans);
+  --font-display: var(--font-space-grotesk), var(--font-geist-sans), ui-sans-serif, sans-serif;
+  --font-heading: var(--font-display);
 
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -55,19 +68,24 @@
   --radius-4xl: 28px;
 
   --text-label: 11px;
-  --text-label--letter-spacing: 0.08em;
+  --text-label--letter-spacing: 0.1em;
   --text-label--line-height: 14px;
-  --text-stat: 34px;
+  --text-stat: 36px;
   --text-stat--line-height: 1;
-  --text-mega: 64px;
-  --text-mega--line-height: 1;
+  --text-mega: 72px;
+  --text-mega--line-height: 0.9;
+  --text-giant: 44px;
+  --text-giant--line-height: 0.92;
+  --text-giant--letter-spacing: -0.02em;
 
   --ease-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
   --animate-live-dot: live-dot 1.6s var(--ease-snap) infinite;
   --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
 
   @keyframes live-dot {
-    0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.6); }
+    0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.65); }
     70% { box-shadow: 0 0 0 6px transparent; }
     100% { box-shadow: 0 0 0 0 transparent; }
   }
@@ -75,62 +93,69 @@
     from { background-position: -200% 0; }
     to { background-position: 200% 0; }
   }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
 }
 
 :root {
-  --background: #fafafa;
-  --foreground: #0a0a0a;
-  --surface-1: #ffffff;
-  --surface-2: #f2f2f2;
-  --surface-3: #e8e8e8;
-  --muted-foreground: #6b6b6b;
-  --hairline: rgb(0 0 0 / 0.08);
-  --hairline-strong: rgb(0 0 0 / 0.14);
-  --ring: rgb(0 0 0 / 0.35);
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --surface-1: #111112;
+  --surface-2: #19191b;
+  --surface-3: #242427;
+  --muted-foreground: #8e8e93;
+  --hairline: rgb(255 255 255 / 0.08);
+  --hairline-strong: rgb(255 255 255 / 0.14);
 
   --bull: #16c784;
   --bear: #ea3943;
   --gold: #f5c451;
+  --brand: #6c5cff;
+  --brand-hover: #7d6fff;
+  --brand-soft: rgb(108 92 255 / 0.16);
+  --brand-glow: rgb(108 92 255 / 0.55);
 
-  --pitch: #1b1d1c;
-  --pitch-stripe: #202221;
-  --pitch-line: rgb(255 255 255 / 0.14);
+  --pitch: #121413;
+  --pitch-stripe: #161817;
+  --pitch-line: rgb(255 255 255 / 0.1);
+
+  /* Sector rings: low saturation so green and red still dominate */
+  --sector-tech: #6e9bd1;
+  --sector-finance: #b89b72;
+  --sector-energy: #c98763;
+  --sector-consumer: #c58bb0;
+  --sector-health: #72b4b0;
+  --sector-industrial: #a3a27e;
+  --sector-crypto: #9c8bd9;
+  --sector-index: #9a9a9a;
+
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
   --dur-fast: 150ms;
   --dur-base: 200ms;
   --dur-slow: 250ms;
-
   --radius: 12px;
-}
-
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  --surface-1: #121212;
-  --surface-2: #1a1a1a;
-  --surface-3: #242424;
-  --muted-foreground: #8c8c8c;
-  --hairline: rgb(255 255 255 / 0.08);
-  --hairline-strong: rgb(255 255 255 / 0.14);
-  --ring: rgb(255 255 255 / 0.4);
-
-  --pitch: #141615;
-  --pitch-stripe: #181a19;
-  --pitch-line: rgb(255 255 255 / 0.1);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   html {
     @apply font-sans;
     -webkit-tap-highlight-color: transparent;
     text-size-adjust: 100%;
+    color-scheme: dark;
   }
   body {
     @apply bg-background text-foreground antialiased;
-    /* Every number in the app uses tabular figures so tickers never jitter. */
+    /* Every number uses tabular figures so tickers never jitter. */
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1, "cv11" 1;
     overscroll-behavior-y: none;
@@ -139,12 +164,30 @@
     cursor: pointer;
     touch-action: manipulation;
   }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 @layer utilities {
   .num {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1;
+  }
+  .font-display {
+    font-family: var(--font-display);
+    font-feature-settings: "tnum" 1, "ss01" 1;
   }
   .no-scrollbar {
     scrollbar-width: none;
@@ -158,10 +201,53 @@
   .pt-safe {
     padding-top: env(safe-area-inset-top);
   }
-  .text-up {
-    color: var(--bull);
+
+  /* Faint film grain on a surface */
+  .noise {
+    isolation: isolate;
   }
-  .text-down {
-    color: var(--bear);
+  .noise:not(.fixed):not(.absolute):not(.sticky) {
+    position: relative;
+  }
+  .noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-image: var(--noise);
+    opacity: 0.045;
+    pointer-events: none;
+  }
+
+  /* Angled cuts, taken from the logo's triangle */
+  .cut-tr {
+    clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+  }
+  .cut-br {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%);
+  }
+  .cut-tl-br {
+    clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+  }
+
+  .pitch-diagonal {
+    background-color: var(--pitch);
+    background-image: repeating-linear-gradient(135deg, var(--pitch) 0 30px, var(--pitch-stripe) 30px 60px);
+  }
+
+  .glow-brand {
+    box-shadow:
+      inset 0 0 0 1px rgb(108 92 255 / 0.55),
+      inset 0 0 28px rgb(108 92 255 / 0.18),
+      0 0 40px -12px var(--brand-glow);
+  }
+  .glow-inner {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      inset 0 0 0 1px var(--hairline);
+  }
+  .text-glow-brand {
+    text-shadow: 0 0 24px rgb(108 92 255 / 0.6);
   }
 }

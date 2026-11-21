@@ -180,3 +180,82 @@ export interface LiveGameweekSnapshot {
   benchmarkPct: number;
   chip?: ChipId;
 }
+
+/* ---------------- Step 4 additions ---------------- */
+
+export interface GameweekResult {
+  gameweek: number;
+  kind: GameweekKind;
+  points: number;
+  rank: number;
+  leagueName: string;
+  leagueSize: number;
+  bestPick: { ticker: string; points: number };
+  captain: { ticker: string; points: number };
+  teamName: string;
+  chip?: ChipId;
+  finishedAt: number;
+}
+
+export interface Fixture {
+  home: { managerId: string; team: string; name: string; points?: number; isYou: boolean };
+  away: { managerId: string; team: string; name: string; points?: number; isYou: boolean };
+}
+
+export interface LeagueFixtures {
+  current: { gameweek: number; fixtures: Fixture[] };
+  previous: { gameweek: number; fixtures: Fixture[] };
+}
+
+export interface LeaguePreview {
+  id: string;
+  name: string;
+  code: string;
+  size: number;
+  leader: { team: string; points: number } | null;
+  member: boolean;
+}
+
+export interface GameweekStats {
+  managers: number;
+  squadsLocked: number;
+  mostPicked: { ticker: string; ownership: number }[];
+  leader: { team: string; points: number };
+}
+
+export interface ProLeague {
+  id: string;
+  name: string;
+  entryUsdc: number;
+  spots: number;
+  filled: number;
+  poolUsdc: number;
+  kind: GameweekKind;
+}
+
+export type ProofStatus = "live" | "building" | "planned";
+
+export interface ProofStats {
+  preview: boolean;
+  counters: { settled: number; locked: number; sessions: number; vrf: number };
+  stack: { moment: string; tech: string; status: ProofStatus }[];
+  oracleProgram: string;
+  gameProgram: string | null;
+}
+
+export type BadgeId = "lockedIn" | "captainsCall" | "podium" | "ironXI" | "centurion" | "champion";
+
+export interface Badge {
+  id: BadgeId;
+  earned: boolean;
+}
+
+export interface FeaturedEntry {
+  gameweek: Gameweek;
+  lineup: Lineup;
+  kickoffAt: number;
+  teamName: string;
+  /** The 15 stocks in the lineup */
+  stocks: Record<string, Stock>;
+  leagueId: string;
+}

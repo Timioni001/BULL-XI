@@ -43,10 +43,19 @@ const PROFILES: Record<string, Profile> = Object.fromEntries(
   }),
 );
 
+/**
+ * Market clock speed. Demo mode runs fast so recordings have action.
+ * Normal mode runs ~10x slower, closer to real price speed.
+ */
+let speed = 0.1;
+export function setMarketSpeed(fast: boolean) {
+  speed = fast ? 1 : 0.1;
+}
+
 export function priceAt(id: string, tMs: number): number {
   const p = PROFILES[id];
   if (!p) return 0;
-  const t = tMs / 1000;
+  const t = (tMs / 1000) * speed;
   let x = 0;
   for (const o of p.octaves) x += o.amp * Math.sin((2 * Math.PI * t) / o.period + o.phase);
   const sec = Math.floor(t);

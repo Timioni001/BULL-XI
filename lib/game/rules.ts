@@ -38,7 +38,9 @@ export const POSITION_META: Record<Position, { label: string; plural: string; sh
 
 export const POINTS_PER_PERCENT = 10;
 export const POINT_CAP = 50;
-export const BEAT_BENCHMARK_BONUS = 3;
+export const BEAT_BENCHMARK_BONUS = 2;
+/** A stock must beat SPYx by at least this many percentage points to earn the bonus. */
+export const BEAT_BENCHMARK_MARGIN = 0.5;
 export const TOP_GAINER_BONUS = 2;
 export const CAPTAIN_MULTIPLIER = 2;
 export const TRIPLE_CAPTAIN_MULTIPLIER = 3;
@@ -371,7 +373,7 @@ export interface StockScore {
 export function scoreStock(input: StockScoreInput): StockScore {
   const base = basePoints(input.pct);
   let bonus = 0;
-  if (!input.isBenchmark && input.pct > input.benchmarkPct) bonus += BEAT_BENCHMARK_BONUS;
+  if (!input.isBenchmark && input.pct - input.benchmarkPct >= BEAT_BENCHMARK_MARGIN - 1e-9) bonus += BEAT_BENCHMARK_BONUS;
   if (input.isTopGainer) bonus += TOP_GAINER_BONUS;
   let points = base + bonus;
   if (input.hedged && points < 0) points = 0;

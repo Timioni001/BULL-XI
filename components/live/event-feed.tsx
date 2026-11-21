@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import type { LiveEvent } from "@/lib/data/types";
 import { signed } from "@/lib/format";
 import { cn } from "@/lib/utils";

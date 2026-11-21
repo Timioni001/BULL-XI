@@ -8,11 +8,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        default:
+          "bg-brand text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.22),0_10px_28px_-10px_var(--brand-glow)] hover:bg-[var(--brand-hover)] disabled:bg-surface-3 disabled:text-muted-foreground disabled:shadow-none disabled:opacity-100",
+        light: "bg-foreground text-background hover:bg-foreground/90",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-secondary text-secondary-foreground ring-1 ring-inset ring-hairline hover:bg-surface-3 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
@@ -32,9 +34,9 @@ const buttonVariants = cva(
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
         /* Mobile CTA sizes */
-        cta: "h-14 gap-2 rounded-2xl px-5 text-[15px] font-semibold [&_svg:not([class*='size-'])]:size-5",
-        "cta-sm": "h-12 gap-2 rounded-xl px-4 text-sm font-semibold",
-        "icon-cta": "size-11 rounded-xl [&_svg:not([class*='size-'])]:size-5",
+        cta: "h-14 gap-2 rounded-full px-6 text-[15px] font-semibold [&_svg:not([class*='size-'])]:size-5",
+        "cta-sm": "h-12 gap-2 rounded-full px-5 text-sm font-semibold",
+        "icon-cta": "size-11 rounded-full [&_svg:not([class*='size-'])]:size-5",
       },
     },
     defaultVariants: {

@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils";
 export function Pitch({ children, className, glow }: { children: React.ReactNode; className?: string; glow?: "up" | "down" | null }) {
   return (
     <div
-      className={cn("relative isolate overflow-hidden rounded-3xl bg-pitch ring-1 ring-inset ring-hairline", className)}
-      style={{ backgroundImage: "repeating-linear-gradient(180deg, var(--pitch) 0 44px, var(--pitch-stripe) 44px 88px)" }}
+      className={cn("pitch-diagonal noise relative isolate overflow-hidden rounded-[28px] ring-1 ring-inset ring-hairline", className)}
     >
       <PitchLines />
       {glow !== undefined && (
@@ -21,7 +20,7 @@ export function Pitch({ children, className, glow }: { children: React.ReactNode
                 ? "radial-gradient(120% 60% at 50% 0%, rgb(22 199 132 / 0.16), transparent 70%)"
                 : glow === "down"
                   ? "radial-gradient(120% 60% at 50% 0%, rgb(234 57 67 / 0.14), transparent 70%)"
-                  : "radial-gradient(120% 60% at 50% 0%, rgb(255 255 255 / 0.06), transparent 70%)",
+                  : "radial-gradient(120% 60% at 50% 0%, rgb(108 92 255 / 0.10), transparent 70%)",
           }}
         />
       )}

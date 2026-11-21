@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
 
@@ -27,10 +27,10 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
             className={cn(
               "relative flex-1 whitespace-nowrap rounded-lg font-semibold transition-colors duration-150",
               size === "sm" ? "h-7 px-2 text-xs" : "h-9 px-3 text-[13px]",
-              active ? "text-background" : "text-muted-foreground",
+              active ? "text-white" : "text-muted-foreground",
             )}
           >
-            {active && <motion.span layoutId={`seg-${id}`} transition={spring} className="absolute inset-0 rounded-lg bg-foreground" />}
+            {active && <motion.span layoutId={`seg-${id}`} transition={spring} className="absolute inset-0 rounded-lg bg-brand shadow-[0_6px_18px_-8px_var(--brand-glow)]" />}
             <span className="relative">{o.label}</span>
           </button>
         );

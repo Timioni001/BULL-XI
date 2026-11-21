@@ -66,3 +66,13 @@ Phase 2 swaps `lib/data/mock/*` for MagicBlock implementations behind the same `
 5. Deadline / Lock
 6. Live Gameweek
 7. Review stop. Then Leagues, Transfers, Chips, History, Profile, Go Pro
+
+## Step 4 additions
+
+- Brand accent: electric indigo `#6C5CFF` for primary buttons, active tabs, countdown and seal. Never for price moves.
+- Sector rings (low saturation) on monogram tiles: tech, finance, energy, consumer, health, industrial, crypto, index.
+- Display type: Space Grotesk. UI: Geist. Tickers and clocks: Geist Mono.
+- Texture: diagonal pitch stripes, angled card cuts, faint noise, inner glows.
+- Routes: landing at `/`, the game at `/app/*`, `/proof` for judges, `/join/[code]` for invites, `/api/card` share images.
+- Desktop (1024px+): side nav, main column, sticky aside. Phones keep the floating pill tab bar.
+- All copy lives in `lib/copy.ts`.
