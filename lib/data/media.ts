@@ -1,9 +1,9 @@
 /**
- * Company logos and photos. Tiny and dependency-free so any component can use
+ * Company logos. Tiny and dependency-free so any component can use
  * it without pulling in the rest of the data layer. Phase 2 can point these at
  * a CDN without changing callers.
  */
-import { DARK_LOGOS, FULL_BLEED_LOGOS, PHOTOS } from "./mock/media";
+import { DARK_LOGOS, FULL_BLEED_LOGOS } from "./mock/media";
 
 export interface Logo {
   src: string;
@@ -23,9 +23,4 @@ export function logoFor(ticker: string): Logo | null {
   const base = ticker.replace(/x$/, "");
   if (!LOGO_TICKERS.has(base)) return null;
   return { src: `/logos/${base}.webp`, tone: DARK_LOGOS.has(base) ? "dark" : "light", fill: FULL_BLEED_LOGOS.has(base) };
-}
-
-/** Editorial photo for a stock id such as "nvdax", if we have one. */
-export function photoFor(id: string): string | null {
-  return PHOTOS[id] ?? null;
 }

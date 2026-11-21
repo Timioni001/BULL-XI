@@ -162,6 +162,27 @@
   color: var(--foreground);
 }
 
+/* Restores the dark app palette inside light pages (phone mockups). */
+.theme-dark {
+  --background: #161618;
+  --foreground: #ffffff;
+  --surface-1: #212124;
+  --surface-2: #2b2b2f;
+  --surface-3: #38383d;
+  --muted-foreground: #8e8e93;
+  --hairline: rgb(255 255 255 / 0.06);
+  --hairline-strong: rgb(255 255 255 / 0.14);
+  color-scheme: dark;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Dot grid backdrop */
+.dot-grid {
+  background-image: radial-gradient(rgb(0 0 0 / 0.12) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -210,6 +231,13 @@
     font-stretch: 125%;
     font-feature-settings: "tnum" 1;
     letter-spacing: -0.01em;
+  }
+  /* Clean wide grotesk for marketing headlines */
+  .font-headline {
+    font-family: var(--font-display);
+    font-stretch: 108%;
+    font-weight: 600;
+    letter-spacing: -0.035em;
   }
   .font-serif {
     font-family: var(--font-serif);

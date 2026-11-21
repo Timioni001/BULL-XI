@@ -267,6 +267,11 @@ export async function getBadges(locks: number): Promise<Badge[]> {
   return computeBadges(mockMode() === "empty" ? [] : MOCK_HISTORY, locks);
 }
 
+/** The full stock universe, synchronous, for static marketing pages. */
+export function getStockUniverse(): Stock[] {
+  return MOCK_STOCKS;
+}
+
 /** A fixed set of stocks for marketing art. Synchronous and deterministic so it prerenders. */
 export function getShowcaseStocks(): Stock[] {
   const ids = ["nvdax", "tslax", "aaplx", "coinx", "amznx", "metax", "nflxx", "gldx", "llyx", "msftx", "pltrx", "spyx"];

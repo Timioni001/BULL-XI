@@ -76,7 +76,7 @@ Program addresses: BULL-XI game program deploys in step 6. Real-time pricing ora
 
 ## Media
 
-Company logos live in `public/logos/` and photos in `public/photos/` (Unsplash License, credits in `public/photos/CREDITS.md`). Everything is served locally, so no image link can break. Access goes through `lib/data/media.ts`.
+Company logos live in `public/logos/` (WebP, served locally so no image link can break) and are trademarks of their owners, shown to identify each stock. Access goes through `lib/data/media.ts`.
 
 ## Stack
 
