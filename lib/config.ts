@@ -59,8 +59,14 @@ export const config = CONFIGS[NETWORK];
 export const PRICE_SOURCE = {
   name: "Jupiter Price API",
   url: "https://lite-api.jup.ag/price/v3",
-  /** Browser polling interval. Free tier limits apply; the reference price moves every few minutes. */
-  pollMs: 5000,
+  /**
+   * Browser polling interval. The free API rate-limits a full 41-stock batch
+   * at 1/s (measured), and the xStocks reference price itself updates about
+   * once a minute, so 3s loses nothing. Backs off on rate limits.
+   */
+  pollMs: 3000,
+  /** Slowest poll after repeated rate limits */
+  maxPollMs: 15_000,
 } as const;
 
 /** Explorer link for an address or transaction on the configured network. */
