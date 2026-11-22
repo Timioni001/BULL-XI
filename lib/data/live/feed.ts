@@ -13,7 +13,8 @@ export function createRealFeed(stocks: { id: string; mint: string }[]) {
   let last: PriceMap | null = null;
   let lastAt = 0;
   let inflight: Promise<PriceMap> | null = null;
-  let timer: ReturnType<typeof setInterval> | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let delay: number = PRICE_SOURCE.pollMs;
 
   async function poll(): Promise<PriceMap> {
     inflight ??= fetchQuotes(mints)
@@ -37,6 +38,26 @@ export function createRealFeed(stocks: { id: string; mint: string }[]) {
     return inflight;
   }
 
+  /** Polls every second while visible. Doubles the wait after a failure (e.g. rate limit), resets on success. */
+  function loop() {
+    clearTimeout(timer);
+    if (listeners.size === 0) return;
+    const hidden = typeof document !== "undefined" && document.visibilityState === "hidden";
+    const run = hidden
+      ? Promise.resolve()
+      : poll().then(
+          () => {
+            delay = PRICE_SOURCE.pollMs;
+          },
+          () => {
+            delay = Math.min(delay * 2, PRICE_SOURCE.maxPollMs);
+          },
+        );
+    void run.then(() => {
+      if (listeners.size > 0) timer = setTimeout(loop, hidden ? 2000 : delay);
+    });
+  }
+
   return {
     /** Latest prices, fetched if missing or stale. Rejects only if nothing was ever loaded. */
     async latest(): Promise<PriceMap> {
@@ -52,13 +73,10 @@ export function createRealFeed(stocks: { id: string; mint: string }[]) {
     subscribe(listener: (p: PriceMap) => void): () => void {
       listeners.add(listener);
       if (last) listener(last);
-      if (listeners.size === 1) {
-        void poll().catch(() => {});
-        timer = setInterval(() => void poll().catch(() => {}), PRICE_SOURCE.pollMs);
-      }
+      if (listeners.size === 1) loop();
       return () => {
         listeners.delete(listener);
-        if (listeners.size === 0) clearInterval(timer);
+        if (listeners.size === 0) clearTimeout(timer);
       };
     },
   };

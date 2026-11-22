@@ -12,7 +12,7 @@ Built for MagicBlock Solana Blitz v10 (theme: Entertainment Finance). Deadline: 
 - **Every claim on the landing page and /proof must be true on devnet**, with devnet explorer links. Test tokens are labelled "Devnet preview with test tokens priced from real market data."
 - **Hosting is Cloudflare only.** Next.js static export (`output: "export"`) served by Workers Static Assets (`wrangler.jsonc`, free workers.dev). No SSR adapter, no server routes, no server actions. Dynamic pages use query params. Do not set `run_worker_first`
 - **One small Worker** (`worker/`) runs the price pusher cron every minute and tiny read APIs. Secrets via `wrangler secret put`
-- **Prices:** the browser polls the free Jupiter Price API (xStocks reference price) every 5s. The Worker writes the same prices to our price book on the Ephemeral Rollup every minute, which builds the onchain TWAP
+- **Prices:** the browser polls the free Jupiter Price API (xStocks reference price) every 3s (the free API rate-limits 1/s for the full batch and the reference price updates about once a minute; pauses when the tab is hidden, backs off on rate limits). The Worker writes the same prices to our price book on the Ephemeral Rollup every minute, which builds the onchain TWAP
 
 ---
 
