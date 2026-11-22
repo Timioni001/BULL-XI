@@ -122,10 +122,835 @@
       ]
     },
     {
+      "name": "create_entry",
+      "docs": [
+        "Creates an empty entry on Solana and pre-funds the rent of its privacy",
+        "permission. The squad itself is never sent to Solana before kickoff."
+      ],
+      "discriminator": [
+        248,
+        207,
+        142,
+        242,
+        66,
+        162,
+        150,
+        16
+      ],
+      "accounts": [
+        {
+          "name": "entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "gameweek"
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "gameweek",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "create_gameweek",
+      "docs": [
+        "Admin creates a gameweek on Solana. kind 0 = daily (24h), 1 = flash (1h)."
+      ],
+      "discriminator": [
+        117,
+        175,
+        252,
+        96,
+        252,
+        109,
+        176,
+        22
+      ],
+      "accounts": [
+        {
+          "name": "gameweek",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "u32"
+        },
+        {
+          "name": "kind",
+          "type": "u8"
+        },
+        {
+          "name": "deadline_ts",
+          "type": "i64"
+        },
+        {
+          "name": "end_ts",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "create_manager",
+      "docs": [
+        "Creates a manager's public profile on Solana. A sponsor may pay."
+      ],
+      "discriminator": [
+        188,
+        55,
+        132,
+        229,
+        104,
+        187,
+        203,
+        62
+      ],
+      "accounts": [
+        {
+          "name": "manager",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  110,
+                  97,
+                  103,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "team",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "delegate_entry",
+      "discriminator": [
+        14,
+        244,
+        184,
+        129,
+        178,
+        22,
+        198,
+        94
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "buffer_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                201,
+                136,
+                231,
+                12,
+                208,
+                242,
+                9,
+                62,
+                12,
+                157,
+                21,
+                208,
+                113,
+                107,
+                163,
+                110,
+                224,
+                141,
+                169,
+                89,
+                158,
+                216,
+                178,
+                220,
+                222,
+                57,
+                252,
+                28,
+                156,
+                199,
+                205,
+                241
+              ]
+            }
+          }
+        },
+        {
+          "name": "delegation_record_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "delegation_metadata_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "gameweek"
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner_program",
+          "address": "EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN"
+        },
+        {
+          "name": "delegation_program",
+          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "gameweek",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "delegate_gameweek",
+      "discriminator": [
+        189,
+        192,
+        25,
+        54,
+        27,
+        254,
+        114,
+        174
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "buffer_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                201,
+                136,
+                231,
+                12,
+                208,
+                242,
+                9,
+                62,
+                12,
+                157,
+                21,
+                208,
+                113,
+                107,
+                163,
+                110,
+                224,
+                141,
+                169,
+                89,
+                158,
+                216,
+                178,
+                220,
+                222,
+                57,
+                252,
+                28,
+                156,
+                199,
+                205,
+                241
+              ]
+            }
+          }
+        },
+        {
+          "name": "delegation_record_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "delegation_metadata_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner_program",
+          "address": "EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN"
+        },
+        {
+          "name": "delegation_program",
+          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "delegate_manager",
+      "docs": [
+        "Hands the profile to the private rollup, where settlement updates it."
+      ],
+      "discriminator": [
+        84,
+        52,
+        63,
+        96,
+        144,
+        124,
+        127,
+        202
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "buffer_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                201,
+                136,
+                231,
+                12,
+                208,
+                242,
+                9,
+                62,
+                12,
+                157,
+                21,
+                208,
+                113,
+                107,
+                163,
+                110,
+                224,
+                141,
+                169,
+                89,
+                158,
+                216,
+                178,
+                220,
+                222,
+                57,
+                252,
+                28,
+                156,
+                199,
+                205,
+                241
+              ]
+            }
+          }
+        },
+        {
+          "name": "delegation_record_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "delegation_metadata_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  110,
+                  97,
+                  103,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner_program",
+          "address": "EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN"
+        },
+        {
+          "name": "delegation_program",
+          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "delegate_price_book",
       "docs": [
-        "Delegates the price book to an Ephemeral Rollup validator",
-        "(pass the validator identity as the first remaining account)."
+        "Delegates the price book (pass the validator identity as the first remaining account)."
       ],
       "discriminator": [
         188,
@@ -291,6 +1116,58 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "init_config",
+      "docs": [
+        "Game config on Solana: who may create gameweeks, and the crank that settles them."
+      ],
+      "discriminator": [
+        23,
+        235,
+        115,
+        232,
+        168,
+        96,
+        1,
+        231
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "crank",
+          "type": "pubkey"
+        }
+      ]
     },
     {
       "name": "init_price_book",
@@ -461,7 +1338,7 @@
       "name": "push_prices",
       "docs": [
         "Writes the latest prices (micro-USD, 0 = no update for that stock)",
-        "and advances every stock's price x time sum. Runs on the Ephemeral Rollup."
+        "and advances every stock's price x time sum. Runs on the rollup."
       ],
       "discriminator": [
         120,
@@ -515,9 +1392,640 @@
       ]
     },
     {
+      "name": "reveal_entry",
+      "docs": [
+        "After kickoff anyone can reveal a sealed entry: it becomes public in the rollup."
+      ],
+      "discriminator": [
+        55,
+        129,
+        203,
+        100,
+        95,
+        189,
+        241,
+        116
+      ],
+      "accounts": [
+        {
+          "name": "entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "entry.gameweek",
+                "account": "Entry"
+              },
+              {
+                "kind": "account",
+                "path": "entry.authority",
+                "account": "Entry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "gameweek",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "entry.gameweek",
+                "account": "Entry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "permission",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  109,
+                  105,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  58
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "entry"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                136,
+                161,
+                10,
+                196,
+                33,
+                152,
+                1,
+                214,
+                246,
+                106,
+                29,
+                60,
+                6,
+                152,
+                192,
+                102,
+                169,
+                175,
+                212,
+                217,
+                180,
+                252,
+                231,
+                71,
+                151,
+                141,
+                209,
+                5,
+                168,
+                212,
+                103,
+                82
+              ]
+            }
+          }
+        },
+        {
+          "name": "permission_program",
+          "address": "ACLseoPoyC3cBqoUtkbjZ4aDrkurZW86v19pXz2XQnp1"
+        },
+        {
+          "name": "ephemeral_vault",
+          "writable": true,
+          "address": "MagicVau1t999999999999999999999999999999999"
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "seal_entry",
+      "docs": [
+        "Seals (or re-seals) the manager's squad inside the private rollup before",
+        "the deadline. The entry becomes readable only by the manager and the crank."
+      ],
+      "discriminator": [
+        68,
+        58,
+        220,
+        128,
+        65,
+        240,
+        179,
+        5
+      ],
+      "accounts": [
+        {
+          "name": "entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "entry.gameweek",
+                "account": "Entry"
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "gameweek",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "entry.gameweek",
+                "account": "Entry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "entry"
+          ]
+        },
+        {
+          "name": "permission",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  109,
+                  105,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  58
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "entry"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                136,
+                161,
+                10,
+                196,
+                33,
+                152,
+                1,
+                214,
+                246,
+                106,
+                29,
+                60,
+                6,
+                152,
+                192,
+                102,
+                169,
+                175,
+                212,
+                217,
+                180,
+                252,
+                231,
+                71,
+                151,
+                141,
+                209,
+                5,
+                168,
+                212,
+                103,
+                82
+              ]
+            }
+          }
+        },
+        {
+          "name": "permission_program",
+          "address": "ACLseoPoyC3cBqoUtkbjZ4aDrkurZW86v19pXz2XQnp1"
+        },
+        {
+          "name": "ephemeral_vault",
+          "writable": true,
+          "address": "MagicVau1t999999999999999999999999999999999"
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "squad",
+          "type": {
+            "array": [
+              "u8",
+              15
+            ]
+          }
+        },
+        {
+          "name": "starters",
+          "type": {
+            "array": [
+              "u8",
+              11
+            ]
+          }
+        },
+        {
+          "name": "bench",
+          "type": {
+            "array": [
+              "u8",
+              4
+            ]
+          }
+        },
+        {
+          "name": "captain",
+          "type": "u8"
+        },
+        {
+          "name": "vice",
+          "type": "u8"
+        },
+        {
+          "name": "chip",
+          "type": "u8"
+        },
+        {
+          "name": "hedge",
+          "type": "u8"
+        },
+        {
+          "name": "transfer_hit",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "set_profile",
+      "docs": [
+        "Renames the manager or team. Runs on the rollup."
+      ],
+      "discriminator": [
+        221,
+        221,
+        195,
+        121,
+        133,
+        71,
+        113,
+        170
+      ],
+      "accounts": [
+        {
+          "name": "manager",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  110,
+                  97,
+                  103,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "manager"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "team",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "settle_entry",
+      "docs": [
+        "Scores a revealed entry from the gameweek's TWAPs, adds it to the",
+        "manager's season, and commits both to Solana in the same transaction."
+      ],
+      "discriminator": [
+        22,
+        208,
+        102,
+        127,
+        180,
+        201,
+        120,
+        68
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "entry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  110,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "entry.gameweek",
+                "account": "Entry"
+              },
+              {
+                "kind": "account",
+                "path": "entry.authority",
+                "account": "Entry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "gameweek",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "entry.gameweek",
+                "account": "Entry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "manager",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  110,
+                  97,
+                  103,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "entry.authority",
+                "account": "Entry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        },
+        {
+          "name": "magic_context",
+          "writable": true,
+          "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "snapshot_gameweek",
+      "docs": [
+        "Moves a gameweek through its TWAP snapshots. Anyone can call it once the",
+        "time has come; it reads the price book in the same rollup.",
+        "OPEN -> KICKED_OFF (at deadline) -> LIVE (opening TWAP) -> CLOSING -> FINAL (closing TWAP)."
+      ],
+      "discriminator": [
+        131,
+        249,
+        209,
+        61,
+        194,
+        108,
+        137,
+        72
+      ],
+      "accounts": [
+        {
+          "name": "gameweek",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "gameweek.id",
+                "account": "Gameweek"
+              }
+            ]
+          }
+        },
+        {
+          "name": "price_book",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "undelegate_price_book",
       "docs": [
-        "Commits and hands the price book back to Solana (admin only)."
+        "Commits and hands the price book back to Solana (admin only), e.g. to move rollups."
       ],
       "discriminator": [
         185,
@@ -573,6 +2081,58 @@
   ],
   "accounts": [
     {
+      "name": "Config",
+      "discriminator": [
+        155,
+        12,
+        170,
+        224,
+        30,
+        250,
+        204,
+        130
+      ]
+    },
+    {
+      "name": "Entry",
+      "discriminator": [
+        63,
+        18,
+        152,
+        113,
+        215,
+        246,
+        221,
+        250
+      ]
+    },
+    {
+      "name": "Gameweek",
+      "discriminator": [
+        74,
+        72,
+        200,
+        69,
+        130,
+        27,
+        119,
+        89
+      ]
+    },
+    {
+      "name": "Manager",
+      "discriminator": [
+        221,
+        78,
+        171,
+        233,
+        213,
+        142,
+        113,
+        56
+      ]
+    },
+    {
       "name": "PriceBook",
       "discriminator": [
         58,
@@ -611,9 +2171,338 @@
       "code": 6004,
       "name": "Overflow",
       "msg": "Number overflow"
+    },
+    {
+      "code": 6005,
+      "name": "BadName",
+      "msg": "Names must be 1 to 24 characters"
+    },
+    {
+      "code": 6006,
+      "name": "BadValidator",
+      "msg": "That validator is not allowed"
+    },
+    {
+      "code": 6007,
+      "name": "BadSchedule",
+      "msg": "End must be after the deadline"
+    },
+    {
+      "code": 6008,
+      "name": "TooEarly",
+      "msg": "Too early for this step"
+    },
+    {
+      "code": 6009,
+      "name": "AlreadyFinal",
+      "msg": "This gameweek is already final"
+    },
+    {
+      "code": 6010,
+      "name": "DeadlinePassed",
+      "msg": "The deadline has passed"
+    },
+    {
+      "code": 6011,
+      "name": "NotSealed",
+      "msg": "Entry is not sealed"
+    },
+    {
+      "code": 6012,
+      "name": "NotRevealed",
+      "msg": "Entry is not revealed yet"
+    },
+    {
+      "code": 6013,
+      "name": "UnknownStock",
+      "msg": "Unknown stock"
+    },
+    {
+      "code": 6014,
+      "name": "Duplicate",
+      "msg": "The same stock appears twice"
+    },
+    {
+      "code": 6015,
+      "name": "SquadQuota",
+      "msg": "Squad needs 2 ETF, 5 Blue Chip, 5 Growth and 3 High Risk"
+    },
+    {
+      "code": 6016,
+      "name": "OverBudget",
+      "msg": "Squad is over the 100 credit budget"
+    },
+    {
+      "code": 6017,
+      "name": "SectorLimit",
+      "msg": "Max 3 stocks from one sector"
+    },
+    {
+      "code": 6018,
+      "name": "LineupMismatch",
+      "msg": "Starters and bench must be your 15 stocks"
+    },
+    {
+      "code": 6019,
+      "name": "Formation",
+      "msg": "Formation is not legal"
+    },
+    {
+      "code": 6020,
+      "name": "Captain",
+      "msg": "Captain and vice must be two different starters"
+    },
+    {
+      "code": 6021,
+      "name": "Chip",
+      "msg": "That chip can't be played like this"
     }
   ],
   "types": [
+    {
+      "name": "Config",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "crank",
+            "docs": [
+              "Key that reveals and settles entries (can read sealed entries)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Entry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gameweek",
+            "type": "u32"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "sealed_ts",
+            "type": "i64"
+          },
+          {
+            "name": "settled_ts",
+            "type": "i64"
+          },
+          {
+            "name": "squad",
+            "type": {
+              "array": [
+                "u8",
+                15
+              ]
+            }
+          },
+          {
+            "name": "starters",
+            "type": {
+              "array": [
+                "u8",
+                11
+              ]
+            }
+          },
+          {
+            "name": "bench",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            }
+          },
+          {
+            "name": "captain",
+            "type": "u8"
+          },
+          {
+            "name": "vice",
+            "type": "u8"
+          },
+          {
+            "name": "chip",
+            "type": "u8"
+          },
+          {
+            "name": "hedge",
+            "type": "u8"
+          },
+          {
+            "name": "transfer_hit",
+            "type": "u8"
+          },
+          {
+            "name": "points",
+            "type": "i32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Gameweek",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u32"
+          },
+          {
+            "name": "kind",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "deadline_ts",
+            "type": "i64"
+          },
+          {
+            "name": "end_ts",
+            "type": "i64"
+          },
+          {
+            "name": "window",
+            "docs": [
+              "Length of the opening and closing TWAP windows, seconds"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "tmp_ts",
+            "docs": [
+              "Price book state saved at the start of the current window"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "tmp_cum",
+            "type": {
+              "array": [
+                "u128",
+                48
+              ]
+            }
+          },
+          {
+            "name": "open_twap",
+            "docs": [
+              "Opening and closing TWAP per stock, micro-USD"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                48
+              ]
+            }
+          },
+          {
+            "name": "close_twap",
+            "type": {
+              "array": [
+                "u64",
+                48
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Manager",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                24
+              ]
+            }
+          },
+          {
+            "name": "team",
+            "type": {
+              "array": [
+                "u8",
+                24
+              ]
+            }
+          },
+          {
+            "name": "created_ts",
+            "type": "i64"
+          },
+          {
+            "name": "gameweeks",
+            "type": "u32"
+          },
+          {
+            "name": "total_points",
+            "type": "i64"
+          },
+          {
+            "name": "best_points",
+            "type": "i32"
+          },
+          {
+            "name": "best_gameweek",
+            "type": "u32"
+          },
+          {
+            "name": "last_gameweek",
+            "type": "u32"
+          },
+          {
+            "name": "last_points",
+            "type": "i32"
+          }
+        ]
+      }
+    },
     {
       "name": "PriceBook",
       "type": {

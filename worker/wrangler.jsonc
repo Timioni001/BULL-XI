@@ -9,7 +9,7 @@
   "observability": { "enabled": true },
   "vars": {
     "NETWORK": "devnet",
-    "ER_RPC": "https://devnet-as.magicblock.app",
+    "ER_RPC": "https://devnet-tee.magicblock.app",
     "PRICE_URL": "https://lite-api.jup.ag/price/v3"
   }
   // Secret (not in this file): wrangler secret put PUSHER_KEY --config worker/wrangler.jsonc

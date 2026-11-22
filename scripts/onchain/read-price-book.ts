@@ -11,7 +11,7 @@ import { PRICE_BOOK_STOCKS } from "../../lib/onchain/universe";
 async function main() {
   const address = await priceBookAddress();
   for (const [label, url] of [
-    ["Ephemeral Rollup", config.erRpc],
+    ["Private ER (TEE)", config.teeRpc],
     ["Solana devnet", config.solanaRpc],
   ] as const) {
     const info = await createSolanaRpc(url).getAccountInfo(address, { encoding: "base64" }).send();

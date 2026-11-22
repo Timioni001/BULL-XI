@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated from the onchain IDL (npm run onchain:client)
+    "lib/onchain/bullxi/**",
+    "onchain/target/**",
   ]),
 ]);
 

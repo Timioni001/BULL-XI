@@ -13,15 +13,17 @@ import {
   pipe,
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
+  signBytes,
   signTransactionMessageWithSigners,
   type KeyPairSigner,
 } from "@solana/kit";
+import { teeLogin, teeRpcUrl } from "./tee-auth";
 import { commitPriceBookIx, pushPricesIx, toMicroUsd } from "./price-book";
 import { PRICE_BOOK_STOCKS } from "./universe";
 
 export interface PushOptions {
   signer: KeyPairSigner;
-  /** Ephemeral Rollup RPC */
+  /** Ephemeral Rollup RPC. A TEE (Private ER) URL logs in first. */
   erRpc: string;
   /** Jupiter Price API v3 */
   priceUrl: string;
@@ -56,7 +58,9 @@ export async function fetchUniversePrices(priceUrl: string): Promise<{ prices: b
 export async function pushOnce({ signer, erRpc, priceUrl, commit = false }: PushOptions): Promise<PushResult> {
   const { prices, missing } = await fetchUniversePrices(priceUrl);
   if (missing.length === prices.length) throw new Error("no prices returned");
-  const rpc = createSolanaRpc(erRpc);
+  // The Private ER only accepts transactions with a login token.
+  const url = erRpc.includes("tee") ? teeRpcUrl(erRpc, (await teeLogin(erRpc, signer.address, (m) => signBytes(signer.keyPair.privateKey, m))).token) : erRpc;
+  const rpc = createSolanaRpc(url);
   const [{ value: blockhash }, push, commitIx] = await Promise.all([
     rpc.getLatestBlockhash().send(),
     pushPricesIx(signer.address, prices),

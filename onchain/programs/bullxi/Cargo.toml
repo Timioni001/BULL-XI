@@ -21,4 +21,4 @@ anchor-debug = []
 
 [dependencies]
 anchor-lang = { version = "1.0.2" }
-ephemeral-rollups-sdk = { version = "0.17.3", features = ["anchor"] }
+ephemeral-rollups-sdk = { version = "0.17.3", features = ["anchor", "access-control"] }

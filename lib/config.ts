@@ -15,7 +15,7 @@ interface NetworkConfig {
   erWs: string;
   /** MagicBlock Magic Router */
   router: string;
-  /** MagicBlock Private ER (TEE) */
+  /** MagicBlock Private ER (TEE): where the game and the price book live */
   teeRpc: string;
   /** ER validator identity used when delegating */
   erValidator: string;
