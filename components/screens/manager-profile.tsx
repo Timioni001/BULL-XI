@@ -68,6 +68,7 @@ export function ManagerProfile({ address }: { address: string }) {
           )}
         </div>
 
+        {record.data !== null && (
         <aside className="flex flex-col gap-3">
           <SectionTitle title={t.results} />
           {results.status === "loading" && <Shimmer className="h-40 rounded-3xl" />}
@@ -79,7 +80,7 @@ export function ManagerProfile({ address }: { address: string }) {
                 <li key={r.account} className="flex min-h-16 items-center gap-3 border-b border-hairline px-4 py-3 last:border-0">
                   <StockAvatar ticker={tickerOf(r.captain)} size={36} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">{r.date ? day(r.date) : `#${r.gameweek}`}</p>
+                    <p className="text-sm font-semibold">{r.date ? day(r.date) : r.gameweek >= 900_000_000 ? t.test : `#${r.gameweek}`}</p>
                     <p className="text-xs text-muted-foreground">{t.captain(tickerOf(r.captain))}</p>
                   </div>
                   <div className="text-right">
@@ -94,6 +95,7 @@ export function ManagerProfile({ address }: { address: string }) {
           )}
           <p className="px-1 text-xs text-muted-foreground">{t.resultsNote}</p>
         </aside>
+        )}
       </main>
       <TabBar />
     </>

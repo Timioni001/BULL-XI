@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PrivyProvider, useLogin, useLogout, usePrivy, type User } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors, useSignMessage, useSignTransaction, useWallets } from "@privy-io/react-auth/solana";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
@@ -38,10 +38,17 @@ function Bridge({ children }: { children: React.ReactNode }) {
   const { signMessage } = useSignMessage();
   const wallet = wallets[0];
   const address = wallet?.address ?? null;
+  // If sign-in never becomes ready (blocked network, domain not allowed), carry on as a guest.
+  const [gaveUp, setGaveUp] = useState(false);
+  useEffect(() => {
+    if (ready) return;
+    const id = setTimeout(() => setGaveUp(true), 10_000);
+    return () => clearTimeout(id);
+  }, [ready]);
 
   const value = useMemo<Auth>(
     () => ({
-      status: !ready ? "loading" : authenticated && user ? "signedIn" : "guest",
+      status: !ready ? (gaveUp ? "unavailable" : "loading") : authenticated && user ? "signedIn" : "guest",
       account: authenticated && user ? toAccount(user, address) : null,
       signIn: () => login({ loginMethods: ["google", "email"] }),
       connectWallet: () => login({ loginMethods: ["wallet"], walletChainType: "solana-only" }),
@@ -49,7 +56,7 @@ function Bridge({ children }: { children: React.ReactNode }) {
       signTransaction: wallet ? async (transaction) => (await signTransaction({ transaction, wallet, chain })).signedTransaction : undefined,
       signMessage: wallet ? async (message) => (await signMessage({ message, wallet })).signature : undefined,
     }),
-    [ready, authenticated, user, address, login, logout, wallet, signTransaction, signMessage],
+    [ready, gaveUp, authenticated, user, address, login, logout, wallet, signTransaction, signMessage],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

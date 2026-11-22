@@ -1,7 +1,7 @@
 /**
  * One-time setup on devnet, after `solana program deploy`:
  *   1. create the price book (deployer = admin, pusher = devnet-only key)
- *   2. delegate it to the MagicBlock devnet Ephemeral Rollup validator
+ *   2. delegate it to the MagicBlock devnet Private ER (TEE)
  *
  *   npm run onchain:setup
  */
@@ -65,8 +65,8 @@ async function main() {
   if (after.value?.owner === "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh") {
     console.log("already delegated");
   } else {
-    const sig = await send(config.solanaRpc, admin, [await delegatePriceBookIx(admin.address, address(config.erValidator))]);
-    console.log("delegated to", config.erValidator, explorer("tx", sig));
+    const sig = await send(config.solanaRpc, admin, [await delegatePriceBookIx(admin.address, address(config.teeValidator))]);
+    console.log("delegated to", config.teeValidator, explorer("tx", sig));
   }
   console.log("account", explorer("address", book));
 }

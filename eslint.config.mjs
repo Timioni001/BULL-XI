@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     // Generated from the onchain IDL (npm run onchain:client)
     "lib/onchain/bullxi/**",
     "onchain/target/**",
+    "**/.wrangler/**",
   ]),
 ]);
 

@@ -11,7 +11,7 @@ Built for MagicBlock Solana Blitz v10 (theme: Entertainment Finance). Deadline: 
 - **Network lives in one value:** `NETWORK` in `lib/config.ts`. Mainnet is a one-line change, only if MagicBlock sponsors it
 - **Every claim on the landing page and /proof must be true on devnet**, with devnet explorer links. Test tokens are labelled "Devnet preview with test tokens priced from real market data."
 - **Hosting is Cloudflare only.** Next.js static export (`output: "export"`) served by Workers Static Assets (`wrangler.jsonc`, free workers.dev). No SSR adapter, no server routes, no server actions. Dynamic pages use query params. Do not set `run_worker_first`
-- **One small Worker** (`worker/`) runs the price pusher cron every minute and tiny read APIs. Secrets via `wrangler secret put`
+- **One small Worker** (`worker/`, `bullxi-game`) runs the cron every minute (prices, snapshots, reveals, settlement) and tiny APIs, including `/relay`, which sponsors fees for an allowlist of game instructions. Secrets via `wrangler secret put`. Solana's public devnet RPC blocks Cloudflare, so the Worker never writes to Solana directly
 - **Prices:** the browser polls the free Jupiter Price API (xStocks reference price) every 3s (the free API rate-limits 1/s for the full batch and the reference price updates about once a minute; pauses when the tab is hidden, backs off on rate limits). The Worker writes the same prices to our price book on the Ephemeral Rollup every minute, which builds the onchain TWAP
 
 ---
@@ -118,7 +118,8 @@ Starting XI = 11 stocks. Bench = 4 (ordered, auto-sub only if a stock is halted)
 - Recharts or lightweight-charts for stock charts
 - PWA-ready (installable on phones)
 - Hosting: Cloudflare Workers Static Assets (`npm run deploy:web`) plus the pusher Worker (`npm run deploy:worker`)
-- Onchain: Anchor 1.x program in `onchain/` (`bullxi`), ephemeral-rollups-sdk 0.17.x (devnet ERs run validator v1), clients with `@solana/kit` in `lib/onchain/`
+- Onchain: Anchor 1.x program in `onchain/` (`bullxi`), ephemeral-rollups-sdk 0.17.x with `access-control` (devnet ERs run validator v1), typed client generated with Codama into `lib/onchain/bullxi`, game rules mirrored in `game.rs`. Box large accounts (4 KB stack)
+- Sign-in: Privy (Google, email, Solana wallets) behind `lib/auth`. Wallet words only on Go Pro
 - **Data layer:** `lib/data/` exposes typed async functions (`getStocks()`, `getLivePrices()`, `getLeague()`, `lockSquad()` etc.). Phase 1 returns mock data with a simulated live price feed (random walk every second). Phase 2 swaps implementations for real prices and MagicBlock without UI changes. Demo mode and `?mock=sim` keep the simulated market
 
 ### Mock data to create
@@ -128,7 +129,7 @@ Starting XI = 11 stocks. Bench = 4 (ordered, auto-sub only if a stock is halted)
 
 ## 8. Phase 2: MagicBlock integration map
 
-Every piece must be load-bearing. Built so far: the price book on the Ephemeral Rollup (checkpoint 1).
+Every piece must be load-bearing. Built so far: price book on the Private ER (checkpoint 1); sealed squads with members-only permissions, onchain scoring, settlement committed to Solana, public profiles (checkpoint 2). Everything runs on the devnet TEE so one transaction can read squads and prices.
 
 | UX moment | MagicBlock tech |
 |---|---|

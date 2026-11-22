@@ -197,18 +197,25 @@ export async function getManagerRecord(addr: string): Promise<ManagerRecord | nu
   };
 }
 
-/** Settled gameweeks committed to Solana for a manager, newest first. */
+/**
+ * Settled gameweeks for a manager, newest first. Settled entries are committed
+ * to Solana; the rollup keeps the live copy, so it is read there (one call, no
+ * public RPC rate limits), plus any entries already handed back to Solana.
+ */
 export async function getManagerResults(addr: string): Promise<OnchainResult[]> {
   const b58 = getBase58Decoder();
-  const res = await createSolanaRpc(config.solanaRpc)
-    .getProgramAccounts(BULLXI_PROGRAM_ADDRESS, {
-      encoding: "base64",
-      filters: [
-        { memcmp: { offset: BigInt(0), bytes: b58.decode(ENTRY_DISCRIMINATOR) as never, encoding: "base58" } },
-        { memcmp: { offset: BigInt(12), bytes: addr as never, encoding: "base58" } },
-      ],
-    })
-    .send();
+  const rpc = createSolanaRpc(config.solanaRpc);
+  const filters = [
+    { memcmp: { offset: BigInt(0), bytes: b58.decode(ENTRY_DISCRIMINATOR) as never, encoding: "base58" as const } },
+    { memcmp: { offset: BigInt(12), bytes: addr as never, encoding: "base58" as const } },
+  ];
+  const tee = createSolanaRpc(config.teeRpc);
+  const lists = await Promise.all([
+    tee.getProgramAccounts(BULLXI_PROGRAM_ADDRESS, { encoding: "base64", filters }).send(),
+    rpc.getProgramAccounts(BULLXI_PROGRAM_ADDRESS, { encoding: "base64", filters }).send().catch(() => []),
+  ]);
+  const seen = new Set<string>();
+  const res = lists.flat().filter((a) => !seen.has(a.pubkey) && !!seen.add(a.pubkey));
   const dec = getEntryDecoder();
   return res
     .map((a) => ({ account: a.pubkey as string, e: dec.decode(Uint8Array.from(atob(a.account.data[0]), (c) => c.charCodeAt(0))) }))

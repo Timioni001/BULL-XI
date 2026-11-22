@@ -60,7 +60,9 @@ export const config = CONFIGS[NETWORK];
  * a secret. Set NEXT_PUBLIC_PRIVY_APP_ID at build time or paste it here.
  * Empty = sign-in hidden, play as guest.
  */
-export const PRIVY_APP_ID: string = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cmwrt3lfl02rq0ijqz5htjny5";
+const privyEnv = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+/** Set NEXT_PUBLIC_PRIVY_APP_ID=off to build without sign-in (e.g. local tests on a domain Privy doesn't allow). */
+export const PRIVY_APP_ID: string = privyEnv === "off" ? "" : privyEnv || "cmwrt3lfl02rq0ijqz5htjny5";
 
 /**
  * The game Worker (Cloudflare): fee relay for players, crank and price pusher.
