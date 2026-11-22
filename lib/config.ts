@@ -60,7 +60,7 @@ export const config = CONFIGS[NETWORK];
  * a secret. Set NEXT_PUBLIC_PRIVY_APP_ID at build time or paste it here.
  * Empty = sign-in hidden, play as guest.
  */
-export const PRIVY_APP_ID: string = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
+export const PRIVY_APP_ID: string = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cmwrt3lfl02rq0ijqz5htjny5";
 
 /** Free mainnet price source (real xStock prices). Read-only, no key. */
 export const PRICE_SOURCE = {
