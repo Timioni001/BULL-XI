@@ -91,6 +91,26 @@ Keys live outside the repo in `~/.config/solana/bullxi/` (`deployer.json`, `push
 
 The price book holds the latest price of all 41 stocks (micro-USD) plus a running price x time sum per stock, so any gameweek TWAP is `(cum_end - cum_start) / (t_end - t_start)`. Pushes on the rollup are free. It is committed to Solana once a day: with a plain payer the ER allows 10 commits per delegation.
 
+## Sign-in (optional, free)
+
+Playing never needs an account. Signing in (Google or email, via Privy's free tier) saves your team to an account and creates a Solana account for you automatically. Crypto users can sign in with Phantom, Solflare or Backpack on Go Pro.
+
+1. Create a free app at dashboard.privy.io and enable Google, Email and Wallets (Solana).
+2. Add your site under Allowed origins (e.g. `https://bullxi.<you>.workers.dev` and `http://localhost:3000`).
+3. Put the App ID (public, not a secret) in `PRIVY_APP_ID` in `lib/config.ts`, or set `NEXT_PUBLIC_PRIVY_APP_ID` in the Cloudflare build settings.
+
+Without an App ID the sign-in UI is hidden. If Privy fails to load, the app falls back to guest play.
+
+## Live on devnet
+
+| What | Address |
+|---|---|
+| `bullxi` program | [`EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN`](https://explorer.solana.com/address/EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN?cluster=devnet) |
+| Price book (delegated to the MagicBlock devnet ER) | [`3QmqpfrpbsTU6J4t8vjhFHr8BZo5yczp6C8zZFnRE7pK`](https://explorer.solana.com/address/3QmqpfrpbsTU6J4t8vjhFHr8BZo5yczp6C8zZFnRE7pK?cluster=devnet) |
+| ER validator | `MAS1Dt9qreoRMQ14YQuhg8UTZMMzDdKhmkZMECCzk57` (devnet-as.magicblock.app) |
+
+`npm run onchain:read` prints the live rollup copy and the last copy saved to Solana.
+
 ## MagicBlock map
 
 | UX moment | MagicBlock tech |

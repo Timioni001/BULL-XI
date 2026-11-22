@@ -2,10 +2,10 @@
 
 import { motion } from "motion/react";
 import { Crown, ShieldCheck, Wallet } from "lucide-react";
-import { toast } from "sonner";
 import { getProLeagues, PRO_PLATFORM_CUT } from "@/lib/data";
 import { copy } from "@/lib/copy";
 import { routes } from "@/lib/routes";
+import { useAuth } from "@/lib/auth/context";
 import { useAsync } from "@/lib/hooks/use-async";
 import { cn } from "@/lib/utils";
 import { dur, ease } from "@/lib/motion";
@@ -20,10 +20,15 @@ const usdc = (n: number) => `${n.toLocaleString("en-US", { minimumFractionDigits
 /** Go Pro: UI only. Wallet words are allowed here, and only here. */
 export function GoPro() {
   const leagues = useAsync(getProLeagues);
-  const connect = () => toast(t.connect, { description: t.connectSoon });
+  const auth = useAuth();
+  const wallet = auth.account?.method === "wallet" ? auth.account.address : null;
 
-  const cta = (
-    <Button size="cta" className="w-full" onClick={connect}>
+  const cta = wallet ? (
+    <p className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-surface-2 text-sm font-semibold ring-1 ring-inset ring-hairline">
+      <Wallet className="size-4" /> {t.connected} {wallet.slice(0, 4)}…{wallet.slice(-4)}
+    </p>
+  ) : (
+    <Button size="cta" className="w-full" onClick={auth.connectWallet} disabled={auth.status === "unavailable" || auth.status === "loading"}>
       <Wallet /> {t.connect}
     </Button>
   );

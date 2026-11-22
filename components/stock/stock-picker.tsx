@@ -124,7 +124,7 @@ function PickerBody({ position, squad, replacing, creditsLeft, onPick }: StockPi
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[max(env(safe-area-inset-bottom),20px)]" data-vaul-no-drag>
         <div className="px-5">
-          <label className="flex h-12 items-center gap-2.5 rounded-2xl bg-surface-1 px-4 ring-1 ring-inset ring-hairline focus-within:ring-2 focus-within:ring-brand">
+          <label className="flex h-12 items-center gap-2.5 rounded-2xl bg-surface-1 px-4 ring-1 ring-inset ring-hairline">
             <Search className="size-[18px] text-muted-foreground" />
             <input
               value={query}

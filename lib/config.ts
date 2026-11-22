@@ -55,6 +55,13 @@ const CONFIGS: Record<Network, NetworkConfig> = {
 
 export const config = CONFIGS[NETWORK];
 
+/**
+ * Privy App ID for sign-in (Google, email, Solana wallets). It is public, not
+ * a secret. Set NEXT_PUBLIC_PRIVY_APP_ID at build time or paste it here.
+ * Empty = sign-in hidden, play as guest.
+ */
+export const PRIVY_APP_ID: string = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
+
 /** Free mainnet price source (real xStock prices). Read-only, no key. */
 export const PRICE_SOURCE = {
   name: "Jupiter Price API",

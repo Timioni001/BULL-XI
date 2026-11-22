@@ -56,7 +56,7 @@
   --color-destructive: var(--bear);
   --color-border: var(--hairline);
   --color-input: var(--hairline-strong);
-  --color-ring: var(--brand);
+  --color-ring: transparent;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -229,10 +229,11 @@
     cursor: pointer;
     touch-action: manipulation;
   }
-  :focus-visible {
-    outline: 2px solid var(--brand);
-    outline-offset: 2px;
-    border-radius: 8px;
+  /* No focus rings anywhere (product decision). Tap highlight is off too. */
+  *,
+  *:focus,
+  *:focus-visible {
+    outline: none !important;
   }
   @media (prefers-reduced-motion: reduce) {
     *,

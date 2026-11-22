@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { useGame } from "@/lib/store/game";
 import { copy } from "@/lib/copy";
 import { routes } from "@/lib/routes";
+import { useAuth } from "@/lib/auth/context";
 import { haptic } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { dur, ease, spring } from "@/lib/motion";
@@ -23,6 +24,7 @@ const CARDS = copy.onboarding.cards.map((c, i) => ({ ...c, art: ART[i] }));
 
 export function Onboarding() {
   const router = useRouter();
+  const auth = useAuth();
   const hydrated = useGame((s) => s.hydrated);
   const onboarded = useGame((s) => s.onboarded);
   const locked = useGame((s) => s.locked);
@@ -136,7 +138,18 @@ export function Onboarding() {
         >
           {last ? copy.onboarding.start : copy.onboarding.next} <ArrowRight />
         </Button>
-        <p className="mt-3 text-center text-xs text-muted-foreground">{copy.onboarding.free}</p>
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          {copy.onboarding.free}
+          {auth.status === "guest" && (
+            <>
+              {" "}
+              {copy.account.haveAccount}{" "}
+              <button className="font-semibold text-foreground underline underline-offset-2" onClick={auth.signIn}>
+                {copy.account.signIn}
+              </button>
+            </>
+          )}
+        </p>
       </footer>
     </div>
   );

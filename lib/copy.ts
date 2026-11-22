@@ -385,6 +385,19 @@ export const copy = {
     flash: "Flash",
   },
 
+  account: {
+    signIn: "Sign in",
+    signOut: "Sign out",
+    haveAccount: "Have an account?",
+    guestTitle: "Save your team",
+    guestBody: "Sign in with Google or email to keep your squad and leagues on any device.",
+    signedInWith: { google: "Signed in with Google", email: "Signed in with email", wallet: "Signed in with a wallet" },
+    playerId: "Player ID",
+    copied: "Player ID copied",
+    signedOut: "Signed out. You can keep playing as a guest.",
+    welcome: (name: string) => `Welcome, ${name}`,
+  },
+
   profile: {
     eyebrow: "Manager",
     title: "Profile",
@@ -429,7 +442,7 @@ export const copy = {
     spots: (n: number, of: number) => `${n}/${of} spots`,
     platformCut: (pct: number) => `Prize pool is entry fees minus a ${pct}% platform fee.`,
     connect: "Connect wallet",
-    connectSoon: "Wallet connection arrives with Pro launch.",
+    connected: "Wallet connected",
     risk: "Stock prices go up and down. You can lose money on the stocks you buy.",
   },
 

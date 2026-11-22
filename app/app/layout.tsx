@@ -2,9 +2,13 @@ import { Suspense } from "react";
 import { SideNav } from "@/components/layout/side-nav";
 import { StockSheetsProvider } from "@/components/stock/stock-sheets";
 import { MotionProvider } from "@/components/providers/motion-provider";
+import { AuthProvider } from "@/components/providers/auth-provider";
+import { AuthSync } from "@/components/providers/auth-sync";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
+    <AuthProvider>
+    <AuthSync />
     <MotionProvider>
     <StockSheetsProvider>
       <div className="min-h-dvh lg:flex">
@@ -15,5 +19,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
     </StockSheetsProvider>
     </MotionProvider>
+    </AuthProvider>
   );
 }

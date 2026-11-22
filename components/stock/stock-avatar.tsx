@@ -1,15 +1,13 @@
 import type { Sector } from "@/lib/data/types";
 import { logoFor } from "@/lib/data/media";
-import { sectorColor } from "@/lib/sectors";
 import { cn } from "@/lib/utils";
 
 /**
- * Stock tile: the company logo on a clean tile with a thin sector ring and
- * a small triangle notch from the BULL-XI mark. Falls back to ticker letters.
+ * Stock tile: the company logo on a clean tile with a neutral hairline edge.
+ * No coloured rings: colour is reserved for price moves. Falls back to ticker letters.
  */
 export function StockAvatar({
   ticker,
-  sector,
   size = 40,
   inverted,
   className,
@@ -24,11 +22,9 @@ export function StockAvatar({
   const logo = logoFor(ticker);
   const letters = ticker.replace(/x$/, "").slice(0, 4);
   const fs = letters.length >= 4 ? size * 0.26 : letters.length === 3 ? size * 0.3 : size * 0.36;
-  const ring = sector ? sectorColor(sector) : "transparent";
   const radius = size * 0.28;
-  const notch = Math.max(5, size * 0.16);
   const dark = logo ? logo.tone === "dark" : !inverted;
-  const ringW = size >= 36 ? 2 : 1.5;
+  const edge = dark ? "rgb(255 255 255 / 0.1)" : "rgb(0 0 0 / 0.08)";
   return (
     <span
       aria-hidden
@@ -38,7 +34,7 @@ export function StockAvatar({
         height: size,
         borderRadius: radius,
         fontSize: fs,
-        boxShadow: `inset 0 0 0 ${ringW}px ${sector ? ring : "rgb(0 0 0 / 0.08)"}, 0 8px 16px -8px rgb(0 0 0 / 0.6)`,
+        boxShadow: `0 8px 16px -8px rgb(0 0 0 / 0.35)`,
       }}
     >
       {logo ? (
@@ -57,13 +53,7 @@ export function StockAvatar({
       ) : (
         <span className="relative z-10">{letters}</span>
       )}
-      {sector && (
-        <span
-          className="absolute bottom-0 right-0 z-10"
-          style={{ width: 0, height: 0, borderStyle: "solid", borderWidth: `0 0 ${notch}px ${notch}px`, borderColor: `transparent transparent ${ring} transparent` }}
-        />
-      )}
-      {sector && <span aria-hidden className="pointer-events-none absolute inset-0 z-10" style={{ borderRadius: radius, boxShadow: `inset 0 0 0 ${ringW}px ${ring}` }} />}
+      <span aria-hidden className="pointer-events-none absolute inset-0 z-10" style={{ borderRadius: radius, boxShadow: `inset 0 0 0 1px ${edge}` }} />
     </span>
   );
 }

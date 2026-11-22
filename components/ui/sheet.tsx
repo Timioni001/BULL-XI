@@ -47,4 +47,4 @@ export function Field({ label, error, children }: { label: string; error?: strin
 }
 
 export const inputClass =
-  "h-12 w-full rounded-2xl bg-surface-2 px-4 text-[16px] outline-none ring-1 ring-inset ring-hairline placeholder:text-muted-foreground focus:ring-2 focus:ring-brand";
+  "h-12 w-full rounded-2xl bg-surface-2 px-4 text-[16px] outline-none ring-1 ring-inset ring-hairline placeholder:text-muted-foreground";

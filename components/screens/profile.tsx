@@ -23,6 +23,7 @@ import { PageHeader, SectionTitle } from "@/components/layout/top-bar";
 import { TabBar } from "@/components/layout/tab-bar";
 import { HowItWorksSheet } from "@/components/game/how-it-works-sheet";
 import { Shimmer } from "@/components/states/states";
+import { AccountCard } from "@/components/game/account-card";
 
 const t = copy.profile;
 const BADGE_ICON: Record<BadgeId, LucideIcon> = { lockedIn: Shield, captainsCall: Star, podium: Medal, ironXI: Flame, centurion: Award, champion: Crown };
@@ -77,6 +78,8 @@ export function Profile() {
               <Stat label={t.leagues} value={leagues.data ? String(leagues.data.length) : "–"} />
             </div>
           </section>
+
+          <AccountCard />
 
           <section>
             <SectionTitle title={t.badges} />
