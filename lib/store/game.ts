@@ -5,8 +5,17 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import type { ChipId, GameweekKind, GameweekResult, Lineup, LockReceipt, Position, SquadSlots } from "@/lib/data/types";
 import { emptySquad, nextFreeTransfers, squadAfterGameweek } from "@/lib/game/rules";
 
+/** The squad sealed onchain in the Private ER (signed-in players). */
+export interface OnchainSeal {
+  gameweek: number;
+  signature: string;
+  sealedAt: number;
+  address: string;
+}
+
 export interface LockedEntry {
   receipt: LockReceipt;
+  onchain?: OnchainSeal | null;
   kind: GameweekKind;
   gameweekNumber: number;
   start: string;
@@ -61,6 +70,7 @@ interface GameState {
   lock: (entry: Omit<LockedEntry, "kickoffAt" | "chip" | "hedgeId" | "transferHit">) => void;
   kickoff: (at: number) => void;
   unlock: () => void;
+  setOnchainSeal: (seal: OnchainSeal | null) => void;
   setChip: (chip: ChipId | null, hedgeId?: string | null) => void;
   applyTransfers: (args: { slots: SquadSlots; transfers: TransferRecord[]; hit: number }) => void;
   finishGameweek: (result: GameweekResult) => void;
@@ -122,6 +132,7 @@ export const useGame = create<GameState>()(
         })),
       kickoff: (at) => set((s) => (s.locked ? { locked: { ...s.locked, kickoffAt: at }, seasonStarted: true } : {})),
       unlock: () => set({ locked: null }),
+      setOnchainSeal: (seal) => set((s) => (s.locked ? { locked: { ...s.locked, onchain: seal } } : {})),
       setChip: (chip, hedgeId = null) =>
         set((s) => {
           const backup = chip === "freeHit" ? (s.freeHitBackup ?? s.slots) : null;

@@ -1,6 +1,8 @@
 "use client";
 
-import { Check, Copy, LogOut, UserRound } from "lucide-react";
+import Link from "next/link";
+import { Check, ChevronRight, Copy, Globe, LogOut, UserRound } from "lucide-react";
+import { routes } from "@/lib/routes";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/context";
@@ -66,10 +68,17 @@ export function AccountCard() {
           {copied ? <Check className="size-4 text-bull" /> : <Copy className="size-4 text-muted-foreground" />}
         </button>
       )}
+      {id && (
+        <Link href={routes.manager(id)} className="mt-2 flex min-h-12 items-center gap-3 rounded-2xl px-1 text-sm font-semibold">
+          <Globe className="size-4 text-muted-foreground" />
+          <span className="flex-1">{copy.manager.view}</span>
+          <ChevronRight className="size-4 text-muted-foreground" />
+        </Link>
+      )}
       <Button
         variant="secondary"
         size="cta"
-        className="mt-3 w-full"
+        className="mt-2 w-full"
         onClick={async () => {
           await signOut();
           toast(t.signedOut);

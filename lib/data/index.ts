@@ -440,3 +440,16 @@ export function subscribeLiveGameweek(
     stop?.();
   };
 }
+
+/* ---------------- Onchain play (signed-in managers) ----------------
+ * Loaded on demand so guests never download the Solana libraries.
+ */
+export async function sealSquadOnchain(...args: Parameters<typeof import("./onchain").sealSquadOnchain>) {
+  return (await import("./onchain")).sealSquadOnchain(...args);
+}
+export async function getManagerRecord(addr: string) {
+  return (await import("./onchain")).getManagerRecord(addr);
+}
+export async function getManagerResults(addr: string) {
+  return (await import("./onchain")).getManagerResults(addr);
+}

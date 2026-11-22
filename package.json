@@ -16,10 +16,11 @@
     "onchain:build": "cd onchain && cargo build-sbf --arch v0",
     "onchain:test": "cd onchain && cargo test",
     "onchain:setup": "tsx scripts/onchain/setup-price-book.ts",
-    "onchain:push": "tsx scripts/onchain/push-prices.ts",
     "onchain:read": "tsx scripts/onchain/read-price-book.ts",
     "onchain:gen": "tsx scripts/onchain/gen-universe.ts",
-    "onchain:client": "tsx scripts/onchain/gen-client.mts"
+    "onchain:client": "tsx scripts/onchain/gen-client.mts",
+    "onchain:crank": "tsx scripts/onchain/crank.ts",
+    "onchain:schedule": "tsx scripts/onchain/schedule.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

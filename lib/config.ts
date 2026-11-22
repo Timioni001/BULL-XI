@@ -62,6 +62,12 @@ export const config = CONFIGS[NETWORK];
  */
 export const PRIVY_APP_ID: string = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cmwrt3lfl02rq0ijqz5htjny5";
 
+/**
+ * The game Worker (Cloudflare): fee relay for players, crank and price pusher.
+ * Override with NEXT_PUBLIC_GAME_API if the Worker lives elsewhere.
+ */
+export const GAME_API: string = process.env.NEXT_PUBLIC_GAME_API || "https://bullxi-game.timioni1490.workers.dev";
+
 /** Free mainnet price source (real xStock prices). Read-only, no key. */
 export const PRICE_SOURCE = {
   name: "Jupiter Price API",
@@ -77,8 +83,9 @@ export const PRICE_SOURCE = {
 } as const;
 
 /** Explorer link for an address or transaction on the configured network. */
-export function explorer(kind: "address" | "tx", id: string, opts?: { er?: boolean }): string {
+export function explorer(kind: "address" | "tx", id: string, opts?: { er?: boolean; tee?: boolean }): string {
   const base = `https://explorer.solana.com/${kind}/${id}`;
+  if (opts?.tee) return `${base}?cluster=custom&customUrl=${encodeURIComponent(config.teeRpc)}`;
   if (opts?.er) return `${base}?cluster=custom&customUrl=${encodeURIComponent(config.erRpc)}`;
   return `${base}${config.explorerCluster}`;
 }

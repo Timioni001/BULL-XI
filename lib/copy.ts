@@ -223,6 +223,17 @@ export const copy = {
     nothingTitle: "Nothing to lock yet",
     nothingBody: "Build your squad and pick your XI, then lock it before the deadline.",
     seal: "Seal",
+    onchain: {
+      sealing: "Sealing your squad privately",
+      sealed: "Sealed on Solana. Only you can see it until kickoff.",
+      proof: "View proof",
+      failed: "We couldn't seal it online. Your squad is still locked here.",
+      retry: "Try again",
+      guest: "Sign in to seal your squad on Solana and keep your results.",
+      signIn: "Sign in",
+      flash: "Flash gameweeks are kept in the app for now.",
+      notOpen: "This gameweek opens online soon. Your squad is locked here.",
+    },
   },
 
   live: {
@@ -396,6 +407,28 @@ export const copy = {
     copied: "Player ID copied",
     signedOut: "Signed out. You can keep playing as a guest.",
     welcome: (name: string) => `Welcome, ${name}`,
+  },
+
+  manager: {
+    eyebrow: "Manager",
+    title: "Public profile",
+    gameweeks: "Gameweeks",
+    points: "Season points",
+    best: "Best gameweek",
+    results: "Results",
+    resultsNote: "Every result here is saved on Solana after full time.",
+    captain: (t: string) => `Captain ${t}`,
+    pts: (n: number) => `${n} pts`,
+    proof: "Proof",
+    empty: "No results yet",
+    emptyBody: "Results appear here after full time.",
+    notFoundTitle: "Manager not found",
+    notFoundBody: "Check the link and try again.",
+    errorTitle: "We couldn't load this profile",
+    share: "Share profile",
+    copied: "Profile link copied",
+    since: (d: string) => `Playing since ${d}`,
+    view: "Public profile",
   },
 
   profile: {

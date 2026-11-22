@@ -84,7 +84,7 @@ npm run onchain:test               # Rust unit tests for the price book math
 npm run onchain:build              # cargo build-sbf --arch v0 -> onchain/target/deploy/bullxi.so
 solana program deploy onchain/target/deploy/bullxi.so --program-id <program keypair> -u devnet
 npm run onchain:setup              # create the price book and delegate it to the devnet ER
-npm run onchain:push               # local fallback pusher (add -- --loop to run every minute)
+npm run onchain:crank              # local fallback for the Worker cron (add -- --loop)
 ```
 
 Keys live outside the repo in `~/.config/solana/bullxi/` (`deployer.json`, `pusher.json`, `program.json`). Program ID: `EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN`.

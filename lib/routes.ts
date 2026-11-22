@@ -16,6 +16,7 @@ export const routes = {
   history: "/app/history",
   profile: "/app/profile",
   pro: "/app/pro",
+  manager: (address: string) => `/app/manager?id=${encodeURIComponent(address)}`,
 } as const;
 
 export const external = {

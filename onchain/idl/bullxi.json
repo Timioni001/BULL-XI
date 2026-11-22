@@ -188,7 +188,7 @@
     {
       "name": "create_gameweek",
       "docs": [
-        "Admin creates a gameweek on Solana. kind 0 = daily (24h), 1 = flash (1h)."
+        "Admin or crank creates a gameweek on Solana. kind 0 = daily (24h), 1 = flash (1h)."
       ],
       "discriminator": [
         117,
@@ -246,11 +246,11 @@
         },
         {
           "name": "admin",
+          "docs": [
+            "Admin or crank"
+          ],
           "writable": true,
-          "signer": true,
-          "relations": [
-            "config"
-          ]
+          "signer": true
         },
         {
           "name": "system_program",

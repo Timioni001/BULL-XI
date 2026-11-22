@@ -1,7 +1,7 @@
 {
-  // BULL-XI price pusher. Deploy: npm run deploy:worker
+  // BULL-XI game Worker: price pusher, crank and fee relay. Deploy: npm run deploy:worker
   "$schema": "../node_modules/wrangler/config-schema.json",
-  "name": "bullxi-pusher",
+  "name": "bullxi-game",
   "main": "src/index.ts",
   "compatibility_date": "2026-11-01",
   "workers_dev": true,
@@ -10,6 +10,7 @@
   "vars": {
     "NETWORK": "devnet",
     "ER_RPC": "https://devnet-tee.magicblock.app",
+    "SOLANA_RPC": "https://api.devnet.solana.com",
     "PRICE_URL": "https://lite-api.jup.ag/price/v3"
   }
   // Secret (not in this file): wrangler secret put PUSHER_KEY --config worker/wrangler.jsonc

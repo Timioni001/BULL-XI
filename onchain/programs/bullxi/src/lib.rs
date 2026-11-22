@@ -175,8 +175,11 @@ pub mod bullxi {
 
     /* ------------------------------- Gameweeks ------------------------------ */
 
-    /// Admin creates a gameweek on Solana. kind 0 = daily (24h), 1 = flash (1h).
+    /// Admin or crank creates a gameweek on Solana. kind 0 = daily (24h), 1 = flash (1h).
     pub fn create_gameweek(ctx: Context<CreateGameweek>, id: u32, kind: u8, deadline_ts: i64, end_ts: i64) -> Result<()> {
+        let c = &ctx.accounts.config;
+        let who = ctx.accounts.admin.key();
+        require!(who == c.admin || who == c.crank, BullError::NotAdmin);
         require!(end_ts > deadline_ts && kind <= 1, BullError::BadSchedule);
         let g = &mut ctx.accounts.gameweek;
         g.id = id;
@@ -192,7 +195,8 @@ pub mod bullxi {
 
     pub fn delegate_gameweek(ctx: Context<DelegateGameweek>, id: u32) -> Result<()> {
         require_tee(ctx.remaining_accounts)?;
-        require_keys_eq!(ctx.accounts.payer.key(), ctx.accounts.config.admin, BullError::NotAdmin);
+        let (c, who) = (&ctx.accounts.config, ctx.accounts.payer.key());
+        require!(who == c.admin || who == c.crank, BullError::NotAdmin);
         ctx.accounts.delegate_pda(
             &ctx.accounts.payer,
             &[GAMEWEEK_SEED, &id.to_le_bytes()],
@@ -212,24 +216,28 @@ pub mod bullxi {
         match g.status {
             status::OPEN => {
                 require!(now >= g.deadline_ts, BullError::TooEarly);
-                g.tmp_cum = book.cum;
+                g.tmp_cum.copy_from_slice(&book.cum);
                 g.tmp_ts = book.last_ts;
                 g.status = status::KICKED_OFF;
             }
             status::KICKED_OFF => {
                 require!(now >= g.deadline_ts + g.window && book.last_ts > g.tmp_ts, BullError::TooEarly);
-                g.open_twap = twap_between(&g.tmp_cum, g.tmp_ts, &book.cum, book.last_ts, n);
+                let (tmp_ts, last_ts) = (g.tmp_ts, book.last_ts);
+                let Gameweek { tmp_cum, open_twap, .. } = &mut ***g;
+                twap_into(open_twap, tmp_cum, tmp_ts, &book.cum, last_ts, n);
                 g.status = status::LIVE;
             }
             status::LIVE => {
                 require!(now >= g.end_ts - g.window, BullError::TooEarly);
-                g.tmp_cum = book.cum;
+                g.tmp_cum.copy_from_slice(&book.cum);
                 g.tmp_ts = book.last_ts;
                 g.status = status::CLOSING;
             }
             status::CLOSING => {
                 require!(now >= g.end_ts && book.last_ts > g.tmp_ts, BullError::TooEarly);
-                g.close_twap = twap_between(&g.tmp_cum, g.tmp_ts, &book.cum, book.last_ts, n);
+                let (tmp_ts, last_ts) = (g.tmp_ts, book.last_ts);
+                let Gameweek { tmp_cum, close_twap, .. } = &mut ***g;
+                twap_into(close_twap, tmp_cum, tmp_ts, &book.cum, last_ts, n);
                 g.status = status::FINAL;
             }
             _ => return err!(BullError::AlreadyFinal),
@@ -439,17 +447,16 @@ fn require_tee(rem: &[AccountInfo]) -> Result<()> {
     Ok(())
 }
 
-/// Average price (micro-USD) per stock between two price book states.
-pub fn twap_between(cum_a: &[u128; MAX_STOCKS], ts_a: i64, cum_b: &[u128; MAX_STOCKS], ts_b: i64, n: usize) -> [u64; MAX_STOCKS] {
-    let mut out = [0u64; MAX_STOCKS];
+/// Average price (micro-USD) per stock between two price book states, written in place.
+pub fn twap_into(out: &mut [u64; MAX_STOCKS], cum_a: &[u128; MAX_STOCKS], ts_a: i64, cum_b: &[u128; MAX_STOCKS], ts_b: i64, n: usize) {
+    out.fill(0);
     let dt = (ts_b - ts_a) as u128;
     if dt == 0 {
-        return out;
+        return;
     }
     for i in 0..n.min(MAX_STOCKS) {
         out[i] = (cum_b[i].saturating_sub(cum_a[i]) / dt) as u64;
     }
-    out
 }
 
 /// Pure update so it can be unit tested without a validator.
@@ -568,7 +575,7 @@ pub struct Entry {
 #[derive(Accounts)]
 pub struct InitPriceBook<'info> {
     #[account(init, payer = admin, space = 8 + PriceBook::INIT_SPACE, seeds = [PRICE_BOOK_SEED], bump)]
-    pub price_book: Account<'info, PriceBook>,
+    pub price_book: Box<Account<'info, PriceBook>>,
     #[account(mut)]
     pub admin: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -577,14 +584,14 @@ pub struct InitPriceBook<'info> {
 #[derive(Accounts)]
 pub struct Configure<'info> {
     #[account(mut, seeds = [PRICE_BOOK_SEED], bump = price_book.bump, has_one = admin @ BullError::NotAdmin)]
-    pub price_book: Account<'info, PriceBook>,
+    pub price_book: Box<Account<'info, PriceBook>>,
     pub admin: Signer<'info>,
 }
 
 #[derive(Accounts)]
 pub struct PushPrices<'info> {
     #[account(mut, seeds = [PRICE_BOOK_SEED], bump = price_book.bump, has_one = pusher @ BullError::NotPusher)]
-    pub price_book: Account<'info, PriceBook>,
+    pub price_book: Box<Account<'info, PriceBook>>,
     pub pusher: Signer<'info>,
 }
 
@@ -603,7 +610,7 @@ pub struct CommitPriceBook<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(mut, seeds = [PRICE_BOOK_SEED], bump = price_book.bump)]
-    pub price_book: Account<'info, PriceBook>,
+    pub price_book: Box<Account<'info, PriceBook>>,
 }
 
 #[derive(Accounts)]
@@ -647,9 +654,10 @@ pub struct SetProfile<'info> {
 #[instruction(id: u32)]
 pub struct CreateGameweek<'info> {
     #[account(init, payer = admin, space = 8 + Gameweek::INIT_SPACE, seeds = [GAMEWEEK_SEED, &id.to_le_bytes()], bump)]
-    pub gameweek: Account<'info, Gameweek>,
-    #[account(seeds = [CONFIG_SEED], bump = config.bump, has_one = admin @ BullError::NotAdmin)]
+    pub gameweek: Box<Account<'info, Gameweek>>,
+    #[account(seeds = [CONFIG_SEED], bump = config.bump)]
     pub config: Account<'info, Config>,
+    /// Admin or crank
     #[account(mut)]
     pub admin: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -671,9 +679,9 @@ pub struct DelegateGameweek<'info> {
 #[derive(Accounts)]
 pub struct SnapshotGameweek<'info> {
     #[account(mut, seeds = [GAMEWEEK_SEED, &gameweek.id.to_le_bytes()], bump = gameweek.bump)]
-    pub gameweek: Account<'info, Gameweek>,
+    pub gameweek: Box<Account<'info, Gameweek>>,
     #[account(seeds = [PRICE_BOOK_SEED], bump = price_book.bump)]
-    pub price_book: Account<'info, PriceBook>,
+    pub price_book: Box<Account<'info, PriceBook>>,
 }
 
 #[derive(Accounts)]
@@ -704,7 +712,7 @@ pub struct SealEntry<'info> {
     #[account(mut, seeds = [ENTRY_SEED, &entry.gameweek.to_le_bytes(), authority.key().as_ref()], bump = entry.bump, has_one = authority)]
     pub entry: Account<'info, Entry>,
     #[account(seeds = [GAMEWEEK_SEED, &entry.gameweek.to_le_bytes()], bump = gameweek.bump)]
-    pub gameweek: Account<'info, Gameweek>,
+    pub gameweek: Box<Account<'info, Gameweek>>,
     #[account(seeds = [CONFIG_SEED], bump = config.bump)]
     pub config: Account<'info, Config>,
     pub authority: Signer<'info>,
@@ -727,7 +735,7 @@ pub struct RevealEntry<'info> {
     #[account(mut, seeds = [ENTRY_SEED, &entry.gameweek.to_le_bytes(), entry.authority.as_ref()], bump = entry.bump)]
     pub entry: Account<'info, Entry>,
     #[account(seeds = [GAMEWEEK_SEED, &entry.gameweek.to_le_bytes()], bump = gameweek.bump)]
-    pub gameweek: Account<'info, Gameweek>,
+    pub gameweek: Box<Account<'info, Gameweek>>,
     #[account(seeds = [CONFIG_SEED], bump = config.bump)]
     pub config: Account<'info, Config>,
     /// CHECK: the entry's permission PDA
@@ -752,7 +760,7 @@ pub struct SettleEntry<'info> {
     #[account(mut, seeds = [ENTRY_SEED, &entry.gameweek.to_le_bytes(), entry.authority.as_ref()], bump = entry.bump)]
     pub entry: Account<'info, Entry>,
     #[account(seeds = [GAMEWEEK_SEED, &entry.gameweek.to_le_bytes()], bump = gameweek.bump)]
-    pub gameweek: Account<'info, Gameweek>,
+    pub gameweek: Box<Account<'info, Gameweek>>,
     #[account(mut, seeds = [MANAGER_SEED, entry.authority.as_ref()], bump = manager.bump)]
     pub manager: Account<'info, Manager>,
 }
@@ -844,7 +852,8 @@ mod tests {
         let (a_cum, a_ts) = (b.cum, b.last_ts);
         apply_prices(&mut b, &[130], 120).unwrap(); // 60s at 100
         apply_prices(&mut b, &[130], 180).unwrap(); // 60s at 130
-        let t = twap_between(&a_cum, a_ts, &b.cum, b.last_ts, 1);
+        let mut t = [0u64; MAX_STOCKS];
+        twap_into(&mut t, &a_cum, a_ts, &b.cum, b.last_ts, 1);
         assert_eq!(t[0], 115);
     }
 

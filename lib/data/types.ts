@@ -261,3 +261,44 @@ export interface FeaturedEntry {
   stocks: Record<string, Stock>;
   leagueId: string;
 }
+
+/* ---------------- Onchain (signed-in players) ---------------- */
+
+/** A manager's public record, read from the private rollup or Solana. */
+export interface ManagerRecord {
+  address: string;
+  name: string;
+  team: string;
+  joinedAt: number;
+  gameweeks: number;
+  totalPoints: number;
+  bestPoints: number;
+  bestGameweek: number;
+  lastGameweek: number;
+  lastPoints: number;
+}
+
+/** One settled gameweek, committed to Solana. */
+export interface OnchainResult {
+  gameweek: number;
+  /** ISO date of the gameweek deadline (daily gameweeks) */
+  date: string | null;
+  points: number;
+  captain: string;
+  settledAt: number;
+  account: string;
+}
+
+export interface SealResult {
+  gameweek: number;
+  signature: string;
+  address: string;
+  sealedAt: number;
+}
+
+/** What the data layer needs from a signed-in player. */
+export interface PlayerSigner {
+  address: string;
+  signTransaction: (tx: Uint8Array) => Promise<Uint8Array>;
+  signMessage: (message: Uint8Array) => Promise<Uint8Array>;
+}

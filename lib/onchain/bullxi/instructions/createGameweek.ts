@@ -145,6 +145,7 @@ export type CreateGameweekAsyncInput<
 > = {
   gameweek?: TAccountGameweek;
   config?: TAccountConfig;
+  /** Admin or crank */
   admin: TAccountAdmin;
   systemProgram?: TAccountSystemProgram;
   id: CreateGameweekInstructionDataArgs["id"];
@@ -279,6 +280,7 @@ export type CreateGameweekInput<
 > = {
   gameweek: TAccountGameweek;
   config: TAccountConfig;
+  /** Admin or crank */
   admin: TAccountAdmin;
   systemProgram?: TAccountSystemProgram;
   id: CreateGameweekInstructionDataArgs["id"];
@@ -401,6 +403,7 @@ export type ParsedCreateGameweekInstruction<
   accounts: {
     gameweek: TAccountMetas[0];
     config: TAccountMetas[1];
+    /** Admin or crank */
     admin: TAccountMetas[2];
     systemProgram: TAccountMetas[3];
   };

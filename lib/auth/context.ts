@@ -33,6 +33,10 @@ export interface Auth {
   /** Wallet sign-in, offered only on Go Pro */
   connectWallet: () => void;
   signOut: () => Promise<void>;
+  /** Signs a serialized transaction as the player (no pop-up for Google and email accounts). */
+  signTransaction?: (tx: Uint8Array) => Promise<Uint8Array>;
+  /** Signs raw bytes as the player (used to read the private squad back). */
+  signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }
 
 const noop = () => {};

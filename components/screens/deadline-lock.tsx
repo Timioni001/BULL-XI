@@ -26,6 +26,7 @@ import { TabBar } from "@/components/layout/tab-bar";
 import { Countdown } from "@/components/game/countdown";
 import { CaptainBadge } from "@/components/game/captain-badge";
 import { SealedCard } from "@/components/game/sealed-card";
+import { OnchainSeal } from "@/components/game/onchain-seal";
 import { EmptyState, ErrorState, Shimmer } from "@/components/states/states";
 
 const t = copy.lock;
@@ -141,6 +142,7 @@ export function DeadlineLock() {
                 <motion.div initial={justLocked ? { opacity: 0, y: 8 } : false} animate={{ opacity: 1, y: 0 }} transition={{ delay: justLocked ? 1.4 : 0, duration: dur.slow, ease }}>
                   <h2 className="mt-6 font-display text-[30px] font-bold uppercase tracking-tight">{t.lockedTitle}</h2>
                   <p className="mx-auto mt-1.5 max-w-[32ch] text-sm text-muted-foreground">{t.lockedBody}</p>
+                  <OnchainSeal locked={locked} deadline={locked.start} />
                   {locked.chip && (
                     <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-3 py-1 text-xs font-semibold">
                       <Sparkles className="size-3.5 text-brand" /> {t.chipOn(copy.chipName[locked.chip])}

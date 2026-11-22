@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { PrivyProvider, useLogin, useLogout, usePrivy, type User } from "@privy-io/react-auth";
-import { toSolanaWalletConnectors, useWallets } from "@privy-io/react-auth/solana";
+import { toSolanaWalletConnectors, useSignMessage, useSignTransaction, useWallets } from "@privy-io/react-auth/solana";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { config, PRIVY_APP_ID } from "@/lib/config";
 import { useTheme } from "@/lib/theme";
@@ -34,7 +34,10 @@ function Bridge({ children }: { children: React.ReactNode }) {
   const { wallets } = useWallets();
   const { login } = useLogin();
   const { logout } = useLogout();
-  const address = wallets[0]?.address ?? null;
+  const { signTransaction } = useSignTransaction();
+  const { signMessage } = useSignMessage();
+  const wallet = wallets[0];
+  const address = wallet?.address ?? null;
 
   const value = useMemo<Auth>(
     () => ({
@@ -43,8 +46,10 @@ function Bridge({ children }: { children: React.ReactNode }) {
       signIn: () => login({ loginMethods: ["google", "email"] }),
       connectWallet: () => login({ loginMethods: ["wallet"], walletChainType: "solana-only" }),
       signOut: logout,
+      signTransaction: wallet ? async (transaction) => (await signTransaction({ transaction, wallet, chain })).signedTransaction : undefined,
+      signMessage: wallet ? async (message) => (await signMessage({ message, wallet })).signature : undefined,
     }),
-    [ready, authenticated, user, address, login, logout],
+    [ready, authenticated, user, address, login, logout, wallet, signTransaction, signMessage],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -66,7 +71,8 @@ export default function PrivyAuth({ children }: { children: React.ReactNode }) {
           walletChainType: "solana-only",
           walletList: ["detected_solana_wallets", "phantom", "solflare", "backpack"],
         },
-        embeddedWallets: { solana: { createOnLogin: "users-without-wallets" }, ethereum: { createOnLogin: "off" } },
+        // No confirmation pop-ups for game actions on the automatic account.
+        embeddedWallets: { solana: { createOnLogin: "users-without-wallets" }, ethereum: { createOnLogin: "off" }, showWalletUIs: false },
         externalWallets: { solana: { connectors } },
         solana: { rpcs },
       }}
