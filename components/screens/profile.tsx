@@ -9,7 +9,8 @@ import { setTheme, useTheme, type Theme } from "@/lib/theme";
 import { Segmented } from "@/components/ui/segmented";
 import { toast } from "sonner";
 import type { BadgeId } from "@/lib/data/types";
-import { getBadges, getHistory, getLeagues, resetLocalData } from "@/lib/data";
+import { getBadges, getHistory, getLeagues, resetLocalData, updateProfileOnchain } from "@/lib/data";
+import { useAuth } from "@/lib/auth/context";
 import { copy } from "@/lib/copy";
 import { routes } from "@/lib/routes";
 import { ordinal } from "@/lib/format";
@@ -234,6 +235,7 @@ function EditProfile({ open, onOpenChange }: { open: boolean; onOpenChange: (o: 
   const managerName = useGame((s) => s.managerName);
   const teamName = useGame((s) => s.teamName);
   const setProfile = useGame((s) => s.setProfile);
+  const auth = useAuth();
   return (
     <Sheet open={open} onOpenChange={onOpenChange} title={copy.common.edit}>
       {open && (
@@ -242,9 +244,17 @@ function EditProfile({ open, onOpenChange }: { open: boolean; onOpenChange: (o: 
           onSubmit={(e) => {
             e.preventDefault();
             const f = new FormData(e.currentTarget);
-            setProfile({ managerName: String(f.get("manager") ?? ""), teamName: String(f.get("team") ?? "") });
+            const next = { managerName: String(f.get("manager") ?? ""), teamName: String(f.get("team") ?? "") };
+            setProfile(next);
             toast(t.saved);
             onOpenChange(false);
+            // Signed in: keep the public profile in step (only once it exists).
+            const addr = auth.account?.address;
+            if (auth.status === "signedIn" && addr && auth.signTransaction && auth.signMessage) {
+              void updateProfileOnchain({ address: addr, signTransaction: auth.signTransaction, signMessage: auth.signMessage }, next.managerName, next.teamName)
+                .then((done) => done && toast(copy.manager.renamed))
+                .catch(() => {});
+            }
           }}
         >
           <Field label={t.managerName}>

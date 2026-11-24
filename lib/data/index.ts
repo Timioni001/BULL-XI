@@ -341,27 +341,10 @@ export async function getProLeagues(): Promise<ProLeague[]> {
 
 export const PRO_PLATFORM_CUT = 10;
 
-export const ORACLE_PROGRAM_ID = "PriCems5tHihc6UDXDjzjeawomAwBduWMGAi8ZUjppd";
 
+/** Live numbers and addresses for /proof, read from devnet and the Private ER. */
 export async function getProofStats(): Promise<ProofStats> {
-  return {
-    preview: true,
-    counters: { settled: 12, locked: 962, sessions: 4310, vrf: 186 },
-    stack: [
-      { moment: "Squads sealed until kickoff", tech: "Private Ephemeral Rollup", status: "planned" },
-      { moment: "Live points every second", tech: "Ephemeral Rollup + Pyth Lazer oracle", status: "building" },
-      { moment: "Deadline lock and settlement", tech: "Cranks", status: "planned" },
-      { moment: "Final standings", tech: "Commit / Undelegate", status: "planned" },
-      { moment: "Prize payouts", tech: "Magic Actions", status: "planned" },
-      { moment: "Entry fees and prize pool", tech: "Ephemeral SPL Token", status: "planned" },
-      { moment: "No pop-ups for captain and transfers", tech: "Session Keys", status: "planned" },
-      { moment: "Head-to-head draws", tech: "VRF", status: "planned" },
-      { moment: "Season rank and badges", tech: "SOAR", status: "planned" },
-      { moment: "Transaction routing", tech: "Magic Router", status: "planned" },
-    ],
-    oracleProgram: ORACLE_PROGRAM_ID,
-    gameProgram: null,
-  };
+  return (await import("./onchain")).getProofStats();
 }
 
 /* ---------------- Demo controls ---------------- */
@@ -416,11 +399,15 @@ export interface LiveGameweekInput {
   kickoffAt: number;
   teamName?: string;
   transferHit?: number;
+  /** Set when the squad is sealed onchain: live table and prices come from devnet */
+  onchain?: { gameweek: number; address: string } | null;
 }
 
 /**
- * Live points, ranks and commentary, pushed every second.
- * Later: Ephemeral Rollup + price oracle stream.
+ * Live points, ranks and commentary. Squads sealed onchain (and real prices)
+ * use the onchain session: every revealed squad in the gameweek, opening TWAP
+ * from the Private ER, live prices, closing TWAP at full time. Otherwise the
+ * simulated session with a mock league.
  */
 export function subscribeLiveGameweek(
   input: LiveGameweekInput,
@@ -429,6 +416,18 @@ export function subscribeLiveGameweek(
 ): () => void {
   let stop: (() => void) | undefined;
   let cancelled = false;
+  if (input.onchain && marketSource() === "real") {
+    const onchain = input.onchain;
+    void import("./onchain-live")
+      .then((m) => {
+        if (!cancelled) stop = m.startOnchainLiveSession({ ...input, onchain }, subscribeLivePrices, listener, onError);
+      })
+      .catch((e: Error) => !cancelled && onError?.(e));
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
+  }
   latency(400)
     .then(() => {
       if (cancelled) return;
@@ -446,6 +445,9 @@ export function subscribeLiveGameweek(
  */
 export async function sealSquadOnchain(...args: Parameters<typeof import("./onchain").sealSquadOnchain>) {
   return (await import("./onchain")).sealSquadOnchain(...args);
+}
+export async function updateProfileOnchain(...args: Parameters<typeof import("./onchain").updateProfileOnchain>) {
+  return (await import("./onchain")).updateProfileOnchain(...args);
 }
 export async function getManagerRecord(addr: string) {
   return (await import("./onchain")).getManagerRecord(addr);

@@ -19,14 +19,18 @@ import {
   setTransactionMessageLifetimeUsingBlockhash,
   type Address,
   type Instruction,
+  type ReadonlyUint8Array,
   type SignatureDictionary,
   type TransactionPartialSigner,
 } from "@solana/kit";
-import { config, GAME_API } from "@/lib/config";
-import { BULLXI_PROGRAM_ADDRESS, ENTRY_DISCRIMINATOR, findEntryPda, findManagerPda, getEntryDecoder } from "@/lib/onchain/bullxi";
+import { config, explorer, GAME_API } from "@/lib/config";
+import { BULLXI_PROGRAM_ADDRESS, ENTRY_DISCRIMINATOR, MANAGER_DISCRIMINATOR, findConfigPda, findEntryPda, findManagerPda, getEntryDecoder, getEntrySize, getSetProfileInstructionAsync } from "@/lib/onchain/bullxi";
+import { DELEGATION_PROGRAM_ID, decodePriceBook, priceBookAddress } from "@/lib/onchain/price-book";
+import { PRICE_BOOK_STOCKS } from "@/lib/onchain/universe";
+import { dailyDeadline } from "@/lib/onchain/crank";
 import { ENTRY_STATUS, accountHome, decodeName, entryIxs, gameweekId, joinIxs, readEntry, readGameweek, readManager, sealIx, stockId, type SealInput } from "@/lib/onchain/game";
 import { teeLogin, teeRpcUrl } from "@/lib/onchain/tee-auth";
-import type { ManagerRecord, OnchainResult, PlayerSigner, SealResult } from "./types";
+import type { ManagerRecord, OnchainResult, PlayerSigner, ProofStats, SealResult } from "./types";
 
 export class OnchainError extends Error {
   constructor(
@@ -176,6 +180,15 @@ async function teeToken(p: PlayerSigner): Promise<string> {
   return t.token;
 }
 
+/** Renames the manager or team onchain. No-op until the manager has a profile. */
+export async function updateProfileOnchain(p: PlayerSigner, name: string, team: string): Promise<boolean> {
+  const authority = address(p.address);
+  if (!(await readManager(config.teeRpc, authority).catch(() => null))) return false;
+  const signer = playerSigner(p);
+  await relay("tee", async () => [await getSetProfileInstructionAsync({ authority: signer, name: name.slice(0, 24) || "Manager", team: team.slice(0, 24) || "My XI" })]);
+  return true;
+}
+
 /* --------------------------------- Reads --------------------------------- */
 
 /** A manager's public record: live copy from the rollup, else the last copy on Solana. */
@@ -229,4 +242,78 @@ export async function getManagerResults(addr: string): Promise<OnchainResult[]> 
       account,
     }))
     .sort((x, y) => y.settledAt - x.settledAt);
+}
+
+/* --------------------------------- Proof --------------------------------- */
+
+const GW_LABEL = ["Open for squads", "Kicked off", "Live", "Closing", "Full time"];
+
+/** Live numbers for /proof. Every value is read from devnet or the Private ER. */
+export async function getProofStats(): Promise<ProofStats> {
+  const b58 = getBase58Decoder();
+  const tee = createSolanaRpc(config.teeRpc);
+  const base = createSolanaRpc(config.solanaRpc);
+  const disc = (d: ReadonlyUint8Array) => [{ memcmp: { offset: BigInt(0), bytes: b58.decode(d) as never, encoding: "base58" as const } }];
+  const slice = { offset: 0, length: 0 };
+  const bookAddr = await priceBookAddress();
+  const [cfg] = await findConfigPda();
+  const deadline = dailyDeadline(Date.now()) - 86_400_000; // the gameweek that kicked off most recently
+  const liveId = gameweekId("daily", deadline);
+  const nextId = gameweekId("daily", dailyDeadline(Date.now()));
+
+  const [book, managers, squads, entries, live, next] = await Promise.all([
+    tee.getAccountInfo(bookAddr, { encoding: "base64" }).send(),
+    tee.getProgramAccounts(BULLXI_PROGRAM_ADDRESS, { encoding: "base64", dataSlice: slice, filters: disc(MANAGER_DISCRIMINATOR) }).send(),
+    // Every entry ever created, counted on Solana (squads inside stay private).
+    // Other Anchor programs can have an "Entry" account too: match our exact size as well.
+    base.getProgramAccounts(DELEGATION_PROGRAM_ID, { encoding: "base64", dataSlice: slice, filters: [...disc(ENTRY_DISCRIMINATOR), { dataSize: BigInt(getEntrySize()) }] }).send().catch(() => []),
+    tee.getProgramAccounts(BULLXI_PROGRAM_ADDRESS, { encoding: "base64", filters: disc(ENTRY_DISCRIMINATOR) }).send(),
+    readGameweek(config.teeRpc, liveId).catch(() => null),
+    readGameweek(config.teeRpc, nextId).catch(() => null),
+  ]);
+  const pb = book.value ? decodePriceBook(Uint8Array.from(atob(book.value.data[0]), (c) => c.charCodeAt(0))) : null;
+  const dec = getEntryDecoder();
+  const settled = entries.filter((a) => dec.decode(Uint8Array.from(atob(a.account.data[0]), (c) => c.charCodeAt(0))).status === ENTRY_STATUS.settled).length;
+  const g = live ?? next;
+  const gId = live ? liveId : nextId;
+  const bits = g ? g.picked.toString(2).split("").filter((b) => b === "1").length : 0;
+  const ex = (a: string) => explorer("address", a);
+
+  return {
+    network: config.label,
+    previewNotice: config.previewNotice,
+    counters: { pushes: pb?.updates ?? 0, managers: managers.length, squads: squads.length, settled },
+    priceBook: {
+      address: bookAddr,
+      lastPushAt: (pb?.lastTs ?? 0) * 1000,
+      prices: (pb?.prices ?? []).map((p, i) => ({ ticker: PRICE_BOOK_STOCKS[i]?.[0] ?? `#${i}`, price: p })),
+    },
+    gameweek: g
+      ? {
+          id: gId,
+          deadline: new Date(Number(g.deadlineTs) * 1000).toISOString(),
+          status: GW_LABEL[g.status] ?? "Unknown",
+          startedStocks: bits,
+          topGainer: g.topGainer < PRICE_BOOK_STOCKS.length ? PRICE_BOOK_STOCKS[g.topGainer][0] : null,
+        }
+      : null,
+    stack: [
+      { moment: "Squads sealed until kickoff", tech: "Private Ephemeral Rollup (TEE) + members-only permission", status: "live" },
+      { moment: "Live prices and TWAP for scoring", tech: "Price book on the Private ER, written every minute", status: "live" },
+      { moment: "Kickoff, reveal and settlement", tech: "Crank in the game Worker (every minute)", status: "live" },
+      { moment: "Final scores on Solana", tech: "Commit from the rollup to Solana", status: "live" },
+      { moment: "Squad rules and scoring", tech: "Enforced in the bullxi program", status: "live" },
+      { moment: "No gas, no pop-ups for players", tech: "Sponsored fees + Privy accounts", status: "live", note: "Session keys planned" },
+      { moment: "Prize payouts", tech: "Magic Actions", status: "planned" },
+      { moment: "Entry fees and prize pool", tech: "Ephemeral SPL Token", status: "planned" },
+      { moment: "Head-to-head draws", tech: "VRF", status: "planned" },
+      { moment: "Season badges", tech: "SOAR", status: "planned" },
+    ],
+    addresses: [
+      { label: "bullxi program", address: BULLXI_PROGRAM_ADDRESS, href: ex(BULLXI_PROGRAM_ADDRESS) },
+      { label: "Price book", address: bookAddr, href: ex(bookAddr) },
+      { label: "Game config", address: cfg, href: ex(cfg) },
+      { label: "Private ER validator (TEE)", address: config.teeValidator, href: ex(config.teeValidator) },
+    ],
+  };
 }

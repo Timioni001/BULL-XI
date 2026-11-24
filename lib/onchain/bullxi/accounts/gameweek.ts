@@ -73,6 +73,10 @@ export type Gameweek = {
   /** Opening and closing TWAP per stock, micro-USD */
   openTwap: Array<bigint>;
   closeTwap: Array<bigint>;
+  /** Bitmask of every stock started by a sealed squad this gameweek */
+  picked: bigint;
+  /** Biggest TWAP gainer among `picked`, set at full time (255 = none) */
+  topGainer: number;
 };
 
 export type GameweekArgs = {
@@ -90,6 +94,10 @@ export type GameweekArgs = {
   /** Opening and closing TWAP per stock, micro-USD */
   openTwap: Array<number | bigint>;
   closeTwap: Array<number | bigint>;
+  /** Bitmask of every stock started by a sealed squad this gameweek */
+  picked: number | bigint;
+  /** Biggest TWAP gainer among `picked`, set at full time (255 = none) */
+  topGainer: number;
 };
 
 /** Gets the encoder for {@link GameweekArgs} account data. */
@@ -108,6 +116,8 @@ export function getGameweekEncoder(): FixedSizeEncoder<GameweekArgs> {
       ["tmpCum", getArrayEncoder(getU128Encoder(), { size: 48 })],
       ["openTwap", getArrayEncoder(getU64Encoder(), { size: 48 })],
       ["closeTwap", getArrayEncoder(getU64Encoder(), { size: 48 })],
+      ["picked", getU64Encoder()],
+      ["topGainer", getU8Encoder()],
     ]),
     (value) => ({ ...value, discriminator: GAMEWEEK_DISCRIMINATOR }),
   );
@@ -128,6 +138,8 @@ export function getGameweekDecoder(): FixedSizeDecoder<Gameweek> {
     ["tmpCum", getArrayDecoder(getU128Decoder(), { size: 48 })],
     ["openTwap", getArrayDecoder(getU64Decoder(), { size: 48 })],
     ["closeTwap", getArrayDecoder(getU64Decoder(), { size: 48 })],
+    ["picked", getU64Decoder()],
+    ["topGainer", getU8Decoder()],
   ]);
 }
 
@@ -206,5 +218,5 @@ export async function fetchAllMaybeGameweek(
 }
 
 export function getGameweekSize(): number {
-  return 1583;
+  return 1592;
 }

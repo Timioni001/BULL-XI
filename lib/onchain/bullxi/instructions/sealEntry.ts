@@ -77,7 +77,7 @@ export type SealEntryInstruction<
         ? WritableAccount<TAccountEntry>
         : TAccountEntry,
       TAccountGameweek extends string
-        ? ReadonlyAccount<TAccountGameweek>
+        ? WritableAccount<TAccountGameweek>
         : TAccountGameweek,
       TAccountConfig extends string
         ? ReadonlyAccount<TAccountConfig>
@@ -274,7 +274,7 @@ export async function getSealEntryInstructionAsync<
     gameweek: {
       value: input.gameweek ?? null,
       isSigner: false,
-      isWritable: false,
+      isWritable: true,
     },
     config: { value: input.config ?? null, isSigner: false, isWritable: false },
     authority: {
@@ -505,7 +505,7 @@ export function getSealEntryInstruction<
     gameweek: {
       value: input.gameweek ?? null,
       isSigner: false,
-      isWritable: false,
+      isWritable: true,
     },
     config: { value: input.config ?? null, isSigner: false, isWritable: false },
     authority: {

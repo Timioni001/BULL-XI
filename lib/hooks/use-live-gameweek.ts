@@ -8,7 +8,7 @@ export function useLiveGameweek(input: LiveGameweekInput | null) {
   const [snapshot, setSnapshot] = useState<LiveGameweekSnapshot | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [nonce, setNonce] = useState(0);
-  const key = input ? `${input.gameweek.id}:${input.kickoffAt}:${input.lineup.starters.join()}:${input.lineup.captainId}:${input.chip ?? ""}` : null;
+  const key = input ? `${input.gameweek.id}:${input.kickoffAt}:${input.lineup.starters.join()}:${input.lineup.captainId}:${input.chip ?? ""}:${input.onchain?.gameweek ?? ""}` : null;
 
   useEffect(() => {
     if (!input) return;

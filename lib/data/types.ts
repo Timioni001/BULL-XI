@@ -237,12 +237,15 @@ export interface ProLeague {
 
 export type ProofStatus = "live" | "building" | "planned";
 
+/** Everything on /proof, read live from devnet and the MagicBlock Private ER. */
 export interface ProofStats {
-  preview: boolean;
-  counters: { settled: number; locked: number; sessions: number; vrf: number };
-  stack: { moment: string; tech: string; status: ProofStatus }[];
-  oracleProgram: string;
-  gameProgram: string | null;
+  network: string;
+  previewNotice: string | null;
+  counters: { pushes: number; managers: number; squads: number; settled: number };
+  priceBook: { address: string; lastPushAt: number; prices: { ticker: string; price: number }[] };
+  gameweek: { id: number; deadline: string; status: string; startedStocks: number; topGainer: string | null } | null;
+  stack: { moment: string; tech: string; status: ProofStatus; note?: string }[];
+  addresses: { label: string; address: string; href: string }[];
 }
 
 export type BadgeId = "lockedIn" | "captainsCall" | "podium" | "ironXI" | "centurion" | "champion";

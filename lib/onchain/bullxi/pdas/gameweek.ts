@@ -35,7 +35,7 @@ export async function findGameweekPda(
     programAddress,
     seeds: [
       getBytesEncoder().encode(
-        new Uint8Array([103, 97, 109, 101, 119, 101, 101, 107]),
+        new Uint8Array([103, 97, 109, 101, 119, 101, 101, 107, 95, 118, 50]),
       ),
       getU32Encoder().encode(seeds.id),
     ],

@@ -30,7 +30,8 @@ declare_id!("EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN");
 pub const PRICE_BOOK_SEED: &[u8] = b"price_book";
 pub const CONFIG_SEED: &[u8] = b"config";
 pub const MANAGER_SEED: &[u8] = b"manager";
-pub const GAMEWEEK_SEED: &[u8] = b"gameweek";
+/// v2: gameweeks also record picked stocks and the top gainer.
+pub const GAMEWEEK_SEED: &[u8] = b"gameweek_v2";
 pub const ENTRY_SEED: &[u8] = b"entry";
 /// Room for growth beyond today's 41 stocks.
 pub const MAX_STOCKS: usize = 48;
@@ -190,6 +191,7 @@ pub mod bullxi {
         // TWAP windows: the first and last 10% of the gameweek, at least 2 minutes.
         g.window = ((end_ts - deadline_ts) / 10).max(120);
         g.status = status::OPEN;
+        g.top_gainer = game::NO_STOCK;
         Ok(())
     }
 
@@ -238,6 +240,7 @@ pub mod bullxi {
                 let (tmp_ts, last_ts) = (g.tmp_ts, book.last_ts);
                 let Gameweek { tmp_cum, close_twap, .. } = &mut ***g;
                 twap_into(close_twap, tmp_cum, tmp_ts, &book.cum, last_ts, n);
+                g.top_gainer = game::top_gainer(g.picked, &g.open_twap, &g.close_twap);
                 g.status = status::FINAL;
             }
             _ => return err!(BullError::AlreadyFinal),
@@ -294,6 +297,8 @@ pub mod bullxi {
         require!(now < ctx.accounts.gameweek.deadline_ts && ctx.accounts.gameweek.status == status::OPEN, BullError::DeadlinePassed);
         let lineup = Lineup { squad, starters, bench, captain, vice, chip, hedge };
         game::validate_lineup(&lineup).map_err(rule_error)?;
+        // Remember which stocks were started this gameweek (for the top gainer bonus).
+        ctx.accounts.gameweek.picked |= game::starters_mask(&starters);
 
         let e = &mut ctx.accounts.entry;
         require!(e.status <= entry_status::SEALED, BullError::AlreadyFinal);
@@ -382,7 +387,7 @@ pub mod bullxi {
         let e = &mut ctx.accounts.entry;
         require!(e.status == entry_status::REVEALED, BullError::NotRevealed);
         let lineup = Lineup { squad: e.squad, starters: e.starters, bench: e.bench, captain: e.captain, vice: e.vice, chip: e.chip, hedge: e.hedge };
-        let points = game::score_lineup(&lineup, &g.open_twap, &g.close_twap, e.transfer_hit);
+        let points = game::score_lineup(&lineup, &g.open_twap, &g.close_twap, e.transfer_hit, g.top_gainer);
         e.points = points;
         e.settled_ts = now;
         e.status = entry_status::SETTLED;
@@ -548,6 +553,10 @@ pub struct Gameweek {
     /// Opening and closing TWAP per stock, micro-USD
     pub open_twap: [u64; MAX_STOCKS],
     pub close_twap: [u64; MAX_STOCKS],
+    /// Bitmask of every stock started by a sealed squad this gameweek
+    pub picked: u64,
+    /// Biggest TWAP gainer among `picked`, set at full time (255 = none)
+    pub top_gainer: u8,
 }
 
 #[account]
@@ -711,7 +720,7 @@ pub struct DelegateEntry<'info> {
 pub struct SealEntry<'info> {
     #[account(mut, seeds = [ENTRY_SEED, &entry.gameweek.to_le_bytes(), authority.key().as_ref()], bump = entry.bump, has_one = authority)]
     pub entry: Account<'info, Entry>,
-    #[account(seeds = [GAMEWEEK_SEED, &entry.gameweek.to_le_bytes()], bump = gameweek.bump)]
+    #[account(mut, seeds = [GAMEWEEK_SEED, &entry.gameweek.to_le_bytes()], bump = gameweek.bump)]
     pub gameweek: Box<Account<'info, Gameweek>>,
     #[account(seeds = [CONFIG_SEED], bump = config.bump)]
     pub config: Account<'info, Config>,

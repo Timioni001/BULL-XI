@@ -9,6 +9,7 @@ import { copy } from "@/lib/copy";
 import { routes } from "@/lib/routes";
 import { ordinal, signed, tone } from "@/lib/format";
 import { useAsync } from "@/lib/hooks/use-async";
+import { OnchainSeasonCard } from "@/components/game/onchain-season-card";
 import { useGame } from "@/lib/store/game";
 import { cn } from "@/lib/utils";
 import { dur, ease } from "@/lib/motion";
@@ -134,7 +135,10 @@ export function History() {
   return (
     <>
       <PageHeader eyebrow={t.eyebrow} title={t.title} back={routes.profile} />
-      <main className="flex flex-1 flex-col px-4 pb-[calc(104px+env(safe-area-inset-bottom))] lg:px-0 lg:pb-10">{body}</main>
+      <main className="flex flex-1 flex-col px-4 pb-[calc(104px+env(safe-area-inset-bottom))] lg:px-0 lg:pb-10">
+        <OnchainSeasonCard className="mb-3" />
+        {body}
+      </main>
       <TabBar />
       <ResultSheet result={open} open={!!open} onOpenChange={(o) => !o && setOpen(null)} />
     </>

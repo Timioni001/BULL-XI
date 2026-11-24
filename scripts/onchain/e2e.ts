@@ -67,7 +67,16 @@ async function main() {
   // Auto-picked squad and lineup, same as the app.
   const slots = autoPick(MOCK_STOCKS, emptySquad(), mulberry32(7));
   const lineup = defaultLineup(slots, (sid) => MOCK_STOCKS_BY_ID[sid]?.credits ?? 0);
-  sig = await sendAndConfirm(adminTee, admin, [await sealIx(player, id, { squad: squadIds(slots), starters: lineup.starters, bench: lineup.bench, captainId: lineup.captainId, viceId: lineup.viceId })]);
+  // A gameweek created seconds ago may not be writable in the TEE yet: retry briefly.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      sig = await sendAndConfirm(adminTee, admin, [await sealIx(player, id, { squad: squadIds(slots), starters: lineup.starters, bench: lineup.bench, captainId: lineup.captainId, viceId: lineup.viceId })]);
+      break;
+    } catch (e) {
+      if (attempt >= 6) throw e;
+      await sleep(5000);
+    }
+  }
   log("squad sealed in the TEE", explorer("tx", sig, { tee: true }), "captain", lineup.captainId);
 
   // Privacy: a stranger can't read it, the player can.

@@ -118,6 +118,12 @@ export function LiveGameweek() {
 }
 
 function toInput(locked: LockedEntry, kickoffAt: number, teamName: string): LiveGameweekInput {
+  // Sealed onchain: the real schedule and the onchain table.
+  if (locked.onchain) {
+    const gameweek: Gameweek = { id: locked.receipt.gameweekId, number: locked.gameweekNumber, kind: locked.kind, deadline: locked.start, start: locked.start, end: locked.end, status: "live" };
+    const onchain = { gameweek: locked.onchain.gameweek, address: locked.onchain.address };
+    return { gameweek, lineup: locked.lineup, chip: locked.chip, hedgeId: locked.hedgeId, kickoffAt: new Date(locked.start).getTime(), teamName, transferHit: locked.transferHit, onchain };
+  }
   const length = new Date(locked.end).getTime() - new Date(locked.start).getTime();
   const gameweek: Gameweek = {
     id: locked.receipt.gameweekId,
