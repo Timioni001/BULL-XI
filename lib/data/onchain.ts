@@ -27,7 +27,6 @@ import { config, explorer, GAME_API } from "@/lib/config";
 import { BULLXI_PROGRAM_ADDRESS, ENTRY_DISCRIMINATOR, MANAGER_DISCRIMINATOR, findConfigPda, findEntryPda, findManagerPda, getEntryDecoder, getEntrySize, getSetProfileInstructionAsync } from "@/lib/onchain/bullxi";
 import { DELEGATION_PROGRAM_ID, decodePriceBook, priceBookAddress } from "@/lib/onchain/price-book";
 import { PRICE_BOOK_STOCKS } from "@/lib/onchain/universe";
-import { dailyDeadline } from "@/lib/onchain/crank";
 import { ENTRY_STATUS, accountHome, decodeName, entryIxs, gameweekId, joinIxs, readEntry, readGameweek, readManager, sealIx, stockId, type SealInput } from "@/lib/onchain/game";
 import { teeLogin, teeRpcUrl } from "@/lib/onchain/tee-auth";
 import type { ManagerRecord, OnchainResult, PlayerSigner, ProofStats, SealResult } from "./types";
@@ -117,10 +116,9 @@ async function waitFor<T>(fn: () => Promise<T | null>, timeoutMs = 45_000): Prom
   throw new OnchainError("timeout", "This is taking longer than usual. Try again in a minute.");
 }
 
-/** Onchain gameweek id for the app's daily gameweek. Flash gameweeks stay offchain for now. */
+/** Onchain gameweek id for the app's gameweek (daily at 20:00 UTC, flash every hour). */
 export function onchainGameweekId(kind: "daily" | "flash", deadlineIso: string): number {
-  if (kind !== "daily") throw new OnchainError("flash", "Flash gameweeks are not onchain yet");
-  return gameweekId("daily", new Date(deadlineIso).getTime());
+  return gameweekId(kind, new Date(deadlineIso).getTime());
 }
 
 /** Creates the manager's public profile the first time they play. */
@@ -257,9 +255,10 @@ export async function getProofStats(): Promise<ProofStats> {
   const slice = { offset: 0, length: 0 };
   const bookAddr = await priceBookAddress();
   const [cfg] = await findConfigPda();
-  const deadline = dailyDeadline(Date.now()) - 86_400_000; // the gameweek that kicked off most recently
-  const liveId = gameweekId("daily", deadline);
-  const nextId = gameweekId("daily", dailyDeadline(Date.now()));
+  // The hourly flash gameweek that kicked off most recently (always something happening), else the next one.
+  const hour = Math.floor(Date.now() / 3_600_000) * 3_600_000;
+  const liveId = gameweekId("flash", hour);
+  const nextId = gameweekId("flash", hour + 3_600_000);
 
   const [book, managers, squads, entries, live, next] = await Promise.all([
     tee.getAccountInfo(bookAddr, { encoding: "base64" }).send(),
@@ -291,6 +290,9 @@ export async function getProofStats(): Promise<ProofStats> {
     gameweek: g
       ? {
           id: gId,
+          kind: g.kind === 1 ? ("flash" as const) : ("daily" as const),
+          golden: g.golden < PRICE_BOOK_STOCKS.length ? PRICE_BOOK_STOCKS[g.golden][0] : null,
+          goldenStatus: ["Draws at kickoff", "Drawing (VRF)", "Drawn by VRF"][g.vrfState] ?? "",
           deadline: new Date(Number(g.deadlineTs) * 1000).toISOString(),
           status: GW_LABEL[g.status] ?? "Unknown",
           startedStocks: bits,
@@ -300,13 +302,14 @@ export async function getProofStats(): Promise<ProofStats> {
     stack: [
       { moment: "Squads sealed until kickoff", tech: "Private Ephemeral Rollup (TEE) + members-only permission", status: "live" },
       { moment: "Live prices and TWAP for scoring", tech: "Price book on the Private ER, written every minute", status: "live" },
-      { moment: "Kickoff, reveal and settlement", tech: "Crank in the game Worker (every minute)", status: "live" },
+      { moment: "Golden stock (points x2), drawn at kickoff", tech: "MagicBlock VRF on the Private ER", status: "live" },
+      { moment: "TWAP snapshots on a timer", tech: "MagicBlock cranks (ScheduleTask on the rollup)", status: "live" },
+      { moment: "Reveal and settlement", tech: "Game Worker crank (every minute), permissionless", status: "live" },
       { moment: "Final scores on Solana", tech: "Commit from the rollup to Solana", status: "live" },
       { moment: "Squad rules and scoring", tech: "Enforced in the bullxi program", status: "live" },
       { moment: "No gas, no pop-ups for players", tech: "Sponsored fees + Privy accounts", status: "live", note: "Session keys planned" },
       { moment: "Prize payouts", tech: "Magic Actions", status: "planned" },
       { moment: "Entry fees and prize pool", tech: "Ephemeral SPL Token", status: "planned" },
-      { moment: "Head-to-head draws", tech: "VRF", status: "planned" },
       { moment: "Season badges", tech: "SOAR", status: "planned" },
     ],
     addresses: [

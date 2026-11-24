@@ -242,6 +242,7 @@ function LiveView({ snapshot, locked, byId, onResult, resultSheet }: { snapshot:
                       position={pos}
                       score={snapshot.scores[id]}
                       role={id === snapshot.effectiveCaptainId ? "C" : id === lineup.viceId ? "V" : null}
+                      golden={snapshot.goldenId === id}
                       onClick={() => openStock(byId.get(id)!)}
                     />
                   ))}
@@ -252,7 +253,7 @@ function LiveView({ snapshot, locked, byId, onResult, resultSheet }: { snapshot:
 
           <BenchStrip label={copy.pick.bench} note={benchCounts ? t.benchCounts : t.benchNoCount}>
             {lineup.bench.map((id) => (
-              <LiveSlot key={id} stock={byId.get(id)!} position={posOf(id)} score={snapshot.scores[id]} bench={!benchCounts} onClick={() => openStock(byId.get(id)!)} />
+              <LiveSlot key={id} stock={byId.get(id)!} position={posOf(id)} score={snapshot.scores[id]} bench={!benchCounts} golden={snapshot.goldenId === id} onClick={() => openStock(byId.get(id)!)} />
             ))}
           </BenchStrip>
 
@@ -386,14 +387,21 @@ function Scoreboard({ snapshot, flash }: { snapshot: LiveGameweekSnapshot; flash
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 divide-x divide-hairline border-t border-hairline text-center">
+      <div className="grid grid-cols-4 divide-x divide-hairline border-t border-hairline text-center">
         <Mini label={t.market} value={<span className={tone(snapshot.benchmarkPct)}>{pct(snapshot.benchmarkPct)}</span>} sub="SPYx" />
         <Mini label={t.captain} value={<span className={tone(cap?.counted ?? 0, 0)}>{signed(cap?.counted ?? 0)}</span>} sub={t.xPoints(cap?.multiplier ?? 2)} />
         <Mini label={t.chip} value={snapshot.chip ? copy.chipName[snapshot.chip] : t.noChip} sub={snapshot.chip ? t.chipActive : t.chipSaved} />
+        <Mini
+          label={t.golden}
+          value={snapshot.goldenId ? <span className="font-mono text-gold">★ {tickerOf(snapshot.goldenId)}</span> : t.drawing}
+          sub={snapshot.goldenId ? t.goldenSub : t.drawingSub}
+        />
       </div>
     </section>
   );
 }
+
+const tickerOf = (id: string) => id.replace(/x$/, "").toUpperCase() + "x";
 
 function Mini({ label, value, sub }: { label: string; value: React.ReactNode; sub: string }) {
   return (

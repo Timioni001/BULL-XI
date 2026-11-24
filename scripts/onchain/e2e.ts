@@ -14,7 +14,7 @@ import { mulberry32 } from "../../lib/data/mock/rng";
 import { autoPick } from "../../lib/game/autopick";
 import { defaultLineup, emptySquad, squadIds } from "../../lib/game/rules";
 import { findEntryPda, findManagerPda } from "../../lib/onchain/bullxi";
-import { ENTRY_STATUS, GW_STATUS, createGameweekIxs, decodeName, entryIxs, joinIxs, readEntry, readGameweek, readManager, revealIx, sealIx, settleIx, snapshotDue, snapshotIx } from "../../lib/onchain/game";
+import { ENTRY_STATUS, GW_STATUS, NO_STOCK, VRF_STATE, createGameweekIxs, decodeName, entryIxs, goldenDue, joinIxs, readEntry, readGameweek, readManager, requestGoldenIx, revealIx, scheduleTicksIx, sealIx, settleIx, snapshotDue, snapshotIx, stockId } from "../../lib/onchain/game";
 import { decodePriceBook, priceBookAddress } from "../../lib/onchain/price-book";
 import { pushOnce } from "../../lib/onchain/pusher";
 import { sendAndConfirm } from "../../lib/onchain/send";
@@ -62,6 +62,9 @@ async function main() {
   log("entry created + delegated", explorer("tx", sig));
 
   await waitFor("gameweek on TEE", () => readGameweek(config.teeRpc, id));
+  // MagicBlock crank: the rollup itself ticks the gameweek every 10 s.
+  sig = await sendAndConfirm(crankTee, crank, [await scheduleTicksIx(crank, id, { intervalMs: 10_000, iterations: 60 })]);
+  log("MagicBlock crank scheduled (tick every 10 s)", explorer("tx", sig, { tee: true }));
   await waitFor("entry on TEE", () => readEntry(adminTee, id, player.address));
 
   // Auto-picked squad and lineup, same as the app.
@@ -88,6 +91,8 @@ async function main() {
 
   // Run the gameweek: keep prices flowing, take snapshots, reveal, settle.
   let lastPush = 0;
+  let lastStatus = -1;
+  let dueSince = 0;
   for (;;) {
     if (Date.now() - lastPush > 20_000) {
       await pushOnce({ signer: crank, erRpc: config.teeRpc, priceUrl: PRICE_SOURCE.url }).catch((e) => log("push failed", e.message));
@@ -96,9 +101,23 @@ async function main() {
     const g = await readGameweek(config.teeRpc, id);
     if (!g) throw new Error("gameweek vanished");
     const nowSec = Math.floor(Date.now() / 1000);
+    if (g.status !== lastStatus) {
+      if (lastStatus >= 0) log(`gameweek -> ${Object.keys(GW_STATUS)[g.status]} (advanced by the MagicBlock crank)`);
+      lastStatus = g.status;
+      dueSince = 0;
+    }
     if (snapshotDue(g, nowSec, await bookLastTs())) {
-      sig = await sendAndConfirm(crankTee, crank, [await snapshotIx(id)]);
-      log("snapshot ->", Object.keys(GW_STATUS)[g.status + 1], explorer("tx", sig, { tee: true }));
+      dueSince ||= Date.now();
+      if (Date.now() - dueSince > 40_000) {
+        // Fallback if the crank is late.
+        sig = await sendAndConfirm(crankTee, crank, [await snapshotIx(id)]);
+        log("fallback snapshot ->", Object.keys(GW_STATUS)[g.status + 1], explorer("tx", sig, { tee: true }));
+        continue;
+      }
+    }
+    if (goldenDue(g, nowSec)) {
+      sig = await sendAndConfirm(crankTee, crank, [await requestGoldenIx(crank, id)]);
+      log("golden stock requested from MagicBlock VRF", explorer("tx", sig, { tee: true }));
       continue;
     }
     const e = await readEntry(crankTee, id, player.address);
@@ -117,6 +136,8 @@ async function main() {
     await sleep(5000);
   }
 
+  const finalGw = await readGameweek(config.teeRpc, id);
+  log("VRF:", finalGw?.vrfState === VRF_STATE.fulfilled ? `golden stock ${finalGw.golden === NO_STOCK ? "none" : stockId(finalGw.golden)}` : `state ${finalGw?.vrfState}`, "| top gainer", finalGw && finalGw.topGainer !== NO_STOCK ? stockId(finalGw.topGainer) : "none");
   const settled = await readEntry(config.teeRpc, id, player.address);
   log("points (TEE):", settled?.points);
   const [managerPda] = await findManagerPda({ authority: player.address });

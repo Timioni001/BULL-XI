@@ -219,7 +219,7 @@
                   107,
                   95,
                   118,
-                  50
+                  51
                 ]
               },
               {
@@ -728,7 +728,7 @@
                   107,
                   95,
                   118,
-                  50
+                  51
                 ]
               },
               {
@@ -1124,6 +1124,73 @@
       "args": []
     },
     {
+      "name": "golden_callback",
+      "docs": [
+        "VRF callback, signed by this program's scoped VRF identity only.",
+        "Draws the golden stock uniformly among the stocks started this week."
+      ],
+      "discriminator": [
+        117,
+        165,
+        170,
+        37,
+        99,
+        253,
+        238,
+        188
+      ],
+      "accounts": [
+        {
+          "name": "vrf_program_identity",
+          "docs": [
+            "Scoped VRF identity PDA, bound to this program. Its presence as a signer proves",
+            "the callback was issued by the VRF program for this program."
+          ],
+          "signer": true
+        },
+        {
+          "name": "gameweek",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107,
+                  95,
+                  118,
+                  51
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "gameweek.id",
+                "account": "Gameweek"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "randomness",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "init_config",
       "docs": [
         "Game config on Solana: who may create gameweeks, and the crank that settles them."
@@ -1398,6 +1465,102 @@
       ]
     },
     {
+      "name": "request_golden",
+      "docs": [
+        "After kickoff, asks MagicBlock VRF for randomness to draw the golden",
+        "stock. Anyone can call it once (or retry after VRF_RETRY_SECS)."
+      ],
+      "discriminator": [
+        246,
+        223,
+        12,
+        11,
+        186,
+        177,
+        247,
+        120
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "gameweek",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107,
+                  95,
+                  118,
+                  51
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "gameweek.id",
+                "account": "Gameweek"
+              }
+            ]
+          }
+        },
+        {
+          "name": "oracle_queue",
+          "writable": true,
+          "address": "5hBR571xnXppuCPveTrctfTU7tJLSN94nq7kv7FRK5Tc"
+        },
+        {
+          "name": "program_identity",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  100,
+                  101,
+                  110,
+                  116,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vrf_program",
+          "address": "Vrf1RNUjXmQGjmQrQLvJHs9SNkvDJEsRVFPkfSQUwGz"
+        },
+        {
+          "name": "slot_hashes",
+          "address": "SysvarS1otHashes111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "seed",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "reveal_entry",
       "docs": [
         "After kickoff anyone can reveal a sealed entry: it becomes public in the rollup."
@@ -1458,7 +1621,7 @@
                   107,
                   95,
                   118,
-                  50
+                  51
                 ]
               },
               {
@@ -1569,6 +1732,99 @@
       "args": []
     },
     {
+      "name": "schedule_ticks",
+      "docs": [
+        "Schedules a MagicBlock crank on the rollup that calls tick_gameweek",
+        "every `interval_ms` for `iterations` runs. No server needed for snapshots."
+      ],
+      "discriminator": [
+        243,
+        206,
+        0,
+        155,
+        207,
+        136,
+        85,
+        251
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "gameweek",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107,
+                  95,
+                  118,
+                  51
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "gameweek.id",
+                "account": "Gameweek"
+              }
+            ]
+          }
+        },
+        {
+          "name": "price_book",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "task_id",
+          "type": "i64"
+        },
+        {
+          "name": "interval_ms",
+          "type": "i64"
+        },
+        {
+          "name": "iterations",
+          "type": "i64"
+        }
+      ]
+    },
+    {
       "name": "seal_entry",
       "docs": [
         "Seals (or re-seals) the manager's squad inside the private rollup before",
@@ -1630,7 +1886,7 @@
                   107,
                   95,
                   118,
-                  50
+                  51
                 ]
               },
               {
@@ -1921,7 +2177,7 @@
                   107,
                   95,
                   118,
-                  50
+                  51
                 ]
               },
               {
@@ -2005,7 +2261,78 @@
                   107,
                   95,
                   118,
-                  50
+                  51
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "gameweek.id",
+                "account": "Gameweek"
+              }
+            ]
+          }
+        },
+        {
+          "name": "price_book",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "tick_gameweek",
+      "docs": [
+        "Same as snapshot_gameweek but never fails when nothing is due, so a",
+        "MagicBlock crank (ScheduleTask) can call it on a timer."
+      ],
+      "discriminator": [
+        26,
+        225,
+        241,
+        202,
+        32,
+        120,
+        171,
+        93
+      ],
+      "accounts": [
+        {
+          "name": "gameweek",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107,
+                  95,
+                  118,
+                  51
                 ]
               },
               {
@@ -2470,6 +2797,36 @@
               "Biggest TWAP gainer among `picked`, set at full time (255 = none)"
             ],
             "type": "u8"
+          },
+          {
+            "name": "golden",
+            "docs": [
+              "Golden stock drawn by MagicBlock VRF after kickoff (255 = none yet)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "vrf_state",
+            "docs": [
+              "VRF request state (none, requested, fulfilled) and when it was requested"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "vrf_requested_ts",
+            "type": "i64"
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Room for future fields without moving gameweeks again"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
           }
         ]
       }

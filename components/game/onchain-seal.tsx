@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { ExternalLink, Loader2, RotateCcw, ShieldCheck } from "lucide-react";
 import { explorer } from "@/lib/config";
 import { useAuth } from "@/lib/auth/context";
+import { useOnchainPlayer } from "@/lib/auth/player";
 import { sealSquadOnchain } from "@/lib/data";
 import { squadIds } from "@/lib/game/rules";
 import { copy } from "@/lib/copy";
@@ -12,73 +13,57 @@ import { useGame, type LockedEntry } from "@/lib/store/game";
 import { dur, ease } from "@/lib/motion";
 
 const t = copy.lock.onchain;
-type State = { kind: "idle" } | { kind: "sealing" } | { kind: "failed"; reason: string; code?: string };
+type State = { kind: "idle" } | { kind: "sealing" } | { kind: "failed"; code?: string };
 
 /**
- * Under the lock seal: for signed-in managers, seals the locked squad inside
- * MagicBlock's Private ER on Solana devnet. Guests see a sign-in nudge.
+ * Under the lock seal: seals the locked squad inside MagicBlock's Private ER
+ * on Solana devnet. Signed-in managers use their account; guests use a key
+ * kept on this device. No fees, no pop-ups.
  */
 export function OnchainSeal({ locked, deadline }: { locked: LockedEntry; deadline: string | null }) {
   const auth = useAuth();
+  const player = useOnchainPlayer();
   const setOnchainSeal = useGame((s) => s.setOnchainSeal);
+  const demo = useGame((s) => s.demoMode);
   const [state, setState] = useState<State>({ kind: "idle" });
   const started = useRef<string | null>(null);
-
-  const canSign = auth.status === "signedIn" && !!auth.account?.address && !!auth.signTransaction && !!auth.signMessage;
-  const sealKey = `${locked.receipt.sealId}:${auth.account?.address ?? ""}`;
+  const sealKey = `${locked.receipt.sealId}:${player.kind}:${auth.account?.address ?? ""}`;
 
   const seal = useCallback(async () => {
-    if (!canSign || !deadline) return;
+    if (!deadline) return;
     setState({ kind: "sealing" });
     try {
       const g = useGame.getState();
-      const result = await sealSquadOnchain(
-        { address: auth.account!.address!, signTransaction: auth.signTransaction!, signMessage: auth.signMessage! },
-        {
-          kind: locked.kind,
-          deadline,
-          managerName: g.managerName,
-          teamName: g.teamName,
-          squad: squadIds(g.slots),
-          starters: locked.lineup.starters,
-          bench: locked.lineup.bench,
-          captainId: locked.lineup.captainId,
-          viceId: locked.lineup.viceId,
-          chip: locked.chip,
-          hedgeId: locked.hedgeId,
-          transferHit: locked.transferHit,
-        },
-      );
+      const result = await sealSquadOnchain(await player.get(), {
+        kind: locked.kind,
+        deadline,
+        managerName: g.managerName,
+        teamName: g.teamName,
+        squad: squadIds(g.slots),
+        starters: locked.lineup.starters,
+        bench: locked.lineup.bench,
+        captainId: locked.lineup.captainId,
+        viceId: locked.lineup.viceId,
+        chip: locked.chip,
+        hedgeId: locked.hedgeId,
+        transferHit: locked.transferHit,
+      });
       setOnchainSeal({ ...result });
       setState({ kind: "idle" });
     } catch (e) {
-      const code = (e as { code?: string }).code;
-      setState({ kind: "failed", reason: e instanceof Error ? e.message : String(e), code });
+      setState({ kind: "failed", code: (e as { code?: string }).code });
     }
-  }, [auth, canSign, deadline, locked, setOnchainSeal]);
+  }, [deadline, locked, player, setOnchainSeal]);
 
-  // Seal automatically once per lock.
+  // Seal automatically once per lock (not in demo mode: its kickoff is simulated).
   useEffect(() => {
-    if (!canSign || locked.onchain || locked.kind !== "daily" || started.current === sealKey) return;
+    if (demo || !player.ready || locked.onchain || started.current === sealKey) return;
     started.current = sealKey;
     void seal();
-  }, [canSign, locked.onchain, locked.kind, sealKey, seal]);
+  }, [demo, player.ready, locked.onchain, sealKey, seal]);
 
-  if (auth.status === "unavailable" || auth.status === "loading") return null;
-
+  if (demo) return null;
   const row = "mx-auto mt-4 flex max-w-[34ch] items-center justify-center gap-2 text-[13px]";
-
-  if (auth.status === "guest") {
-    return (
-      <p className={`${row} flex-wrap text-muted-foreground`}>
-        {t.guest}
-        <button className="font-semibold text-foreground underline underline-offset-2" onClick={auth.signIn}>
-          {t.signIn}
-        </button>
-      </p>
-    );
-  }
-  if (locked.kind !== "daily") return <p className={`${row} text-muted-foreground`}>{t.flash}</p>;
 
   if (locked.onchain) {
     return (
@@ -89,6 +74,14 @@ export function OnchainSeal({ locked, deadline }: { locked: LockedEntry; deadlin
         <a href={explorer("address", locked.onchain.address)} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground underline underline-offset-2">
           {t.proof} <ExternalLink className="size-3" />
         </a>
+        {player.kind === "device" && auth.status === "guest" && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {t.guest}{" "}
+            <button className="font-semibold text-foreground underline underline-offset-2" onClick={auth.signIn}>
+              {t.signIn}
+            </button>
+          </p>
+        )}
       </motion.div>
     );
   }

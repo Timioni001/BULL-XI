@@ -31,6 +31,7 @@ const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
 
 export function createLiveScorer(input: LiveScorerInput, initialManagers: ScoredManager[]) {
   let managers = initialManagers;
+  let goldenId: string | null = null;
   const { posOf, tickerOf } = input;
   const end = new Date(input.gameweek.end).getTime();
   const events: LiveEvent[] = [];
@@ -53,6 +54,10 @@ export function createLiveScorer(input: LiveScorerInput, initialManagers: Scored
     setManagers(next: ScoredManager[]) {
       managers = next;
     },
+    /** Golden stock drawn by VRF (null until drawn). */
+    setGolden(id: string | null) {
+      goldenId = id;
+    },
     /** Every stock id any manager holds, plus the benchmark. */
     stockIds(): string[] {
       const ids = new Set<string>([input.benchmarkId]);
@@ -72,6 +77,7 @@ export function createLiveScorer(input: LiveScorerInput, initialManagers: Scored
           pct,
           benchmarkId: input.benchmarkId,
           topGainerId,
+          goldenId,
           chip: m.isYou ? input.chip : (m.chip ?? null),
           hedgeId: m.isYou ? input.hedgeId : (m.hedgeId ?? null),
           transferHit: m.isYou ? input.transferHit : (m.transferHit ?? 0),
@@ -151,6 +157,7 @@ export function createLiveScorer(input: LiveScorerInput, initialManagers: Scored
         events: [...events],
         benchmarkPct: pct[input.benchmarkId] ?? 0,
         chip: input.chip ?? undefined,
+        goldenId,
       };
     },
   };

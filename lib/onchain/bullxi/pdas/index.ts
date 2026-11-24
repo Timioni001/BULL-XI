@@ -14,3 +14,4 @@ export * from "./entry";
 export * from "./gameweek";
 export * from "./manager";
 export * from "./priceBook";
+export * from "./programIdentity";

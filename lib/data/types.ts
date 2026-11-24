@@ -181,6 +181,8 @@ export interface LiveGameweekSnapshot {
   events: LiveEvent[];
   benchmarkPct: number;
   chip?: ChipId;
+  /** Golden stock drawn by MagicBlock VRF at kickoff (points doubled); null until drawn */
+  goldenId?: string | null;
 }
 
 /* ---------------- Step 4 additions ---------------- */
@@ -243,7 +245,7 @@ export interface ProofStats {
   previewNotice: string | null;
   counters: { pushes: number; managers: number; squads: number; settled: number };
   priceBook: { address: string; lastPushAt: number; prices: { ticker: string; price: number }[] };
-  gameweek: { id: number; deadline: string; status: string; startedStocks: number; topGainer: string | null } | null;
+  gameweek: { id: number; kind: "daily" | "flash"; deadline: string; status: string; startedStocks: number; topGainer: string | null; golden: string | null; goldenStatus: string } | null;
   stack: { moment: string; tech: string; status: ProofStatus; note?: string }[];
   addresses: { label: string; address: string; href: string }[];
 }

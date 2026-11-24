@@ -18,7 +18,12 @@ use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
 use ephemeral_rollups_sdk::access_control::instructions::{CreateEphemeralPermissionCpi, UpdateEphemeralPermissionCpi};
 use ephemeral_rollups_sdk::access_control::structs::{EphemeralMembersArgs, EphemeralPermission, Member, PERMISSION_SEED};
-use ephemeral_rollups_sdk::anchor::{commit, delegate, ephemeral};
+use ephemeral_rollups_sdk::anchor::{commit, delegate, ephemeral, vrf, vrf_callback};
+#[allow(deprecated)]
+use ephemeral_rollups_sdk::crank::{ScheduleCrankCpi, ScheduleTaskArgs};
+use ephemeral_rollups_sdk::vrf::instructions::{create_request_randomness_ix, RequestRandomnessParams};
+use ephemeral_rollups_sdk::vrf::types::SerializableAccountMeta;
+use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
 use ephemeral_rollups_sdk::consts::{EPHEMERAL_VAULT_ID, MAGIC_PROGRAM_ID, PERMISSION_PROGRAM_ID};
 use ephemeral_rollups_sdk::cpi::DelegateConfig;
 use ephemeral_rollups_sdk::ephem::MagicIntentBundleBuilder;
@@ -30,8 +35,8 @@ declare_id!("EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN");
 pub const PRICE_BOOK_SEED: &[u8] = b"price_book";
 pub const CONFIG_SEED: &[u8] = b"config";
 pub const MANAGER_SEED: &[u8] = b"manager";
-/// v2: gameweeks also record picked stocks and the top gainer.
-pub const GAMEWEEK_SEED: &[u8] = b"gameweek_v2";
+/// v3: gameweeks also hold the VRF golden stock (v2 added picked stocks and top gainer).
+pub const GAMEWEEK_SEED: &[u8] = b"gameweek_v3";
 pub const ENTRY_SEED: &[u8] = b"entry";
 /// Room for growth beyond today's 41 stocks.
 pub const MAX_STOCKS: usize = 48;
@@ -52,6 +57,14 @@ pub mod status {
     pub const CLOSING: u8 = 3;
     pub const FINAL: u8 = 4;
 }
+
+pub mod vrf_state {
+    pub const NONE: u8 = 0;
+    pub const REQUESTED: u8 = 1;
+    pub const FULFILLED: u8 = 2;
+}
+/// A VRF request older than this can be retried (the queue purges after ~2 minutes).
+pub const VRF_RETRY_SECS: i64 = 180;
 
 pub mod entry_status {
     pub const CREATED: u8 = 0;
@@ -192,6 +205,7 @@ pub mod bullxi {
         g.window = ((end_ts - deadline_ts) / 10).max(120);
         g.status = status::OPEN;
         g.top_gainer = game::NO_STOCK;
+        g.golden = game::NO_STOCK;
         Ok(())
     }
 
@@ -212,39 +226,78 @@ pub mod bullxi {
     /// OPEN -> KICKED_OFF (at deadline) -> LIVE (opening TWAP) -> CLOSING -> FINAL (closing TWAP).
     pub fn snapshot_gameweek(ctx: Context<SnapshotGameweek>) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
-        let book = &ctx.accounts.price_book;
-        let g = &mut ctx.accounts.gameweek;
-        let n = book.count as usize;
-        match g.status {
-            status::OPEN => {
-                require!(now >= g.deadline_ts, BullError::TooEarly);
-                g.tmp_cum.copy_from_slice(&book.cum);
-                g.tmp_ts = book.last_ts;
-                g.status = status::KICKED_OFF;
-            }
-            status::KICKED_OFF => {
-                require!(now >= g.deadline_ts + g.window && book.last_ts > g.tmp_ts, BullError::TooEarly);
-                let (tmp_ts, last_ts) = (g.tmp_ts, book.last_ts);
-                let Gameweek { tmp_cum, open_twap, .. } = &mut ***g;
-                twap_into(open_twap, tmp_cum, tmp_ts, &book.cum, last_ts, n);
-                g.status = status::LIVE;
-            }
-            status::LIVE => {
-                require!(now >= g.end_ts - g.window, BullError::TooEarly);
-                g.tmp_cum.copy_from_slice(&book.cum);
-                g.tmp_ts = book.last_ts;
-                g.status = status::CLOSING;
-            }
-            status::CLOSING => {
-                require!(now >= g.end_ts && book.last_ts > g.tmp_ts, BullError::TooEarly);
-                let (tmp_ts, last_ts) = (g.tmp_ts, book.last_ts);
-                let Gameweek { tmp_cum, close_twap, .. } = &mut ***g;
-                twap_into(close_twap, tmp_cum, tmp_ts, &book.cum, last_ts, n);
-                g.top_gainer = game::top_gainer(g.picked, &g.open_twap, &g.close_twap);
-                g.status = status::FINAL;
-            }
-            _ => return err!(BullError::AlreadyFinal),
+        require!(g_status_final_guard(&ctx.accounts.gameweek), BullError::AlreadyFinal);
+        require!(advance_gameweek(&mut ctx.accounts.gameweek, &ctx.accounts.price_book, now), BullError::TooEarly);
+        Ok(())
+    }
+
+    /// Same as snapshot_gameweek but never fails when nothing is due, so a
+    /// MagicBlock crank (ScheduleTask) can call it on a timer.
+    pub fn tick_gameweek(ctx: Context<SnapshotGameweek>) -> Result<()> {
+        let now = Clock::get()?.unix_timestamp;
+        advance_gameweek(&mut ctx.accounts.gameweek, &ctx.accounts.price_book, now);
+        Ok(())
+    }
+
+    /// Schedules a MagicBlock crank on the rollup that calls tick_gameweek
+    /// every `interval_ms` for `iterations` runs. No server needed for snapshots.
+    #[allow(deprecated)]
+    pub fn schedule_ticks<'info>(ctx: Context<'info, ScheduleTicks<'info>>, task_id: i64, interval_ms: i64, iterations: i64) -> Result<()> {
+        let tick = Instruction {
+            program_id: crate::ID,
+            accounts: vec![
+                AccountMeta::new(ctx.accounts.gameweek.key(), false),
+                AccountMeta::new_readonly(ctx.accounts.price_book.key(), false),
+            ],
+            data: anchor_lang::InstructionData::data(&crate::instruction::TickGameweek {}),
+        };
+        ScheduleCrankCpi {
+            payer: &ctx.accounts.payer,
+            magic_program: &ctx.accounts.magic_program,
+            instruction_accounts: &[
+                ctx.accounts.payer.to_account_info(),
+                ctx.accounts.gameweek.to_account_info(),
+                ctx.accounts.price_book.to_account_info(),
+            ],
+            args: ScheduleTaskArgs { task_id, execution_interval_millis: interval_ms, iterations, instructions: vec![tick] },
         }
+        .invoke()?;
+        Ok(())
+    }
+
+    /// After kickoff, asks MagicBlock VRF for randomness to draw the golden
+    /// stock. Anyone can call it once (or retry after VRF_RETRY_SECS).
+    pub fn request_golden(ctx: Context<RequestGolden>, seed: u8) -> Result<()> {
+        let now = Clock::get()?.unix_timestamp;
+        let g = &mut ctx.accounts.gameweek;
+        require!(g.status >= status::KICKED_OFF, BullError::TooEarly);
+        let retry = g.vrf_state == vrf_state::REQUESTED && now - g.vrf_requested_ts > VRF_RETRY_SECS;
+        require!(g.vrf_state == vrf_state::NONE || retry, BullError::AlreadyFinal);
+        g.vrf_state = vrf_state::REQUESTED;
+        g.vrf_requested_ts = now;
+        let ix = create_request_randomness_ix(RequestRandomnessParams {
+            payer: ctx.accounts.payer.key(),
+            oracle_queue: ctx.accounts.oracle_queue.key(),
+            callback_program_id: crate::ID,
+            callback_discriminator: crate::instruction::GoldenCallback::DISCRIMINATOR.to_vec(),
+            caller_seed: [seed; 32],
+            accounts_metas: Some(vec![SerializableAccountMeta { pubkey: g.key(), is_signer: false, is_writable: true }]),
+            ..Default::default()
+        });
+        ctx.accounts.gameweek.exit(&crate::ID)?;
+        ctx.accounts.invoke_signed_vrf(&ctx.accounts.payer.to_account_info(), &ix)?;
+        Ok(())
+    }
+
+    /// VRF callback, signed by this program's scoped VRF identity only.
+    /// Draws the golden stock uniformly among the stocks started this week.
+    pub fn golden_callback(ctx: Context<GoldenCallback>, randomness: [u8; 32]) -> Result<()> {
+        let g = &mut ctx.accounts.gameweek;
+        if g.vrf_state == vrf_state::FULFILLED {
+            return Ok(()); // duplicate or late callback: no effect
+        }
+        g.golden = game::pick_golden(g.picked, &randomness);
+        g.vrf_state = vrf_state::FULFILLED;
         Ok(())
     }
 
@@ -387,7 +440,7 @@ pub mod bullxi {
         let e = &mut ctx.accounts.entry;
         require!(e.status == entry_status::REVEALED, BullError::NotRevealed);
         let lineup = Lineup { squad: e.squad, starters: e.starters, bench: e.bench, captain: e.captain, vice: e.vice, chip: e.chip, hedge: e.hedge };
-        let points = game::score_lineup(&lineup, &g.open_twap, &g.close_twap, e.transfer_hit, g.top_gainer);
+        let points = game::score_lineup(&lineup, &g.open_twap, &g.close_twap, e.transfer_hit, g.top_gainer, g.golden);
         e.points = points;
         e.settled_ts = now;
         e.status = entry_status::SETTLED;
@@ -416,6 +469,43 @@ pub mod bullxi {
 }
 
 /* ------------------------------- Helpers ------------------------------- */
+
+fn g_status_final_guard(g: &Gameweek) -> bool {
+    g.status < status::FINAL
+}
+
+/// Moves a gameweek through its TWAP snapshots when due. Returns true if it advanced.
+/// OPEN -> KICKED_OFF (at deadline) -> LIVE (opening TWAP) -> CLOSING -> FINAL (closing TWAP).
+pub fn advance_gameweek(g: &mut Gameweek, book: &PriceBook, now: i64) -> bool {
+    let n = book.count as usize;
+    match g.status {
+        status::OPEN if now >= g.deadline_ts => {
+            g.tmp_cum.copy_from_slice(&book.cum);
+            g.tmp_ts = book.last_ts;
+            g.status = status::KICKED_OFF;
+        }
+        status::KICKED_OFF if now >= g.deadline_ts + g.window && book.last_ts > g.tmp_ts => {
+            let (tmp_ts, last_ts) = (g.tmp_ts, book.last_ts);
+            let Gameweek { tmp_cum, open_twap, .. } = g;
+            twap_into(open_twap, tmp_cum, tmp_ts, &book.cum, last_ts, n);
+            g.status = status::LIVE;
+        }
+        status::LIVE if now >= g.end_ts - g.window => {
+            g.tmp_cum.copy_from_slice(&book.cum);
+            g.tmp_ts = book.last_ts;
+            g.status = status::CLOSING;
+        }
+        status::CLOSING if now >= g.end_ts && book.last_ts > g.tmp_ts => {
+            let (tmp_ts, last_ts) = (g.tmp_ts, book.last_ts);
+            let Gameweek { tmp_cum, close_twap, .. } = g;
+            twap_into(close_twap, tmp_cum, tmp_ts, &book.cum, last_ts, n);
+            g.top_gainer = game::top_gainer(g.picked, &g.open_twap, &g.close_twap);
+            g.status = status::FINAL;
+        }
+        _ => return false,
+    }
+    true
+}
 
 fn rule_error(e: RuleError) -> Error {
     match e {
@@ -557,6 +647,13 @@ pub struct Gameweek {
     pub picked: u64,
     /// Biggest TWAP gainer among `picked`, set at full time (255 = none)
     pub top_gainer: u8,
+    /// Golden stock drawn by MagicBlock VRF after kickoff (255 = none yet)
+    pub golden: u8,
+    /// VRF request state (none, requested, fulfilled) and when it was requested
+    pub vrf_state: u8,
+    pub vrf_requested_ts: i64,
+    /// Room for future fields without moving gameweeks again
+    pub reserved: [u8; 64],
 }
 
 #[account]
@@ -691,6 +788,38 @@ pub struct SnapshotGameweek<'info> {
     pub gameweek: Box<Account<'info, Gameweek>>,
     #[account(seeds = [PRICE_BOOK_SEED], bump = price_book.bump)]
     pub price_book: Box<Account<'info, PriceBook>>,
+}
+
+#[derive(Accounts)]
+pub struct ScheduleTicks<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    #[account(mut, seeds = [GAMEWEEK_SEED, &gameweek.id.to_le_bytes()], bump = gameweek.bump)]
+    pub gameweek: Box<Account<'info, Gameweek>>,
+    #[account(seeds = [PRICE_BOOK_SEED], bump = price_book.bump)]
+    pub price_book: Box<Account<'info, PriceBook>>,
+    /// CHECK: Magic Program
+    #[account(address = MAGIC_PROGRAM_ID)]
+    pub magic_program: UncheckedAccount<'info>,
+}
+
+#[vrf]
+#[derive(Accounts)]
+pub struct RequestGolden<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    #[account(mut, seeds = [GAMEWEEK_SEED, &gameweek.id.to_le_bytes()], bump = gameweek.bump)]
+    pub gameweek: Box<Account<'info, Gameweek>>,
+    /// CHECK: the delegated (rollup) VRF oracle queue
+    #[account(mut, address = ephemeral_rollups_sdk::vrf::consts::DEFAULT_EPHEMERAL_QUEUE)]
+    pub oracle_queue: UncheckedAccount<'info>,
+}
+
+#[vrf_callback]
+#[derive(Accounts)]
+pub struct GoldenCallback<'info> {
+    #[account(mut, seeds = [GAMEWEEK_SEED, &gameweek.id.to_le_bytes()], bump = gameweek.bump)]
+    pub gameweek: Box<Account<'info, Gameweek>>,
 }
 
 #[derive(Accounts)]

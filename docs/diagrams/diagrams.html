@@ -52,19 +52,20 @@
     <text x="708" y="238" font-size="13" font-weight="600" fill="#ff5b1f" letter-spacing="1.2">CLOUDFLARE WORKER · bullxi-game</text>
     <text x="708" y="270" font-size="22" font-weight="700">Cron every minute + relay</text>
     <text x="708" y="300" font-size="15" fill="#444">1. Push 41 prices to the price book</text>
-    <text x="708" y="324" font-size="15" fill="#444">2. Snapshot TWAPs, reveal, settle</text>
+    <text x="708" y="324" font-size="15" fill="#444">2. Request VRF, reveal, settle (+ backup ticks)</text>
     <text x="708" y="348" font-size="15" fill="#444">3. /relay: co-sign allowlisted game</text>
     <text x="708" y="370" font-size="15" fill="#444">    instructions as fee payer</text>
 
     <!-- TEE -->
-    <rect x="0" y="430" width="560" height="210" rx="22" fill="#161618"/>
+    <rect x="0" y="420" width="560" height="220" rx="22" fill="#161618"/>
     <text x="24" y="468" font-size="13" font-weight="600" fill="#ff8a5c" letter-spacing="1.2">MAGICBLOCK PRIVATE ER (TEE) · devnet</text>
     <text x="24" y="500" font-size="22" font-weight="700" fill="#fff">Where the game runs (free, ~10 ms)</text>
     <g font-size="15" fill="#d6d6d6">
-      <text x="24" y="534">● Price book: 41 prices + running price x time sums</text>
-      <text x="24" y="560">● Gameweeks: opening and closing TWAP, top gainer</text>
-      <text x="24" y="586">● Entries: squads sealed with a members-only permission</text>
-      <text x="24" y="612">● Managers: public season record</text>
+      <text x="24" y="530">● Price book: 41 prices + running price x time sums</text>
+      <text x="24" y="554">● Gameweeks: TWAPs, top gainer, VRF golden stock</text>
+      <text x="24" y="578">● Entries: squads sealed with a members-only permission</text>
+      <text x="24" y="602">● Managers: public season record</text>
+      <text x="24" y="626" fill="#ff8a5c">● MagicBlock cranks tick each gameweek on a timer</text>
     </g>
 
     <!-- Solana -->
@@ -103,7 +104,7 @@
 <!-- ============================== Gameweek lifecycle ============================== -->
 <section class="d" id="gameweek">
   <h1>A gameweek onchain</h1>
-  <p class="sub">Daily gameweeks: deadline 20:00 UTC, 24 hours long. Points use opening TWAP vs closing TWAP, never a single trade.</p>
+  <p class="sub">Daily (20:00 UTC, 24 h) and hourly flash gameweeks. Points use opening TWAP vs closing TWAP, never a single trade.</p>
   <svg width="1104" height="430" viewBox="0 0 1104 430" style="margin-top:28px">
     <defs><marker id="t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#111"/></marker></defs>
     <!-- timeline -->
@@ -124,8 +125,9 @@
       <!-- 2 -->
       <circle cx="200" cy="155" r="16" fill="#ff5b1f"/><text x="200" y="160" fill="#fff" text-anchor="middle" font-weight="700">2</text>
       <text x="200" y="250" font-size="17" font-weight="700">Kickoff (deadline)</text>
-      <text x="200" y="274" fill="#444">Crank snapshots the price book</text>
-      <text x="200" y="294" fill="#444">and reveals every squad.</text>
+      <text x="200" y="274" fill="#444">MagicBlock crank snapshots prices,</text>
+      <text x="200" y="294" fill="#444">squads are revealed, VRF draws</text>
+      <text x="200" y="314" fill="#444">the golden stock (x2).</text>
       <!-- 3 -->
       <circle cx="310" cy="155" r="16" fill="#ff5b1f"/><text x="310" y="160" fill="#fff" text-anchor="middle" font-weight="700">3</text>
       <text x="360" y="40" font-size="17" font-weight="700">Opening TWAP</text>
@@ -154,7 +156,7 @@
     <!-- legend -->
     <g font-size="13" transform="translate(0,370)">
       <rect x="0" y="0" width="1104" height="60" rx="16" fill="#fff" stroke="#d9d9d6"/>
-      <text x="22" y="35" fill="#444"><tspan font-weight="700" fill="#111">Who does what:</tspan>  step 1 is the player (sponsored, no SOL needed). Steps 2 to 5 are the crank in the Cloudflare Worker, every minute, and anyone could run them.</text>
+      <text x="22" y="35" fill="#444"><tspan font-weight="700" fill="#111">Who does what:</tspan>  step 1 is the player (no SOL needed). Snapshots run on MagicBlock cranks; VRF, reveal and settlement on the Worker. All permissionless.</text>
     </g>
   </svg>
 </section>
@@ -217,7 +219,7 @@
       <text x="560" y="200" font-weight="700" font-size="18">Points per stock</text>
       <text x="560" y="236" font-family="Geist Mono">pct = (close_twap − open_twap) / open_twap</text>
       <text x="560" y="264" font-family="Geist Mono">points = round(pct × 10), capped at ±50</text>
-      <text x="560" y="292" fill="#444">+2 beats SPYx by 0.5 pts · +2 top gainer · captain ×2</text>
+      <text x="560" y="292" fill="#444">+2 beats SPYx · +2 top gainer · golden ×2 · captain ×2</text>
     </g>
   </svg>
 </section>

@@ -3,12 +3,14 @@
  *   1. push live prices to the price book (Private ER)
  *   2. make sure the next daily gameweek exists on Solana and is delegated
  *   3. move live gameweeks through their TWAP snapshots
- *   4. reveal sealed entries after kickoff, settle and commit them at full time
+ *   4. after kickoff, ask MagicBlock VRF to draw the golden stock
+ *   5. reveal sealed entries after kickoff, settle and commit them at full time
+ * Covers daily gameweeks (20:00 UTC) and hourly flash gameweeks.
  * Runtime-agnostic; one key does it all (it is the config crank and the pusher).
  */
 import { createSolanaRpc, signBytes, type KeyPairSigner } from "@solana/kit";
 import { findGameweekPda } from "./bullxi";
-import { ENTRY_STATUS, GW_STATUS, accountHome, createGameweekIxs, gameweekId, listEntries, readGameweek, revealIx, settleIx, snapshotDue, snapshotIx } from "./game";
+import { ENTRY_STATUS, GW_STATUS, accountHome, createGameweekIxs, gameweekId, goldenDue, listEntries, readGameweek, requestGoldenIx, revealIx, scheduleTicksIx, settleIx, snapshotDue, snapshotIx } from "./game";
 import { decodePriceBook, priceBookAddress } from "./price-book";
 import { pushOnce } from "./pusher";
 import { sendAndConfirm } from "./send";
@@ -31,6 +33,7 @@ export interface CrankReport {
 }
 
 const DAY = 86_400_000;
+const HOUR = 3_600_000;
 /** Daily deadlines are 20:00 UTC, same as the app. */
 export function dailyDeadline(nowMs: number, offsetDays = 0): number {
   const d = new Date(nowMs);
@@ -78,14 +81,35 @@ export async function runCrank(env: CrankEnv, opts: { commit?: boolean } = {}): 
     return `created gameweek ${id}`;
   });
 
-  // Gameweeks that can still need work: the one that kicked off last, and the one before.
+  // Arm MagicBlock's own crank on the rollup for the next gameweeks, so their
+  // snapshots happen even without this Worker: the next flash gameweek at
+  // minute 35 of each hour, the next daily one at 19:35 UTC.
+  await step("arm", async () => {
+    const t = new Date(now);
+    if (t.getUTCMinutes() !== 35) return;
+    const armed: string[] = [];
+    const nextHour = Math.floor(now / HOUR) * HOUR + HOUR;
+    const targets: [number, number][] = [[gameweekId("flash", nextHour), 100]];
+    if (t.getUTCHours() === 19) targets.push([gameweekId("daily", dailyDeadline(now)), 1500]);
+    for (const [id, iterations] of targets) {
+      if (!(await readGameweek(env.teeRpc, id))) continue;
+      await sendAndConfirm(tee, signer, [await scheduleTicksIx(signer, id, { intervalMs: 60_000, iterations })]);
+      armed.push(String(id));
+    }
+    return armed.length ? `MagicBlock crank armed for ${armed.join(", ")}` : undefined;
+  });
+
+  // Gameweeks that can still need work: the daily that kicked off last and the
+  // one before, and the last three hourly flash gameweeks.
   const bookInfo = await createSolanaRpc(env.teeRpc).getAccountInfo(await priceBookAddress(), { encoding: "base64" }).send();
   const bookLast = bookInfo.value ? decodePriceBook(Uint8Array.from(atob(bookInfo.value.data[0]), (c) => c.charCodeAt(0))).lastTs : 0;
   const lastKickoff = dailyDeadline(now) - DAY;
-  for (const deadline of [lastKickoff, lastKickoff - DAY]) {
-    const id = gameweekId("daily", deadline);
-    await step(`gw ${id}`, () => advance(id));
-  }
+  const hour = Math.floor(now / HOUR) * HOUR;
+  const ids = [
+    ...[lastKickoff, lastKickoff - DAY].map((d) => gameweekId("daily", d)),
+    ...[hour, hour - HOUR, hour - 2 * HOUR].map((d) => gameweekId("flash", d)),
+  ];
+  for (const id of ids) await step(`gw ${id}`, () => advance(id));
   return report;
 
   async function advance(id: number): Promise<string | void> {
@@ -98,6 +122,10 @@ export async function runCrank(env: CrankEnv, opts: { commit?: boolean } = {}): 
       g.status += 1;
     }
     if (g.status < GW_STATUS.kickedOff) return out.join(", ");
+    if (goldenDue(g, Math.floor(now / 1000))) {
+      await sendAndConfirm(tee, signer, [await requestGoldenIx(signer, id)]);
+      out.push("golden stock requested (VRF)");
+    }
     const entries = await listEntries(tee, id);
     const sealed = entries.filter((e) => e.data.status === ENTRY_STATUS.sealed);
     for (let i = 0; i < sealed.length; i += MAX_REVEALS_PER_TX) {

@@ -6,7 +6,7 @@ import { useFlash } from "@/lib/hooks/use-flash";
 import { PitchSlot } from "@/components/pitch/pitch-slot";
 
 /** A pitch slot that shows live points and flashes on every change. */
-export function LiveSlot({ stock, position, score, role, bench, onClick }: { stock: Stock; position: Position; score?: LiveStockScore; role?: "C" | "V" | null; bench?: boolean; onClick?: () => void }) {
+export function LiveSlot({ stock, position, score, role, bench, golden, onClick }: { stock: Stock; position: Position; score?: LiveStockScore; role?: "C" | "V" | null; bench?: boolean; golden?: boolean; onClick?: () => void }) {
   const value = bench ? (score?.points ?? 0) : (score?.counted ?? 0);
   const flash = useFlash(value);
   const tone = bench ? "muted" : value > 0 ? "up" : value < 0 ? "down" : "neutral";
@@ -21,7 +21,9 @@ export function LiveSlot({ stock, position, score, role, bench, onClick }: { sto
       state={bench ? "dim" : "default"}
       onClick={onClick}
       badge={
-        !bench && score && score.multiplier > 1 ? (
+        golden ? (
+          <span aria-label="Golden stock, points x2" className="grid h-[18px] place-items-center rounded-full bg-gold px-1 text-[9px] font-bold text-black shadow-[0_0_0_2px_var(--pitch)]">★{!bench && score && score.multiplier > 1 ? ` x${score.multiplier}` : ""}</span>
+        ) : !bench && score && score.multiplier > 1 ? (
           <span className="grid h-[18px] place-items-center rounded-full bg-gold px-1 text-[9px] font-bold text-black shadow-[0_0_0_2px_var(--pitch)]">x{score.multiplier}</span>
         ) : undefined
       }

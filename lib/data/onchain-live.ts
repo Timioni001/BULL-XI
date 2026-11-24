@@ -9,7 +9,7 @@
  */
 import { address } from "@solana/kit";
 import { config } from "@/lib/config";
-import { ENTRY_STATUS, GW_STATUS, decodeName, listEntries, readGameweek, readManager, stockId } from "@/lib/onchain/game";
+import { ENTRY_STATUS, GW_STATUS, NO_STOCK, decodeName, listEntries, readGameweek, readManager, stockId } from "@/lib/onchain/game";
 import { PRICE_BOOK_STOCKS } from "@/lib/onchain/universe";
 import { percentChange } from "@/lib/game/rules";
 import { copy } from "@/lib/copy";
@@ -82,6 +82,7 @@ export function startOnchainLiveSession(
       if (!g) throw new Error("This gameweek isn't onchain yet");
       if (g.status >= GW_STATUS.live) open = twapMap(g.openTwap);
       if (g.status === GW_STATUS.final) close = twapMap(g.closeTwap);
+      scorer.setGolden(g.golden !== NO_STOCK ? stockId(g.golden) : null);
 
       const entries = await listEntries(config.teeRpc, input.onchain.gameweek);
       const rivals = entries.filter((e) => e.data.status >= ENTRY_STATUS.revealed && e.data.authority !== me);

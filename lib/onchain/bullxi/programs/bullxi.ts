@@ -62,15 +62,19 @@ import {
   getDelegateGameweekInstructionAsync,
   getDelegateManagerInstructionAsync,
   getDelegatePriceBookInstructionAsync,
+  getGoldenCallbackInstruction,
   getInitConfigInstructionAsync,
   getInitPriceBookInstructionAsync,
   getProcessUndelegationInstructionAsync,
   getPushPricesInstructionAsync,
+  getRequestGoldenInstructionAsync,
   getRevealEntryInstructionAsync,
+  getScheduleTicksInstructionAsync,
   getSealEntryInstructionAsync,
   getSetProfileInstructionAsync,
   getSettleEntryInstruction,
   getSnapshotGameweekInstructionAsync,
+  getTickGameweekInstructionAsync,
   getUndelegatePriceBookInstructionAsync,
   parseCommitPriceBookInstruction,
   parseConfigureInstruction,
@@ -81,15 +85,19 @@ import {
   parseDelegateGameweekInstruction,
   parseDelegateManagerInstruction,
   parseDelegatePriceBookInstruction,
+  parseGoldenCallbackInstruction,
   parseInitConfigInstruction,
   parseInitPriceBookInstruction,
   parseProcessUndelegationInstruction,
   parsePushPricesInstruction,
+  parseRequestGoldenInstruction,
   parseRevealEntryInstruction,
+  parseScheduleTicksInstruction,
   parseSealEntryInstruction,
   parseSetProfileInstruction,
   parseSettleEntryInstruction,
   parseSnapshotGameweekInstruction,
+  parseTickGameweekInstruction,
   parseUndelegatePriceBookInstruction,
   type CommitPriceBookAsyncInput,
   type ConfigureAsyncInput,
@@ -100,6 +108,7 @@ import {
   type DelegateGameweekAsyncInput,
   type DelegateManagerAsyncInput,
   type DelegatePriceBookAsyncInput,
+  type GoldenCallbackInput,
   type InitConfigAsyncInput,
   type InitPriceBookAsyncInput,
   type ParsedCommitPriceBookInstruction,
@@ -111,23 +120,30 @@ import {
   type ParsedDelegateGameweekInstruction,
   type ParsedDelegateManagerInstruction,
   type ParsedDelegatePriceBookInstruction,
+  type ParsedGoldenCallbackInstruction,
   type ParsedInitConfigInstruction,
   type ParsedInitPriceBookInstruction,
   type ParsedProcessUndelegationInstruction,
   type ParsedPushPricesInstruction,
+  type ParsedRequestGoldenInstruction,
   type ParsedRevealEntryInstruction,
+  type ParsedScheduleTicksInstruction,
   type ParsedSealEntryInstruction,
   type ParsedSetProfileInstruction,
   type ParsedSettleEntryInstruction,
   type ParsedSnapshotGameweekInstruction,
+  type ParsedTickGameweekInstruction,
   type ParsedUndelegatePriceBookInstruction,
   type ProcessUndelegationAsyncInput,
   type PushPricesAsyncInput,
+  type RequestGoldenAsyncInput,
   type RevealEntryAsyncInput,
+  type ScheduleTicksAsyncInput,
   type SealEntryAsyncInput,
   type SetProfileAsyncInput,
   type SettleEntryInput,
   type SnapshotGameweekAsyncInput,
+  type TickGameweekAsyncInput,
   type UndelegatePriceBookAsyncInput,
 } from "../instructions";
 import {
@@ -139,6 +155,7 @@ import {
   findGameweekPda,
   findManagerPda,
   findPriceBookPda,
+  findProgramIdentityPda,
 } from "../pdas";
 
 export const BULLXI_PROGRAM_ADDRESS =
@@ -227,15 +244,19 @@ export enum BullxiInstruction {
   DelegateGameweek,
   DelegateManager,
   DelegatePriceBook,
+  GoldenCallback,
   InitConfig,
   InitPriceBook,
   ProcessUndelegation,
   PushPrices,
+  RequestGolden,
   RevealEntry,
+  ScheduleTicks,
   SealEntry,
   SetProfile,
   SettleEntry,
   SnapshotGameweek,
+  TickGameweek,
   UndelegatePriceBook,
 }
 
@@ -346,6 +367,17 @@ export function identifyBullxiInstruction(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([117, 165, 170, 37, 99, 253, 238, 188]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.GoldenCallback;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([23, 235, 115, 232, 168, 96, 1, 231]),
       ),
       0,
@@ -390,12 +422,34 @@ export function identifyBullxiInstruction(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([246, 223, 12, 11, 186, 177, 247, 120]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.RequestGolden;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([55, 129, 203, 100, 95, 189, 241, 116]),
       ),
       0,
     )
   ) {
     return BullxiInstruction.RevealEntry;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([243, 206, 0, 155, 207, 136, 85, 251]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.ScheduleTicks;
   }
   if (
     containsBytes(
@@ -445,6 +499,17 @@ export function identifyBullxiInstruction(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([26, 225, 241, 202, 32, 120, 171, 93]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.TickGameweek;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([185, 210, 76, 123, 126, 150, 126, 121]),
       ),
       0,
@@ -489,6 +554,9 @@ export type ParsedBullxiInstruction<
       instructionType: BullxiInstruction.DelegatePriceBook;
     } & ParsedDelegatePriceBookInstruction<TProgram>)
   | ({
+      instructionType: BullxiInstruction.GoldenCallback;
+    } & ParsedGoldenCallbackInstruction<TProgram>)
+  | ({
       instructionType: BullxiInstruction.InitConfig;
     } & ParsedInitConfigInstruction<TProgram>)
   | ({
@@ -501,8 +569,14 @@ export type ParsedBullxiInstruction<
       instructionType: BullxiInstruction.PushPrices;
     } & ParsedPushPricesInstruction<TProgram>)
   | ({
+      instructionType: BullxiInstruction.RequestGolden;
+    } & ParsedRequestGoldenInstruction<TProgram>)
+  | ({
       instructionType: BullxiInstruction.RevealEntry;
     } & ParsedRevealEntryInstruction<TProgram>)
+  | ({
+      instructionType: BullxiInstruction.ScheduleTicks;
+    } & ParsedScheduleTicksInstruction<TProgram>)
   | ({
       instructionType: BullxiInstruction.SealEntry;
     } & ParsedSealEntryInstruction<TProgram>)
@@ -515,6 +589,9 @@ export type ParsedBullxiInstruction<
   | ({
       instructionType: BullxiInstruction.SnapshotGameweek;
     } & ParsedSnapshotGameweekInstruction<TProgram>)
+  | ({
+      instructionType: BullxiInstruction.TickGameweek;
+    } & ParsedTickGameweekInstruction<TProgram>)
   | ({
       instructionType: BullxiInstruction.UndelegatePriceBook;
     } & ParsedUndelegatePriceBookInstruction<TProgram>);
@@ -587,6 +664,13 @@ export function parseBullxiInstruction<TProgram extends string>(
         ...parseDelegatePriceBookInstruction(instruction),
       };
     }
+    case BullxiInstruction.GoldenCallback: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.GoldenCallback,
+        ...parseGoldenCallbackInstruction(instruction),
+      };
+    }
     case BullxiInstruction.InitConfig: {
       assertIsInstructionWithAccounts(instruction);
       return {
@@ -615,11 +699,25 @@ export function parseBullxiInstruction<TProgram extends string>(
         ...parsePushPricesInstruction(instruction),
       };
     }
+    case BullxiInstruction.RequestGolden: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.RequestGolden,
+        ...parseRequestGoldenInstruction(instruction),
+      };
+    }
     case BullxiInstruction.RevealEntry: {
       assertIsInstructionWithAccounts(instruction);
       return {
         instructionType: BullxiInstruction.RevealEntry,
         ...parseRevealEntryInstruction(instruction),
+      };
+    }
+    case BullxiInstruction.ScheduleTicks: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.ScheduleTicks,
+        ...parseScheduleTicksInstruction(instruction),
       };
     }
     case BullxiInstruction.SealEntry: {
@@ -648,6 +746,13 @@ export function parseBullxiInstruction<TProgram extends string>(
       return {
         instructionType: BullxiInstruction.SnapshotGameweek,
         ...parseSnapshotGameweekInstruction(instruction),
+      };
+    }
+    case BullxiInstruction.TickGameweek: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.TickGameweek,
+        ...parseTickGameweekInstruction(instruction),
       };
     }
     case BullxiInstruction.UndelegatePriceBook: {
@@ -733,6 +838,11 @@ export type BullxiPluginInstructions = {
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getDelegatePriceBookInstructionAsync> &
     SelfPlanAndSendFunctions;
+  goldenCallback: (
+    input: GoldenCallbackInput,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getGoldenCallbackInstruction> &
+    SelfPlanAndSendFunctions;
   initConfig: (
     input: InitConfigAsyncInput,
     config?: { programAddress?: Address | HasAddress },
@@ -753,10 +863,20 @@ export type BullxiPluginInstructions = {
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getPushPricesInstructionAsync> &
     SelfPlanAndSendFunctions;
+  requestGolden: (
+    input: MakeOptional<RequestGoldenAsyncInput, "payer">,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getRequestGoldenInstructionAsync> &
+    SelfPlanAndSendFunctions;
   revealEntry: (
     input: RevealEntryAsyncInput,
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getRevealEntryInstructionAsync> &
+    SelfPlanAndSendFunctions;
+  scheduleTicks: (
+    input: MakeOptional<ScheduleTicksAsyncInput, "payer">,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getScheduleTicksInstructionAsync> &
     SelfPlanAndSendFunctions;
   sealEntry: (
     input: SealEntryAsyncInput,
@@ -777,6 +897,11 @@ export type BullxiPluginInstructions = {
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getSnapshotGameweekInstructionAsync> &
     SelfPlanAndSendFunctions;
+  tickGameweek: (
+    input: TickGameweekAsyncInput,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getTickGameweekInstructionAsync> &
+    SelfPlanAndSendFunctions;
   undelegatePriceBook: (
     input: MakeOptional<UndelegatePriceBookAsyncInput, "payer">,
     config?: { programAddress?: Address | HasAddress },
@@ -793,6 +918,7 @@ export type BullxiPluginPdas = {
   bufferPda: typeof findBufferPdaPda;
   delegationRecordPda: typeof findDelegationRecordPdaPda;
   delegationMetadataPda: typeof findDelegationMetadataPdaPda;
+  programIdentity: typeof findProgramIdentityPda;
 };
 
 export type BullxiPluginRequirements = ClientWithRpc<
@@ -911,6 +1037,14 @@ export function bullxiProgram(
                 },
               ),
             ),
+          goldenCallback: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getGoldenCallbackInstruction(input, {
+                programAddress:
+                  instructionConfig?.programAddress ?? config.programAddress,
+              }),
+            ),
           initConfig: (input, instructionConfig) =>
             addSelfPlanAndSendFunctions(
               client,
@@ -946,6 +1080,17 @@ export function bullxiProgram(
                   instructionConfig?.programAddress ?? config.programAddress,
               }),
             ),
+          requestGolden: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getRequestGoldenInstructionAsync(
+                { ...input, payer: input.payer ?? client.payer },
+                {
+                  programAddress:
+                    instructionConfig?.programAddress ?? config.programAddress,
+                },
+              ),
+            ),
           revealEntry: (input, instructionConfig) =>
             addSelfPlanAndSendFunctions(
               client,
@@ -953,6 +1098,17 @@ export function bullxiProgram(
                 programAddress:
                   instructionConfig?.programAddress ?? config.programAddress,
               }),
+            ),
+          scheduleTicks: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getScheduleTicksInstructionAsync(
+                { ...input, payer: input.payer ?? client.payer },
+                {
+                  programAddress:
+                    instructionConfig?.programAddress ?? config.programAddress,
+                },
+              ),
             ),
           sealEntry: (input, instructionConfig) =>
             addSelfPlanAndSendFunctions(
@@ -985,6 +1141,14 @@ export function bullxiProgram(
             addSelfPlanAndSendFunctions(
               client,
               getSnapshotGameweekInstructionAsync(input, {
+                programAddress:
+                  instructionConfig?.programAddress ?? config.programAddress,
+              }),
+            ),
+          tickGameweek: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getTickGameweekInstructionAsync(input, {
                 programAddress:
                   instructionConfig?.programAddress ?? config.programAddress,
               }),
@@ -1039,6 +1203,11 @@ export function bullxiProgram(
             }),
           delegationMetadataPda: (seeds, pdaConfig) =>
             findDelegationMetadataPdaPda(seeds, {
+              programAddress:
+                pdaConfig?.programAddress ?? config.programAddress,
+            }),
+          programIdentity: (pdaConfig) =>
+            findProgramIdentityPda({
               programAddress:
                 pdaConfig?.programAddress ?? config.programAddress,
             }),

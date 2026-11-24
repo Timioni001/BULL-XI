@@ -48,6 +48,9 @@ export function startLiveSession(input: LiveSessionInput, onSnapshot: (s: LiveGa
     { ...input, benchmarkId: BENCHMARK_ID, leagueName: league.name, posOf, tickerOf },
     managers,
   );
+  // Simulated golden stock: a stable draw among the league's starters for this gameweek.
+  const pool = [...new Set(managers.flatMap((m) => m.lineup.starters))].sort();
+  if (pool.length) scorer.setGolden(pool[(input.gameweek.number * 7919 + 13) % pool.length]);
   const tick = () => {
     const now = Date.now();
     const pct: Record<string, number> = {};

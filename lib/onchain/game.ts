@@ -19,7 +19,9 @@ import {
   getDelegateGameweekInstructionAsync,
   getDelegateManagerInstructionAsync,
   getEntryDecoder,
+  getRequestGoldenInstructionAsync,
   getRevealEntryInstructionAsync,
+  getScheduleTicksInstructionAsync,
   getSealEntryInstructionAsync,
   getSettleEntryInstruction,
   getSnapshotGameweekInstructionAsync,
@@ -35,6 +37,10 @@ export const TEE_VALIDATOR = address("MTEWGuqxUpYZGFJQcp8tLN7x5v9BSeoFHYWQQ3n3xz
 
 export const GW_STATUS = { open: 0, kickedOff: 1, live: 2, closing: 3, final: 4 } as const;
 export const ENTRY_STATUS = { created: 0, sealed: 1, revealed: 2, settled: 3 } as const;
+export const VRF_STATE = { none: 0, requested: 1, fulfilled: 2 } as const;
+/** No stock (top gainer or golden stock not set). */
+export const NO_STOCK = 255;
+export const VRF_RETRY_SECS = 180;
 export const CHIP_CODE = { none: 0, tripleCaptain: 1, benchBoost: 2, hedge: 3, wildcard: 4, freeHit: 5 } as const;
 
 /* ------------------------------ Gameweek ids ----------------------------- */
@@ -183,6 +189,27 @@ export function snapshotDue(g: GameweekAccount, nowSec: number, bookLastTs: numb
 export async function snapshotIx(id: number): Promise<Instruction> {
   const [gw] = await findGameweekPda({ id });
   return getSnapshotGameweekInstructionAsync({ gameweek: gw });
+}
+
+/** Rollup: ask MagicBlock VRF for the golden stock draw (after kickoff). */
+export async function requestGoldenIx(payer: TransactionSigner, id: number): Promise<Instruction> {
+  const [gw] = await findGameweekPda({ id });
+  return getRequestGoldenInstructionAsync({ payer, gameweek: gw, seed: Math.floor(Math.random() * 256) });
+}
+
+/** Is a golden stock draw due (kicked off, never requested, or a stale request)? */
+export function goldenDue(g: GameweekAccount, nowSec: number): boolean {
+  if (g.status < GW_STATUS.kickedOff) return false;
+  if (g.vrfState === VRF_STATE.none) return true;
+  return g.vrfState === VRF_STATE.requested && nowSec - Number(g.vrfRequestedTs) > VRF_RETRY_SECS;
+}
+
+/** Rollup: schedule a MagicBlock crank that ticks the gameweek every interval. */
+export async function scheduleTicksIx(payer: TransactionSigner, id: number, opts: { intervalMs: number; iterations: number }): Promise<Instruction> {
+  const [gw] = await findGameweekPda({ id });
+  // Task ids are validator-global: derive one from the program and gameweek.
+  const taskId = BigInt(0x6275_6c6c) * BigInt(1_000_000_000) + BigInt(id % 1_000_000_000);
+  return getScheduleTicksInstructionAsync({ payer, gameweek: gw, taskId, intervalMs: BigInt(opts.intervalMs), iterations: BigInt(opts.iterations) });
 }
 
 export async function revealIx(entry: Address, gameweek: number): Promise<Instruction> {

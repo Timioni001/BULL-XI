@@ -13,6 +13,8 @@ pub const BEAT_BENCHMARK_BONUS: i32 = 2;
 pub const TOP_GAINER_BONUS: i32 = 2;
 /// No top gainer (nobody started anything, or no prices).
 pub const NO_STOCK: u8 = u8::MAX;
+/// The VRF-drawn golden stock scores double for everyone who has it.
+pub const GOLDEN_MULTIPLIER: i32 = 2;
 /// Beat SPYx by at least 0.5 percentage points (in millionths of a percent).
 pub const BEAT_BENCHMARK_MARGIN_E6: i128 = 500_000;
 pub const CAPTAIN_MULTIPLIER: i32 = 2;
@@ -134,7 +136,7 @@ pub fn base_points(open: u64, close: u64) -> i32 {
 }
 
 /// Points for one stock before the captain multiplier (base + bonuses, hedge applied).
-pub fn stock_points(i: usize, open: &[u64], close: &[u64], hedged: bool, top_gainer: u8) -> i32 {
+pub fn stock_points(i: usize, open: &[u64], close: &[u64], hedged: bool, top_gainer: u8, golden: u8) -> i32 {
     let base = base_points(open[i], close[i]);
     let mut bonus = 0;
     let halted = open[i] == 0 || close[i] == 0;
@@ -147,6 +149,9 @@ pub fn stock_points(i: usize, open: &[u64], close: &[u64], hedged: bool, top_gai
     let mut pts = base + bonus;
     if hedged && pts < 0 {
         pts = 0;
+    }
+    if i == golden as usize {
+        pts *= GOLDEN_MULTIPLIER;
     }
     pts
 }
@@ -203,6 +208,26 @@ pub fn top_gainer(picked: u64, open: &[u64], close: &[u64]) -> u8 {
     best.map_or(NO_STOCK, |(i, _)| i as u8)
 }
 
+/// Picks the golden stock from VRF randomness: uniformly among the stocks
+/// started this gameweek (bitmask), or NO_STOCK if none.
+pub fn pick_golden(picked: u64, randomness: &[u8; 32]) -> u8 {
+    let n = picked.count_ones() as u64;
+    if n == 0 {
+        return NO_STOCK;
+    }
+    let r = u64::from_le_bytes(randomness[0..8].try_into().unwrap()) % n;
+    let mut seen = 0u64;
+    for i in 0..64u8 {
+        if picked & (1u64 << i) != 0 {
+            if seen == r {
+                return i;
+            }
+            seen += 1;
+        }
+    }
+    NO_STOCK
+}
+
 /// Bitmask of a lineup's starters (used to find the gameweek's top gainer).
 pub fn starters_mask(starters: &[u8; XI_SIZE]) -> u64 {
     starters.iter().fold(0u64, |m, &s| m | (1u64 << s))
@@ -211,7 +236,7 @@ pub fn starters_mask(starters: &[u8; XI_SIZE]) -> u64 {
 /// Gameweek total from opening and closing TWAPs (micro-USD per stock), with
 /// auto-subs for halted stocks (no price), the vice taking the armband if the
 /// captain is halted, chips, the gameweek's top gainer and any transfer hit.
-pub fn score_lineup(l: &Lineup, open: &[u64], close: &[u64], transfer_hit: u8, top: u8) -> i32 {
+pub fn score_lineup(l: &Lineup, open: &[u64], close: &[u64], transfer_hit: u8, top: u8, golden: u8) -> i32 {
     let halted = |s: u8| open[s as usize] == 0 || close[s as usize] == 0;
     let (starters, bench) = apply_auto_subs(l, halted);
     let captain = if !halted(l.captain) {
@@ -224,12 +249,12 @@ pub fn score_lineup(l: &Lineup, open: &[u64], close: &[u64], transfer_hit: u8, t
     let mult = if l.chip == CHIP_TRIPLE_CAPTAIN { TRIPLE_CAPTAIN_MULTIPLIER } else { CAPTAIN_MULTIPLIER };
     let mut total = 0;
     for &s in &starters {
-        let p = stock_points(s as usize, open, close, l.chip == CHIP_HEDGE && l.hedge == s, top);
+        let p = stock_points(s as usize, open, close, l.chip == CHIP_HEDGE && l.hedge == s, top, golden);
         total += if Some(s) == captain && starters.contains(&s) { p * mult } else { p };
     }
     if l.chip == CHIP_BENCH_BOOST {
         for &s in &bench {
-            total += stock_points(s as usize, open, close, false, top);
+            total += stock_points(s as usize, open, close, false, top, golden);
         }
     }
     total - transfer_hit as i32
@@ -319,22 +344,22 @@ mod tests {
         let mut close = vec![100_000_000u64; STOCK_COUNT];
         close[l.captain as usize] = 102_000_000; // +2% = 20, beats SPYx (0%) by 2 -> +2 = 22, x2 = 44
         close[l.starters[2] as usize] = 99_000_000; // -1% = -10
-        assert_eq!(score_lineup(&l, &open, &close, 0, NO_STOCK), 44 - 10);
-        assert_eq!(score_lineup(&l, &open, &close, 4, NO_STOCK), 44 - 10 - 4);
+        assert_eq!(score_lineup(&l, &open, &close, 0, NO_STOCK, NO_STOCK), 44 - 10);
+        assert_eq!(score_lineup(&l, &open, &close, 4, NO_STOCK, NO_STOCK), 44 - 10 - 4);
 
         let mut tc = squad();
         tc.chip = CHIP_TRIPLE_CAPTAIN;
-        assert_eq!(score_lineup(&tc, &open, &close, 0, NO_STOCK), 66 - 10);
+        assert_eq!(score_lineup(&tc, &open, &close, 0, NO_STOCK, NO_STOCK), 66 - 10);
 
         let mut h = squad();
         h.chip = CHIP_HEDGE;
         h.hedge = h.starters[2];
-        assert_eq!(score_lineup(&h, &open, &close, 0, NO_STOCK), 44);
+        assert_eq!(score_lineup(&h, &open, &close, 0, NO_STOCK, NO_STOCK), 44);
 
         let mut bb = squad();
         bb.chip = CHIP_BENCH_BOOST;
         close[bb.bench[0] as usize] = 101_000_000; // ETF on bench +1% = 10 (+2 beats SPYx by 1) = 12
-        assert_eq!(score_lineup(&bb, &open, &close, 0, NO_STOCK), 44 - 10 + 12);
+        assert_eq!(score_lineup(&bb, &open, &close, 0, NO_STOCK, NO_STOCK), 44 - 10 + 12);
     }
 
     #[test]
@@ -344,7 +369,7 @@ mod tests {
         let mut close = vec![100_000_000u64; STOCK_COUNT];
         close[l.captain as usize] = 0; // no price = halted
         close[l.vice as usize] = 101_000_000; // +1% = 10 + 2 bonus = 12, x2 = 24
-        assert_eq!(score_lineup(&l, &open, &close, 0, NO_STOCK), 24);
+        assert_eq!(score_lineup(&l, &open, &close, 0, NO_STOCK, NO_STOCK), 24);
     }
 
     #[test]
@@ -357,7 +382,7 @@ mod tests {
         let picked = starters_mask(&l.starters);
         let top = top_gainer(picked, &open, &close);
         assert_eq!(top, l.starters[3]);
-        assert_eq!(score_lineup(&l, &open, &close, 0, top), 32 + 2 + 12);
+        assert_eq!(score_lineup(&l, &open, &close, 0, top, NO_STOCK), 32 + 2 + 12);
         // A stock nobody started can't be the top gainer.
         let outsider = (0..STOCK_COUNT as u8).find(|s| !l.squad.contains(s)).unwrap();
         close[outsider as usize] = 150_000_000;
@@ -380,6 +405,32 @@ mod tests {
         assert!(is_valid_formation(&st));
         // The sub scores: +1% on the bench Blue Chip = 10 + 2 beat SPYx.
         close[l.bench[1] as usize] = 101_000_000;
-        assert_eq!(score_lineup(&l, &open, &close, 0, NO_STOCK), 12);
+        assert_eq!(score_lineup(&l, &open, &close, 0, NO_STOCK, NO_STOCK), 12);
+    }
+
+    #[test]
+    fn golden_stock_doubles_points() {
+        let l = squad();
+        let open = vec![100_000_000u64; STOCK_COUNT];
+        let mut close = vec![100_000_000u64; STOCK_COUNT];
+        close[l.starters[2] as usize] = 101_000_000; // +1% = 10 +2 beat SPYx = 12
+        assert_eq!(score_lineup(&l, &open, &close, 0, NO_STOCK, NO_STOCK), 12);
+        assert_eq!(score_lineup(&l, &open, &close, 0, NO_STOCK, l.starters[2]), 24);
+        // Golden captain: doubled, then the armband doubles again.
+        close[l.captain as usize] = 101_000_000;
+        assert_eq!(score_lineup(&l, &open, &close, 0, NO_STOCK, l.captain), 12 + 48);
+    }
+
+    #[test]
+    fn golden_pick_is_uniform_over_started_stocks() {
+        let picked = (1u64 << 3) | (1u64 << 7) | (1u64 << 20);
+        let mut seen = [0u32; 64];
+        for k in 0..300u64 {
+            let mut r = [0u8; 32];
+            r[0..8].copy_from_slice(&k.to_le_bytes());
+            seen[pick_golden(picked, &r) as usize] += 1;
+        }
+        assert_eq!((seen[3], seen[7], seen[20]), (100, 100, 100));
+        assert_eq!(pick_golden(0, &[9u8; 32]), NO_STOCK);
     }
 }

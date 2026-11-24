@@ -109,6 +109,8 @@ export function ProofView() {
                 <Fact label={P.deadline} value={new Date(d.gameweek.deadline).toUTCString().slice(5, 22) + " UTC"} />
                 <Fact label={P.startedStocks} value={String(d.gameweek.startedStocks)} />
                 <Fact label={P.topGainer} value={d.gameweek.topGainer ?? "–"} />
+                <Fact label={P.golden} value={d.gameweek.golden ? `★ ${d.gameweek.golden}` : "–"} />
+                <Fact label="VRF" value={d.gameweek.goldenStatus} />
               </dl>
             ) : (
               <Shimmer className="mt-4 h-28 rounded-xl" />

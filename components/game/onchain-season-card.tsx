@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth/context";
+import { existingDeviceAddress } from "@/lib/auth/player";
 import { getManagerRecord } from "@/lib/data";
 import { copy } from "@/lib/copy";
 import { routes } from "@/lib/routes";
@@ -10,10 +12,14 @@ import { useAsync } from "@/lib/hooks/use-async";
 
 const t = copy.manager;
 
-/** Signed-in managers: your season as settled onchain, linking to your public profile. */
+/** Your season as settled onchain (signed-in account, or this device), linking to your public profile. */
 export function OnchainSeasonCard({ className }: { className?: string }) {
   const { status, account } = useAuth();
-  const addr = status === "signedIn" ? account?.address : null;
+  const [device, setDevice] = useState<string | null>(null);
+  useEffect(() => {
+    if (status !== "signedIn") void existingDeviceAddress().then(setDevice);
+  }, [status]);
+  const addr = status === "signedIn" ? account?.address : device;
   if (!addr) return null;
   return <Card key={addr} address={addr} className={className} />;
 }

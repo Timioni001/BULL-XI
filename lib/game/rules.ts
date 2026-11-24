@@ -42,6 +42,8 @@ export const BEAT_BENCHMARK_BONUS = 2;
 /** A stock must beat SPYx by at least this many percentage points to earn the bonus. */
 export const BEAT_BENCHMARK_MARGIN = 0.5;
 export const TOP_GAINER_BONUS = 2;
+/** The golden stock, drawn by MagicBlock VRF at kickoff, scores double for everyone who has it. */
+export const GOLDEN_MULTIPLIER = 2;
 export const CAPTAIN_MULTIPLIER = 2;
 export const TRIPLE_CAPTAIN_MULTIPLIER = 3;
 
@@ -361,6 +363,8 @@ export interface StockScoreInput {
   isBenchmark?: boolean;
   isTopGainer?: boolean;
   hedged?: boolean;
+  /** Golden stock this gameweek: points doubled (after hedge, before the captain's armband) */
+  golden?: boolean;
 }
 
 export interface StockScore {
@@ -377,6 +381,7 @@ export function scoreStock(input: StockScoreInput): StockScore {
   if (input.isTopGainer) bonus += TOP_GAINER_BONUS;
   let points = base + bonus;
   if (input.hedged && points < 0) points = 0;
+  if (input.golden) points *= GOLDEN_MULTIPLIER;
   return { base, bonus, points };
 }
 
@@ -420,6 +425,8 @@ export interface GameweekScoreInput {
   pct: Record<string, number>;
   benchmarkId: string;
   topGainerId?: string | null;
+  /** Golden stock drawn by VRF for this gameweek, if any */
+  goldenId?: string | null;
   halted?: ReadonlySet<string>;
   chip?: ChipId | null;
   hedgeId?: string | null;
@@ -452,6 +459,7 @@ export function scoreGameweek(input: GameweekScoreInput): GameweekScore {
       isBenchmark: id === input.benchmarkId,
       isTopGainer: id === input.topGainerId,
       hedged: input.chip === "hedge" && input.hedgeId === id,
+      golden: !!input.goldenId && id === input.goldenId,
     });
     const isStarter = starters.includes(id);
     const active = !halted.has(id) && (isStarter || benchCounts);

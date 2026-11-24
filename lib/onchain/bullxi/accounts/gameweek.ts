@@ -77,6 +77,13 @@ export type Gameweek = {
   picked: bigint;
   /** Biggest TWAP gainer among `picked`, set at full time (255 = none) */
   topGainer: number;
+  /** Golden stock drawn by MagicBlock VRF after kickoff (255 = none yet) */
+  golden: number;
+  /** VRF request state (none, requested, fulfilled) and when it was requested */
+  vrfState: number;
+  vrfRequestedTs: bigint;
+  /** Room for future fields without moving gameweeks again */
+  reserved: ReadonlyUint8Array;
 };
 
 export type GameweekArgs = {
@@ -98,6 +105,13 @@ export type GameweekArgs = {
   picked: number | bigint;
   /** Biggest TWAP gainer among `picked`, set at full time (255 = none) */
   topGainer: number;
+  /** Golden stock drawn by MagicBlock VRF after kickoff (255 = none yet) */
+  golden: number;
+  /** VRF request state (none, requested, fulfilled) and when it was requested */
+  vrfState: number;
+  vrfRequestedTs: number | bigint;
+  /** Room for future fields without moving gameweeks again */
+  reserved: ReadonlyUint8Array;
 };
 
 /** Gets the encoder for {@link GameweekArgs} account data. */
@@ -118,6 +132,10 @@ export function getGameweekEncoder(): FixedSizeEncoder<GameweekArgs> {
       ["closeTwap", getArrayEncoder(getU64Encoder(), { size: 48 })],
       ["picked", getU64Encoder()],
       ["topGainer", getU8Encoder()],
+      ["golden", getU8Encoder()],
+      ["vrfState", getU8Encoder()],
+      ["vrfRequestedTs", getI64Encoder()],
+      ["reserved", fixEncoderSize(getBytesEncoder(), 64)],
     ]),
     (value) => ({ ...value, discriminator: GAMEWEEK_DISCRIMINATOR }),
   );
@@ -140,6 +158,10 @@ export function getGameweekDecoder(): FixedSizeDecoder<Gameweek> {
     ["closeTwap", getArrayDecoder(getU64Decoder(), { size: 48 })],
     ["picked", getU64Decoder()],
     ["topGainer", getU8Decoder()],
+    ["golden", getU8Decoder()],
+    ["vrfState", getU8Decoder()],
+    ["vrfRequestedTs", getI64Decoder()],
+    ["reserved", fixDecoderSize(getBytesDecoder(), 64)],
   ]);
 }
 
@@ -218,5 +240,5 @@ export async function fetchAllMaybeGameweek(
 }
 
 export function getGameweekSize(): number {
-  return 1592;
+  return 1666;
 }

@@ -435,3 +435,11 @@ describe("real stock universe", () => {
     }
   });
 });
+
+describe("golden stock (VRF)", () => {
+  it("doubles the golden stock's points, then the armband doubles again", () => {
+    expect(scoreStock({ pct: 1, benchmarkPct: 0, golden: true }).points).toBe(24); // (10 + 2 beat SPYx) x2
+    expect(scoreStock({ pct: -1, benchmarkPct: 0, golden: true, hedged: true }).points).toBe(0);
+    expect(scoreStock({ pct: -1, benchmarkPct: 0, golden: true }).points).toBe(-20);
+  });
+});
