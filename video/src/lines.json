@@ -1,0 +1,14 @@
+[
+  { "id": "open", "text": "Every weekend, millions of people pick a team, wear the armband, and argue about it all week." },
+  { "id": "question", "text": "Now markets never close. So we asked a simple question. What if stocks were the players?" },
+  { "id": "title", "text": "This is BULL-XI. Fantasy football, for real stocks." },
+  { "id": "squad", "text": "Pick fifteen tokenized stocks with a hundred credits. One tap builds a legal squad." },
+  { "id": "pick", "text": "Choose your starting eleven. Your captain scores double." },
+  { "id": "seal", "text": "Lock it before kickoff. Your squad is sealed inside MagicBlock's private rollup, so rivals can't copy it." },
+  { "id": "points", "text": "Points come from real price moves. Up one point eight percent is eighteen points, from a time-weighted price written onchain every minute." },
+  { "id": "golden", "text": "At kickoff, MagicBlock's verifiable randomness draws a golden stock. It scores double for everyone who holds it." },
+  { "id": "hourly", "text": "A new gameweek starts every hour, and MagicBlock cranks run every step on their own." },
+  { "id": "record", "text": "At full time, the program scores every squad and commits the result to Solana. Anyone can check it." },
+  { "id": "everyone", "text": "No wallet. No fees. Just sign in and play." },
+  { "id": "close", "text": "BULL-XI. Built on Solana and MagicBlock." }
+]
