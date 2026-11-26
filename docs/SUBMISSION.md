@@ -9,8 +9,8 @@ Paste into `build.magicblock.app/?stage=blitz#submit`.
 **Category / theme:** Entertainment Finance
 
 **Links**
-- App: https://bullxi.timioni1490.workers.dev
-- Proof page (live devnet numbers): https://bullxi.timioni1490.workers.dev/proof
+- App: https://bull-xi.timioni1490.workers.dev
+- Proof page (live devnet numbers): https://bull-xi.timioni1490.workers.dev/proof
 - GitHub: https://github.com/Timioni001/BULL-XI
 - Program (devnet): https://explorer.solana.com/address/EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN?cluster=devnet
 - Demo video: `docs/media/bullxi-demo.mp4` in the repo

@@ -9,7 +9,7 @@ Built for MagicBlock Solana Blitz v10. Runs on **devnet**: test SOL, real market
 
 | | |
 |---|---|
-| App | `https://bullxi.timioni1490.workers.dev` |
+| App | `https://bull-xi.timioni1490.workers.dev` |
 | Proof page (live devnet numbers) | `/proof` |
 | Program (devnet) | [`EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN`](https://explorer.solana.com/address/EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN?cluster=devnet) |
 | Demo video (80 s, recorded from the real app) | [`docs/media/bullxi-demo.mp4`](docs/media/bullxi-demo.mp4) |
