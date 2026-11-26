@@ -13,20 +13,22 @@ BULL-XI
 **Description**
 
 ```
-BULL-XI is a live stock-picking competition on Solana. You build a portfolio of 15 tokenized stocks (xStocks such as NVDAx, TSLAx and SPYx) within a fixed budget, pick one stock to count double, and lock it in before the round starts. A new round starts every hour, plus a daily one, and every point comes from real price moves.
+BULL-XI is a real-time stock-picking competition built on Solana and MagicBlock. Participants assemble a portfolio of 15 tokenized equities (xStocks such as NVDAx, TSLAx and SPYx) within a fixed budget, designate one holding to count double, and commit their selection before each round opens. Rounds run hourly and daily, and results are calculated from live market prices.
 
-How it uses MagicBlock (every piece does real work, all live on devnet):
-- Private Ephemeral Rollup (TEE): locked picks stay sealed until the round starts, so no one can copy them. Pro portfolios and league prize pots also live here, readable only by their owners.
-- Price book on the rollup: 41 live prices written every minute. Scores use time-weighted prices, so one odd trade can't move the result.
-- MagicBlock cranks: the rollup moves each round from start to finish on a timer, with no server involved.
-- VRF: a bonus stock is drawn at the start of each round and scores double for everyone who holds it.
-- Commit: every final score and season record is written back to Solana, where anyone can check it.
+The app uses familiar fantasy-sports language (squad, captain, gameweek) to make equity markets approachable for a mainstream audience.
 
-Pro preview turns your picks into investments: test dollars split equally across your 15 stocks at the onchain price, private to you, and you can sell any time. Friends leagues hold entry fees in an onchain pot that is paid to the winner automatically.
+MagicBlock integration (all live on devnet):
+- Private Ephemeral Rollup (TEE): submitted portfolios remain confidential until the round opens, preventing copy-trading. Pro portfolios and league prize pools are held under the same members-only access.
+- Onchain price book: 41 prices are written to the rollup every minute. Scoring uses time-weighted average prices, which limits the impact of any single trade.
+- Cranks: each round advances from open to settlement on a schedule executed by the rollup itself.
+- VRF: a verifiably random bonus asset is selected at the start of each round.
+- Commit: final results and season standings are committed to Solana for independent verification.
 
-Accounts and fees: sign in with Google or email. An account is created for you and the game covers network fees, so there is no wallet app to install and no gas to buy. Rules and scoring are enforced in the program, not just the app.
+Pro preview: each selection becomes an investment. Test funds are allocated equally across the 15 holdings at the onchain price, held privately, and can be sold at any time. Private leagues collect entry fees into an onchain prize pool that is paid to the winner automatically at settlement. An explainer sets out the reasoning behind every automated selection, using current price data and no forecasts.
 
-Devnet preview with test dollars priced from real market data. Next step: real-money Pro, with USDC deposits buying real xStocks.
+Onboarding: users sign in with Google or email. An account is provisioned automatically and network fees are sponsored, so no wallet software or SOL is required. All game rules and scoring are enforced by the onchain program.
+
+Status: devnet preview using test funds priced from real market data. Next milestone: real-money Pro, with USDC deposits purchasing real xStocks.
 ```
 
 **Categories:** Games, DeFi, Privacy
@@ -75,82 +77,75 @@ Attach `docs/media/bullxi-film.mp4`.
 ### Option A: one long post (needs X Premium)
 
 ```
-BULL-XI: a live stock-picking competition on Solana, built for @magicblock Solana Blitz.
+Introducing BULL-XI: a real-time stock-picking competition on Solana, built on @magicblock for Solana Blitz.
 
-How it works
-• Pick 15 tokenized stocks (NVDAx, TSLAx, SPYx and more) within a fixed budget
-• Choose one stock to count double, then lock your picks before the round starts
-• A new round every hour. Points come from real price moves, measured with time-weighted prices so one odd trade can't swing a score
-• Not sure what to pick? Auto-pick explains every choice with real data from today and this week
+Participants build a portfolio of 15 tokenized equities, designate one holding to count double, and commit before each round opens. Rounds run every hour, scored from live market prices.
 
-What MagicBlock does
-• Private Ephemeral Rollup: your picks stay sealed until the round starts, so no one can copy them
-• Price book on the rollup: 41 live prices written every minute
-• Cranks: each round runs from start to finish on its own timer
-• VRF: a bonus stock is drawn every round and scores double
-• Commit: every final score is written to Solana for anyone to verify
+MagicBlock integration
+• Private Ephemeral Rollup: portfolios stay confidential until the round opens, preventing copy-trading
+• Onchain price book: 41 prices written every minute; scoring uses time-weighted averages
+• Cranks: every round advances to settlement on the rollup's own schedule
+• VRF: a verifiably random bonus asset is drawn each round
+• Commit: final results are written to Solana for independent verification
 
 Pro preview
-• Your picks become your investments: test dollars split equally across your 15 stocks at the onchain price
-• Your portfolio is private to you. Sell any time
-• Friends leagues hold entry fees in an onchain pot, paid to the winner automatically
+• Selections become investments, allocated equally at the onchain price and held privately
+• Private leagues pool entry fees onchain and pay the winner automatically at settlement
+• Every automated pick comes with a data-based rationale, no forecasts
 
-Sign in with Google or email. The game covers network fees, so there's no wallet app to install and no gas to buy.
+Google or email sign-in. Network fees are sponsored, so no wallet software or SOL is required.
 
-Live on devnet with test dollars priced from real market data.
+Live on devnet with test funds priced from real market data.
 
-Try it: https://bull-xi.timioni1490.workers.dev
-Proof: https://bull-xi.timioni1490.workers.dev/proof
+App: https://bull-xi.timioni1490.workers.dev
+Live proof: https://bull-xi.timioni1490.workers.dev/proof
 Code: https://github.com/Timioni001/BULL-XI
 ```
 
-### Option B: thread (works on any account, each post under 280 characters)
+### Option B: thread (any account, each post under 280 characters)
 
 1/ (attach the video)
 ```
-BULL-XI: a live stock-picking competition on Solana.
+Introducing BULL-XI: a real-time stock-picking competition on Solana, built on @magicblock for Solana Blitz.
 
-Pick 15 real stocks, choose one to count double, lock in. A new round every hour, scored from real price moves.
+Build a 15-stock portfolio, commit before the round opens, and compete on live market prices. New rounds every hour.
 
-Built on @magicblock for Solana Blitz 🧵
 https://bull-xi.timioni1490.workers.dev
 ```
 
 2/
 ```
-Your picks stay sealed in MagicBlock's Private Ephemeral Rollup until the round starts. No one can copy them.
+Confidentiality: portfolios are sealed in MagicBlock's Private Ephemeral Rollup until the round opens, preventing copy-trading.
 
-At the start, VRF draws a bonus stock that scores double for everyone holding it.
+Fairness: a verifiably random bonus asset is drawn by VRF at the start of every round.
 ```
 
 3/
 ```
-Scores use time-weighted prices from a price book on the rollup, updated every minute, so one odd trade can't swing a result.
+Scoring integrity: 41 prices are written to an onchain price book every minute, and results use time-weighted averages.
 
-MagicBlock cranks run every round on a timer. Final scores are committed to Solana.
+Automation: MagicBlock cranks advance each round to settlement, and final results are committed to Solana.
 ```
 
 4/
 ```
-Not sure what to pick? Auto-pick explains every choice: what the company does, its role in your portfolio, and its real moves today and this week.
+Pro preview: selections become investments, allocated equally at the onchain price and held privately.
 
-No forecasts. Just the reasoning.
+Private leagues pool entry fees onchain and pay the winner automatically at settlement.
 ```
 
 5/
 ```
-Pro preview: your picks become your investments.
+Every automated pick comes with a rationale: the company's business, its role in the portfolio, and its price moves today and this week. No forecasts.
 
-Test dollars split across your 15 stocks at the onchain price, private to you, sell any time. Friends leagues hold entry fees in an onchain pot that pays the winner automatically.
+Sign-in is Google or email. Fees are sponsored, so no wallet software or SOL is needed.
 ```
 
 6/
 ```
-Sign in with Google or email. The game covers network fees: no wallet app, no gas.
+Live on devnet with test funds priced from real market data.
 
-Devnet preview with test dollars priced from real market data.
-
-Proof: https://bull-xi.timioni1490.workers.dev/proof
+Live proof: https://bull-xi.timioni1490.workers.dev/proof
 Code: https://github.com/Timioni001/BULL-XI
 ```
 
