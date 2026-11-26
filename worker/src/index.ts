@@ -43,8 +43,18 @@ const cors = {
 const json = (body: unknown, status = 200, extra: Record<string, string> = {}) => new Response(JSON.stringify(body), { status, headers: { ...cors, ...extra } });
 
 let signerCache: KeyPairSigner | null = null;
+/** Reads PUSHER_KEY: a [n,n,...] byte array (64 numbers). Extra text around it, as in PUSHER_KEY.txt, is ignored. */
+export function parseKey(raw: string | undefined): Uint8Array {
+  if (!raw || !raw.trim()) throw new Error("PUSHER_KEY secret is not set");
+  const arr = raw.match(/\[[\d\s,]+\]/)?.[0];
+  if (!arr) throw new Error("PUSHER_KEY must contain the [n,n,...] line from PUSHER_KEY.txt");
+  const bytes = JSON.parse(arr) as number[];
+  if (bytes.length !== 64) throw new Error(`PUSHER_KEY has ${bytes.length} numbers, expected 64`);
+  return new Uint8Array(bytes);
+}
+
 async function signer(env: Env) {
-  signerCache ??= await createKeyPairSignerFromBytes(new Uint8Array(JSON.parse(env.PUSHER_KEY) as number[]));
+  signerCache ??= await createKeyPairSignerFromBytes(parseKey(env.PUSHER_KEY));
   return signerCache;
 }
 
@@ -133,7 +143,13 @@ export default {
         return json({ ok: false, error: e instanceof Error ? e.message : String(e) }, 500);
       }
     }
-    if (url.pathname === "/sponsor") return json({ address: (await signer(env)).address });
+    if (url.pathname === "/sponsor") {
+      try {
+        return json({ address: (await signer(env)).address });
+      } catch (e) {
+        return json({ ok: false, error: e instanceof Error ? e.message : String(e) }, 500);
+      }
+    }
     if (url.pathname === "/health" || url.pathname === "/price-book") {
       const cache = caches.default;
       const hit = await cache.match(req);
