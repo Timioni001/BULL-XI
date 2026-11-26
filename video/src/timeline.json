@@ -1,7 +1,7 @@
 {
   "fps": 30,
-  "frames": 2741,
-  "seconds": 91.36,
+  "frames": 3573,
+  "seconds": 119.09,
   "scenes": [
     {
       "id": "open",
@@ -32,60 +32,81 @@
       "voiceAt": 652
     },
     {
-      "id": "pick",
+      "id": "thesis",
       "start": 858,
-      "frames": 168,
-      "voice": "pick",
+      "frames": 246,
+      "voice": "thesis",
       "voiceAt": 876
     },
     {
+      "id": "pick",
+      "start": 1104,
+      "frames": 168,
+      "voice": "pick",
+      "voiceAt": 1122
+    },
+    {
       "id": "seal",
-      "start": 1026,
+      "start": 1272,
       "frames": 259,
       "voice": "seal",
-      "voiceAt": 1044
+      "voiceAt": 1290
     },
     {
       "id": "points",
-      "start": 1285,
+      "start": 1531,
       "frames": 310,
       "voice": "points",
-      "voiceAt": 1303
+      "voiceAt": 1549
     },
     {
       "id": "golden",
-      "start": 1595,
+      "start": 1841,
       "frames": 262,
       "voice": "golden",
-      "voiceAt": 1613
+      "voiceAt": 1859
     },
     {
       "id": "hourly",
-      "start": 1857,
+      "start": 2103,
       "frames": 210,
       "voice": "hourly",
-      "voiceAt": 1875
+      "voiceAt": 2121
+    },
+    {
+      "id": "pro",
+      "start": 2313,
+      "frames": 324,
+      "voice": "pro",
+      "voiceAt": 2331
+    },
+    {
+      "id": "pot",
+      "start": 2637,
+      "frames": 262,
+      "voice": "pot",
+      "voiceAt": 2655
     },
     {
       "id": "record",
-      "start": 2067,
+      "start": 2899,
       "frames": 242,
       "voice": "record",
-      "voiceAt": 2085
+      "voiceAt": 2917
     },
     {
       "id": "everyone",
-      "start": 2309,
+      "start": 3141,
       "frames": 162,
       "voice": "everyone",
-      "voiceAt": 2327
+      "voiceAt": 3159
     },
     {
       "id": "close",
-      "start": 2471,
+      "start": 3303,
       "frames": 270,
       "voice": "close",
-      "voiceAt": 2495
+      "voiceAt": 3327
     }
   ]
 }

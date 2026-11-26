@@ -198,6 +198,72 @@ const CLIPS = {
     await ctx.close();
   },
 
+  /** Auto-pick, then "Why this squad" with real moves */
+  async thesis(browser) {
+    const { ctx, page } = await newPhone(browser);
+    await page.goto(APP + "/app?demo=0");
+    await page.evaluate(() => localStorage.clear());
+    await page.goto(APP + "/app/squad");
+    await page.getByRole("button", { name: /Auto-pick/ }).first().click({ timeout: 20000 });
+    await wait(page, 1500);
+    await page.keyboard.press("Escape");
+    const stop = await record(page, "thesis");
+    await wait(page, 800);
+    await page.getByRole("button", { name: /Why this squad/ }).first().click();
+    await wait(page, 5000);
+    await page.evaluate(() => document.querySelector("[data-vaul-drawer] .overflow-y-auto, [data-vaul-drawer] [class*=overflow]")?.scrollBy({ top: 700, behavior: "smooth" }));
+    await wait(page, 3500);
+    await stop();
+    await ctx.close();
+  },
+
+  /** Go Pro: claim test dollars, invest the squad (real devnet, private rollup) */
+  async pro(browser) {
+    const { ctx, page } = await newPhone(browser);
+    await page.goto(APP + "/app?demo=0");
+    await page.evaluate(() => localStorage.clear());
+    await page.goto(APP + "/app/squad");
+    await page.getByRole("button", { name: /Auto-pick/ }).first().click({ timeout: 20000 });
+    await wait(page, 800);
+    await page.goto(APP + "/app/pro");
+    await page.getByRole("button", { name: /Claim \$1,000/ }).last().waitFor({ timeout: 30000 });
+    await wait(page, 1000);
+    const stop = await record(page, "pro");
+    await wait(page, 1200);
+    await page.getByRole("button", { name: /Claim \$1,000/ }).last().click();
+    await page.getByText("Portfolio value").waitFor({ timeout: 120000 });
+    await wait(page, 1500);
+    await page.getByRole("button", { name: /Invest \$250/ }).last().click();
+    await page.getByText(/shares/).first().waitFor({ timeout: 90000 });
+    await wait(page, 1500);
+    await scroll(page, 500);
+    await wait(page, 2500);
+    await stop();
+    await ctx.close();
+  },
+
+  /** Friends league: create with a $5 pot, land on the league page */
+  async pot(browser) {
+    const { ctx, page } = await newPhone(browser);
+    await page.goto(APP + "/app?demo=0");
+    await page.goto(APP + "/app/leagues");
+    await wait(page, 2500);
+    const stop = await record(page, "pot");
+    await wait(page, 1000);
+    await page.getByRole("button", { name: /Create league/ }).first().click();
+    await wait(page, 800);
+    await page.getByPlaceholder("Office Legends").fill("Desk Bulls");
+    await wait(page, 600);
+    await page.getByRole("radio", { name: "$5" }).click();
+    await wait(page, 600);
+    await page.getByRole("button", { name: /^Create league$/ }).last().click();
+    await page.waitForURL("**/app/friends**", { timeout: 150000 });
+    await page.getByText(/Pot/).first().waitFor({ timeout: 30000 });
+    await wait(page, 3500);
+    await stop();
+    await ctx.close();
+  },
+
   /** Public profile with results settled on Solana */
   async profile(browser) {
     const { ctx, page } = await newPhone(browser);

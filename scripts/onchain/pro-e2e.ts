@@ -72,9 +72,9 @@ async function main() {
 
   // Portfolios (sponsor pays), managers and entries.
   for (const [p, name] of [[A, "Alice"], [B, "Bola"]] as const) {
-    sig = await sendAndConfirm(config.solanaRpc, crank, await portfolioIxs(p, crank));
+    sig = await retry(async () => sendAndConfirm(config.solanaRpc, crank, await portfolioIxs(p, crank)));
     log(name, "portfolio created + delegated", explorer("tx", sig));
-    sig = await sendAndConfirm(config.solanaRpc, crank, [...(await joinIxs(p, crank, name, `${name} XI`)), ...(await entryIxs(p, crank, id))]);
+    sig = await retry(async () => sendAndConfirm(config.solanaRpc, crank, [...(await joinIxs(p, crank, name, `${name} XI`)), ...(await entryIxs(p, crank, id))]));
     log(name, "manager + entry created + delegated", explorer("tx", sig));
   }
 
@@ -104,7 +104,7 @@ async function main() {
 
   // A creates a $10 friends league for this gameweek, both join.
   const leagueId = newLeagueId();
-  sig = await sendAndConfirm(config.solanaRpc, crank, await createLeagueIxs(A, crank, leagueId, "Desk Bulls", id, 10));
+  sig = await retry(async () => sendAndConfirm(config.solanaRpc, crank, await createLeagueIxs(A, crank, leagueId, "Desk Bulls", id, 10)));
   log("league", leagueCode(leagueId), "created + delegated ($10 entry)", explorer("tx", sig));
   const league0 = await waitFor("league on TEE", () => readLeague(config.teeRpc, leagueId));
   sig = await retry(async () => sendAndConfirm(aTee, A, [await joinLeagueIx(A, league0)]));

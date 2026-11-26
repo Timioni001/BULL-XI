@@ -196,7 +196,7 @@ function Pick() {
           <div style={{ position: "absolute", left: 420, top: 150, width: 96, height: 96, borderRadius: "50%", background: C.gold, color: "#1b1300", display: "grid", placeItems: "center", fontFamily: F.sans, fontWeight: 800, fontSize: 52, transform: `scale(${badge})`, boxShadow: "0 0 60px rgba(245,196,81,0.55)" }}>C</div>
         </div>
         <div style={{ position: "absolute", left: 1000, top: 360 }}>
-          <Label at={4} color="rgba(255,255,255,0.5)">02 · Captain</Label>
+          <Label at={4} color="rgba(255,255,255,0.5)">03 · Captain</Label>
           <div style={{ height: 26 }} />
           <Headline at={spoken(id, "Choose")} color="#fff" lines={[{ text: "Your captain" }, { text: "scores double.", color: C.gold }]} stagger={spoken(id, "captain scores") - spoken(id, "Choose")} />
         </div>
@@ -265,7 +265,7 @@ function Seal() {
         </div>
         <div style={{ position: "absolute", left: 705, top: 580, fontSize: 56, color: C.bear, fontFamily: F.sans, fontWeight: 300, opacity: blocked, transform: `scale(${0.6 + 0.4 * blocked})` }}>✕</div>
         <div style={{ position: "absolute", left: 150, top: 860 }}>
-          <Label at={4}>03 · Seal</Label>
+          <Label at={4}>04 · Seal</Label>
           <div style={{ height: 18 }} />
           <Headline at={spoken(id, "Lock it")} size={84} color={C.lightInk} lines={[{ text: "Sealed until kickoff." }]} />
         </div>
@@ -296,7 +296,7 @@ function Points() {
     <AbsoluteFill style={{ background: C.dark }}>
       <Out id={id}>
         <div style={{ position: "absolute", left: 150, top: 380 }}>
-          <Label at={4} color="rgba(255,255,255,0.5)">04 · Score</Label>
+          <Label at={4} color="rgba(255,255,255,0.5)">05 · Score</Label>
           <div style={{ height: 26 }} />
           <Headline at={numAt - 6} color="#fff" lines={[{ text: "Up 1.8%." }, { text: "18 points.", color: C.bull }]} stagger={18} />
           <div style={{ marginTop: 44, fontFamily: F.mono, fontSize: 26, color: "rgba(255,255,255,0.55)", letterSpacing: "0.04em", opacity: useIn(numAt + 30, 16) }}>
@@ -335,7 +335,7 @@ function Golden() {
     <AbsoluteFill style={{ background: "radial-gradient(70% 70% at 70% 50%, #1d1708 0%, #0b0b0b 60%)" }}>
       <Out id={id}>
         <div style={{ position: "absolute", left: 150, top: 340 }}>
-          <Label at={4} color="rgba(255,255,255,0.5)">05 · Golden stock</Label>
+          <Label at={4} color="rgba(255,255,255,0.5)">06 · Golden stock</Label>
           <div style={{ height: 26 }} />
           <Headline at={spoken(id, "At kickoff")} color="#fff" lines={[{ text: "Drawn by VRF." }, { text: "Double points.", color: C.gold }]} stagger={spoken(id, "scores double") - spoken(id, "At kickoff")} />
           <div style={{ display: "flex", alignItems: "center", gap: 22, marginTop: 48, opacity: p }}>
@@ -385,13 +385,170 @@ function Hourly() {
           </div>
         </div>
         <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-          <Label at={4}>06 · Live 24/7</Label>
+          <Label at={4}>07 · Live 24/7</Label>
           <div style={{ height: 26 }} />
           <Headline at={spoken(id, "A new gameweek")} color={C.lightInk} size={104} lines={[{ text: "Every hour." }, { text: "Every day.", color: "#9a9a96" }]} stagger={14} style={{ textAlign: "center" }} />
           <div style={{ marginTop: 40, fontFamily: F.mono, fontSize: 22, letterSpacing: "0.14em", textTransform: "uppercase", color: "#77776f", opacity: useIn(spoken(id, "cranks"), 14) }}>
             MagicBlock cranks run every step
           </div>
         </AbsoluteFill>
+      </Out>
+    </AbsoluteFill>
+  );
+}
+
+/* ------------------------------------------------------------------ thesis */
+
+const REASONS = [
+  { t: "NVDA", role: "Midfield", about: "Designs the graphics chips used to train most AI models." },
+  { t: "SPY", role: "Keeper", about: "Tracks the S&P 500. One holding buys a whole basket." },
+  { t: "GLD", role: "Keeper", about: "Tracks gold. Often moves differently from stocks." },
+];
+
+function Thesis() {
+  const id = "thesis";
+  const s = scene(id);
+  const f = useCurrentFrame();
+  const ph = useIn(0, 26);
+  return (
+    <AbsoluteFill style={{ background: C.light }}>
+      <Out id={id}>
+        <div style={{ position: "absolute", left: 230, top: 70, perspective: 2200 }}>
+          <div style={{ transform: `translateX(${(1 - ph) * -120}px) rotateY(16deg) rotateZ(-2deg)`, opacity: ph }}>
+            <Float amp={8}>
+              <IPhone clip="thesis" width={400} playbackRate={fit("thesis", s.frames)} />
+            </Float>
+          </div>
+        </div>
+        <div style={{ position: "absolute", left: 960, top: 190 }}>
+          <Label at={4}>02 · Why this squad</Label>
+          <div style={{ height: 26 }} />
+          <Headline at={spoken(id, "Auto-pick explains")} color={C.lightInk} lines={[{ text: "Every pick," }, { text: "explained.", color: "#9a9a96" }]} stagger={12} />
+          <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 16, width: 760 }}>
+            {REASONS.map((r, i) => {
+              const at = spoken(id, "real price") - 30 + i * 12;
+              const p = interpolate(f, [at, at + 18], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: ease });
+              return (
+                <div key={r.t} style={{ display: "flex", alignItems: "center", gap: 22, padding: "20px 24px", borderRadius: 28, background: "#fff", boxShadow: "0 20px 40px -24px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.06)", opacity: p, transform: `translateY(${(1 - p) * 24}px)` }}>
+                  <StockTile ticker={r.t} size={64} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, fontFamily: F.sans, fontWeight: 600, fontSize: 30, color: C.lightInk }}>
+                      {r.t}x
+                      <span style={{ fontFamily: F.mono, fontSize: 16, letterSpacing: "0.14em", textTransform: "uppercase", color: "#77776f", background: "#efefec", borderRadius: 999, padding: "4px 12px" }}>{r.role}</span>
+                    </div>
+                    <div style={{ fontFamily: F.sans, fontWeight: 300, fontSize: 24, color: "#55554f", marginTop: 4 }}>{r.about}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: 26, fontFamily: F.mono, fontSize: 20, letterSpacing: "0.06em", color: "#77776f", opacity: useIn(spoken(id, "this week"), 14) }}>today and 1-week moves from live market data · not financial advice</div>
+        </div>
+      </Out>
+    </AbsoluteFill>
+  );
+}
+
+/* ------------------------------------------------------------------ pro */
+
+function Pro() {
+  const id = "pro";
+  const s = scene(id);
+  const ph = useIn(0, 26);
+  const lock = useIn(spoken(id, "kept private"), 16);
+  return (
+    <AbsoluteFill style={{ background: "radial-gradient(70% 70% at 30% 50%, #241a0c 0%, #0b0b0b 62%)" }}>
+      <Out id={id}>
+        <div style={{ position: "absolute", left: 150, top: 300 }}>
+          <Label at={4} color="rgba(255,255,255,0.5)">08 · Pro</Label>
+          <div style={{ height: 26 }} />
+          <Headline at={spoken(id, "Go Pro")} color="#fff" lines={[{ text: "Your picks." }, { text: "Your investments.", color: C.gold }]} stagger={spoken(id, "become your investments") - spoken(id, "Go Pro")} />
+          <div style={{ marginTop: 44, display: "flex", flexDirection: "column", gap: 14 }}>
+            {[
+              [spoken(id, "split across"), "$1,000 test dollars, split equally across 15 stocks"],
+              [spoken(id, "kept private"), "Private in MagicBlock's rollup. Only you can read it"],
+              [spoken(id, "sell any time"), "Sell back to cash at the onchain price, any time"],
+            ].map(([at, text]) => (
+              <div key={String(text)} style={{ display: "flex", alignItems: "center", gap: 14, fontFamily: F.mono, fontSize: 24, color: "rgba(255,255,255,0.75)", opacity: useIn(Number(at), 14) }}>
+                <span style={{ width: 10, height: 10, borderRadius: 99, background: C.gold }} /> {text}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ position: "absolute", left: 1220, top: 70, perspective: 2200 }}>
+          <div style={{ transform: `translateY(${(1 - ph) * 120}px) rotateY(-14deg) rotateZ(2deg)`, opacity: ph }}>
+            <Float amp={8}>
+              <IPhone clip="pro" width={400} playbackRate={Math.max(1, clips.pro / (s.frames / timeline.fps))} />
+            </Float>
+          </div>
+          <div style={{ position: "absolute", left: -70, top: 140, opacity: lock, transform: `scale(${0.8 + 0.2 * lock})` }}>
+            <Pill dark glow={C.bull} style={{ fontSize: 30, padding: "18px 30px" }}>
+              <svg width="26" height="30" viewBox="0 0 24 26" fill="none" stroke="#fff" strokeWidth="2.2"><rect x="3" y="11" width="18" height="13" rx="3" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+              Private
+            </Pill>
+          </div>
+        </div>
+      </Out>
+      <Grain opacity={0.08} />
+    </AbsoluteFill>
+  );
+}
+
+/* ------------------------------------------------------------------ pot */
+
+function Pot() {
+  const id = "pot";
+  const s = scene(id);
+  const f = useCurrentFrame();
+  const feeAt = spoken(id, "Entry fees");
+  const winAt = spoken(id, "winner");
+  const potIn = useIn(feeAt, 16);
+  const winIn = useIn(winAt - 4, 16);
+  const ph = useIn(0, 26);
+  const potValue = interpolate(f, [feeAt + 6, feeAt + 40], [0, 15], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const friends: [string, number][] = [["Alice", 170], ["Bola", 470], ["You", 770]];
+  return (
+    <AbsoluteFill style={{ background: C.light }}>
+      <DotGrid />
+      <Out id={id}>
+        <svg width={1920} height={1080} style={{ position: "absolute", inset: 0 }}>
+          {friends.map(([n, y], i) => (
+            <Wire key={n} from={[330, y + 38]} to={[640, 470]} pulseAt={feeAt + i * 6} color={C.gold} />
+          ))}
+          <Wire from={[930, 470]} to={[1060, 470]} pulseAt={winAt} color={C.bull} />
+        </svg>
+        {friends.map(([n, y], i) => {
+          const p = interpolate(f, [4 + i * 5, 20 + i * 5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: ease });
+          return (
+            <div key={n} style={{ position: "absolute", left: 120, top: y, opacity: p, transform: `scale(${0.9 + 0.1 * p})` }}>
+              <Pill dark={n === "You"} style={{ fontSize: 32, padding: "20px 34px" }}>
+                {n} <span style={{ fontFamily: F.mono, fontSize: 22, color: n === "You" ? "rgba(255,255,255,0.6)" : "#8a8a86" }}>$5</span>
+              </Pill>
+            </div>
+          );
+        })}
+        <div style={{ position: "absolute", left: 640, top: 420, opacity: potIn, transform: `scale(${0.85 + 0.15 * potIn})` }}>
+          <Pill dark glow={C.gold} style={{ fontSize: 36 }}>
+            Pot <span style={{ color: C.gold, fontVariantNumeric: "tabular-nums" }}>${potValue.toFixed(0)}</span>
+          </Pill>
+        </div>
+        <div style={{ position: "absolute", left: 1060, top: 420, opacity: winIn, transform: `scale(${0.85 + 0.15 * winIn})` }}>
+          <Pill glow={C.bull} style={{ fontSize: 36 }}>
+            <span style={{ color: C.gold }}>♛</span> Winner
+          </Pill>
+        </div>
+        <div style={{ position: "absolute", left: 120, top: 900 }}>
+          <Label at={4}>09 · Friends leagues</Label>
+          <div style={{ height: 14 }} />
+          <Headline at={spoken(id, "Play your friends")} size={76} color={C.lightInk} lines={[{ text: "Winner takes the pot." }]} />
+        </div>
+        <div style={{ position: "absolute", left: 1450, top: 70, perspective: 2200 }}>
+          <div style={{ transform: `translateY(${(1 - ph) * 120}px) rotateY(-14deg) rotateZ(2deg)`, opacity: ph }}>
+            <Float amp={7}>
+              <IPhone clip="pot" width={400} playbackRate={Math.max(1, clips.pot / (s.frames / timeline.fps))} />
+            </Float>
+          </div>
+        </div>
       </Out>
     </AbsoluteFill>
   );
@@ -541,11 +698,14 @@ const SCENES: Record<string, () => React.ReactElement> = {
   question: Question,
   title: Title,
   squad: Squad,
+  thesis: Thesis,
   pick: Pick,
   seal: Seal,
   points: Points,
   golden: Golden,
   hourly: Hourly,
+  pro: Pro,
+  pot: Pot,
   record: Record,
   everyone: Everyone,
   close: Close,
