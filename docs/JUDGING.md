@@ -33,7 +33,7 @@ Takeaways: judges reward **(1) zero-friction try-it**, **(2) a short video**, **
 - [x] Sponsored fees: players never need SOL
 
 ### Zero-friction try-it (creativity, UX)
-- [x] Every locked squad is sealed onchain, guests included (device account, no sign-in)
+- [x] Sign-in required (Google or email); every locked squad is sealed onchain with the player's account, device key as fallback
 - [x] **Hourly flash gameweeks onchain**: a judge can lock, watch live and see settlement within about an hour
 - [x] Demo mode for instant simulated playback
 - [x] Public profiles and a live /proof page

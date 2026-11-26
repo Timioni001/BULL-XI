@@ -61,7 +61,7 @@ export function PageHeader({ eyebrow, title, right, back, className }: { eyebrow
         <AppHeader />
       )}
       <div className="flex items-end justify-between gap-3 px-4 pb-4 pt-1 lg:px-0">
-        <h1 className="font-display text-[42px] font-black uppercase leading-[0.92] lg:text-[64px]">
+        <h1 className="font-display text-[36px] font-black uppercase leading-[0.92] min-[360px]:text-[42px] lg:text-[64px]">
           <span className="block text-foreground">{eyebrow}</span>
           <span className="block text-heading-muted">{title}</span>
         </h1>

@@ -18,7 +18,7 @@ Built for MagicBlock Solana Blitz v10. Runs on **devnet**: test SOL, real market
 ## Try it in 2 minutes
 
 1. Open the app, tap **Start playing free**, then **Auto-pick** and **Pick your team**.
-2. Tap **Lock squad**. Within a few seconds you'll see **Sealed on Solana**: your squad is now inside MagicBlock's Private ER. No sign-in, no wallet, no SOL.
+2. Tap **Lock squad**. Within a few seconds you'll see **Sealed on Solana**: your squad is now inside MagicBlock's Private ER. You sign in with Google or email first; no wallet, no SOL, no pop-ups.
 3. Switch the deadline to **Flash** before locking to play the hourly gameweek: it kicks off on the hour and settles an hour later. Then **Watch live**.
 4. Open **/proof** to see the live counters, this hour's gameweek and its VRF golden stock.
 5. Short on time? Add `?demo=1` for a 10x replay of a gameweek.
@@ -34,7 +34,7 @@ Built for MagicBlock Solana Blitz v10. Runs on **devnet**: test SOL, real market
 - **Sealed squads.** A locked squad lives in MagicBlock's **Private ER (TEE)** with a members-only permission. Rivals can't read it until kickoff.
 - **Onchain rules and scoring.** Squad rules (15 stocks, 2/5/5/3, 100 credits, max 3 per sector, formation, captain) and scoring (TWAP move, captain, chips, bonuses, auto-subs) run in the program.
 - **Settlement on Solana.** At full time each squad is scored and the result plus the manager's season record are committed to Solana.
-- **No SOL, no pop-ups, no sign-in needed.** Guests play onchain with a key kept on their device; signing in (Google or email via Privy) keeps it across devices. A sponsor key pays fees for an allowlist of game instructions only.
+- **Sign in with Google or email, then no SOL and no pop-ups.** Privy creates a Solana account for every player automatically and it signs game actions silently. If that account can't sign, a key kept on the device seals the squad as a fallback. A sponsor key pays fees for an allowlist of game instructions only.
 - **Live table.** During a gameweek the app scores every revealed squad from the onchain opening TWAP and live prices, the same maths as settlement.
 - **Demo mode.** `?demo=1` replays a gameweek at 10x with a simulated league, for quick looks.
 
@@ -129,7 +129,8 @@ From the end-to-end run on Nov 24 ([full log](docs/devnet-runs/2026-11-24-e2e-v3
 | Squad public after kickoff | Pass | [reveal_entry](https://explorer.solana.com/tx/5YjTEhunDLjdSz35gwHLQ71UaxzSh5nPv7cy1nHhVtgUdVm8JPD6aCvj7qvKeLmRAjPUhjYc8nHbCKbqCgEZZhPK?cluster=custom&customUrl=https%3A%2F%2Fdevnet-tee.magicblock.app) |
 | Settled onchain (7 pts) and committed to Solana | Pass | [settle](https://explorer.solana.com/tx/23fdvXkWVGK7MFc2FprDr2cgrug6a9w1Lk3JS9Uq2nncFDSc6AxwvEsmbvzMCfewbk7u9DC5CwzAqdsjqwDtyFmi?cluster=custom&customUrl=https%3A%2F%2Fdevnet-tee.magicblock.app) · [manager on Solana](https://explorer.solana.com/address/961VZjtTUfDnYjJZpqQF63nLTwzt2spoPFMEHDP6v9yc?cluster=devnet) · [entry on Solana](https://explorer.solana.com/address/yHfYFccD14oQUdNPAXrhmhV85gu8ujuxS9QswcSv3zQ?cluster=devnet) |
 | App live score equals onchain settled score | Pass | `scripts/onchain/live-check.ts` |
-| A guest browser seals from the app in ~8 s, no sign-in | Pass | Playwright run, demo video |
+| A browser seals from the app in ~8 s with no wallet or SOL (device-key path) | Pass | Playwright run, demo video |
+| Sign-in is required before playing (Google or email via Privy) | Pass | Playwright: gate shown, Privy modal opens |
 
 Rust: 15 unit tests (squad rules, scoring, TWAP, top gainer, auto-subs, golden stock). TypeScript: 57 (rules, relay allowlist, price book encoding).
 

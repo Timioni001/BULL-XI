@@ -4,13 +4,15 @@ import { createContext, useContext } from "react";
 
 /**
  * Sign-in state for the UI. Screens only use `useAuth()`; the provider behind
- * it (Privy today) can change without touching them. Playing never needs an
- * account: signing in saves your team and leagues to an account.
+ * it (Privy today) can change without touching them. Players sign in before
+ * using the app (see components/layout/sign-in-gate.tsx).
  */
 export type AuthStatus =
   /** No sign-in configured (no Privy App ID) */
   | "unavailable"
   | "loading"
+  /** Sign-in is configured but did not load (blocked network, domain not allowed) */
+  | "failed"
   | "guest"
   | "signedIn";
 
@@ -41,6 +43,8 @@ export interface Auth {
 
 const noop = () => {};
 export const unavailableAuth: Auth = { status: "unavailable", account: null, signIn: noop, connectWallet: noop, signOut: async () => {} };
+
+export const failedAuth: Auth = { ...unavailableAuth, status: "failed" };
 
 export const AuthContext = createContext<Auth>(unavailableAuth);
 

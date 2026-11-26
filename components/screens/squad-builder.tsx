@@ -95,12 +95,19 @@ export function SquadBuilder() {
 
   const actions = (
     <div className="flex gap-2">
-      <Button size="cta" variant={filled === 0 ? "default" : "secondary"} className={filled === 0 ? "flex-1" : "px-4"} onClick={runAutoPick}>
+      <Button
+        size="cta"
+        variant={filled === 0 ? "default" : "secondary"}
+        className={filled === 0 ? "flex-1" : "px-4"}
+        onClick={runAutoPick}
+        aria-label={filled === 15 ? t.shuffle : filled === 0 ? t.autoPickAll : t.autoPickRest(empty)}
+      >
         {filled === 15 ? <Shuffle /> : <Sparkles />}
-        {filled === 15 ? t.shuffle : filled === 0 ? t.autoPickAll : t.autoPickRest(empty)}
+        {/* On very small phones the secondary button shows its icon only */}
+        <span className={filled === 0 ? undefined : "max-[379px]:hidden"}>{filled === 15 ? t.shuffle : filled === 0 ? t.autoPickAll : t.autoPickRest(empty)}</span>
       </Button>
       {filled > 0 && (
-        <Button size="cta" className="flex-1" disabled={!validation.valid} onClick={() => router.push(routes.pick)}>
+        <Button size="cta" className="min-w-0 flex-1" disabled={!validation.valid} onClick={() => router.push(routes.pick)}>
           {validation.valid ? t.next : empty > 0 ? t.toGo(empty) : t.fix}
           {validation.valid && <ArrowRight />}
         </Button>

@@ -79,13 +79,13 @@ Starting XI = 11 stocks. Bench = 4 (ordered, auto-sub only if a stock is halted)
 2. **Squad built in under 60 seconds.** Offer "Auto-pick" that builds a valid squad instantly, then let users tweak it.
 3. **The live gameweek is the hero screen.** Points tick up and down live, ranks move, and green and red flashes show price moves. It should feel like watching a match.
 4. **No crypto words on core screens.** Say "stocks", "credits", "entry fee", "prize". Never "wallet", "SPL", "rollup" or "sign transaction" until the Pro payment step.
-5. **Thumb-first mobile.** Designed at 390x844. Primary actions sit in the bottom third. Desktop is a centered phone-width column for now.
+5. **Thumb-first mobile.** Designed at 390x844. Primary actions sit in the bottom third. Tablets use the full width (up to 720px); desktop adds a side nav and two-column layouts. Everything must fit from 320px phones to 1920px monitors.
 6. **Instant feedback.** Every tap responds within 100ms with motion or state change.
 7. **Empty, loading and error states** designed for every screen.
 
 ## 5. Screens (Phase 1)
 
-1. **Landing / Onboarding**: 3 swipe cards (Pick stocks, Wear the armband, Win leagues), then "Build your squad". Free mode needs no signup.
+1. **Landing / Onboarding**: 3 swipe cards (Pick stocks, Wear the armband, Win leagues), then "Build your squad". Players sign in (Google or email) before entering the app.
 2. **Squad Builder**: pitch view, budget bar (credits left), position slots, Auto-pick, validation hints ("Need 1 more Growth").
 3. **Stock Picker** (bottom sheet): search, filter by position and sector, sort by credits / form / ownership %. Each row: ticker, name, credits, 24h move, selected-by %.
 4. **Stock Detail** (sheet): price chart (1D/1W), credits, ownership %, recent gameweek points.
@@ -129,7 +129,7 @@ Starting XI = 11 stocks. Bench = 4 (ordered, auto-sub only if a stock is halted)
 
 ## 8. Phase 2: MagicBlock integration map
 
-Every piece must be load-bearing. Built so far: price book on the Private ER (checkpoint 1); sealed squads with members-only permissions, onchain scoring, settlement committed to Solana, public profiles (checkpoint 2); top gainer and auto-subs onchain, live table from revealed onchain squads, live /proof (checkpoint 3); VRF golden stock, MagicBlock cranks for snapshots, hourly flash gameweeks, guests onchain with a device key (checkpoint 4). Everything runs on the devnet TEE so one transaction can read squads and prices.
+Every piece must be load-bearing. Built so far: price book on the Private ER (checkpoint 1); sealed squads with members-only permissions, onchain scoring, settlement committed to Solana, public profiles (checkpoint 2); top gainer and auto-subs onchain, live table from revealed onchain squads, live /proof (checkpoint 3); VRF golden stock, MagicBlock cranks for snapshots, hourly flash gameweeks, device key as a sealing fallback (checkpoint 4); sign-in required before playing, responsive from phone to desktop (checkpoint 5). Everything runs on the devnet TEE so one transaction can read squads and prices.
 
 | UX moment | MagicBlock tech |
 |---|---|

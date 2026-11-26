@@ -18,7 +18,7 @@ Paste into `build.magicblock.app/?stage=blitz#submit`.
 
 **Description (short)**
 
-BULL-XI turns tokenized stocks (xStocks) into a fantasy league that runs every hour. You build a 15-stock squad within 100 credits, pick a captain and lock it before kickoff. Your squad is sealed inside MagicBlock's Private Ephemeral Rollup, so rivals can't copy it. At kickoff it is revealed, a golden stock is drawn with MagicBlock VRF, and points come from time-weighted average prices written onchain every minute. At full time the program scores every squad and commits the results to Solana. No wallet, no SOL and no pop-ups: guests play with a device key, fees are sponsored.
+BULL-XI turns tokenized stocks (xStocks) into a fantasy league that runs every hour. You build a 15-stock squad within 100 credits, pick a captain and lock it before kickoff. Your squad is sealed inside MagicBlock's Private Ephemeral Rollup, so rivals can't copy it. At kickoff it is revealed, a golden stock is drawn with MagicBlock VRF, and points come from time-weighted average prices written onchain every minute. At full time the program scores every squad and commits the results to Solana. Players sign in with Google or email. No wallet, no SOL and no pop-ups: Privy creates their Solana account and the game sponsors fees.
 
 **How we use MagicBlock (all load-bearing)**
 

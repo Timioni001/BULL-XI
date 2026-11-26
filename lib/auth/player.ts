@@ -3,8 +3,8 @@
 /**
  * Who signs onchain game actions.
  *  - Signed in (Privy): the account's key, same on every device.
- *  - Guest: a device key kept in this browser, created on first use. Guests'
- *    squads are sealed onchain too; signing in keeps them across devices.
+ *  - Device: a key kept in this browser, used only if sign-in is unavailable
+ *    or the account can't sign (a fallback so a locked squad is still sealed).
  * Players never pay fees: the game Worker sponsors allowlisted actions.
  */
 import { useMemo } from "react";
@@ -49,7 +49,7 @@ export function existingDeviceAddress(): Promise<string | null> {
   return deviceSigner().then((s) => s.address);
 }
 
-async function devicePlayer(): Promise<PlayerSigner> {
+export async function devicePlayer(): Promise<PlayerSigner> {
   const s = await deviceSigner();
   return {
     address: s.address,
@@ -73,7 +73,9 @@ export function useOnchainPlayer(): { kind: PlayerKind; ready: boolean; get: () 
       const p: PlayerSigner = { address: addr, signTransaction: auth.signTransaction, signMessage: auth.signMessage };
       return { kind: "account" as const, ready: true, get: async () => p };
     }
-    // While sign-in is still loading, wait rather than create a device key a signed-in player doesn't need.
-    return { kind: "device" as const, ready: auth.status !== "loading", get: devicePlayer };
+    // Signed in but the account's key is still being set up, or sign-in is loading: wait
+    // rather than create a device key a signed-in player doesn't need.
+    const waiting = auth.status === "loading" || auth.status === "signedIn";
+    return { kind: "device" as const, ready: !waiting, get: devicePlayer };
   }, [auth]);
 }

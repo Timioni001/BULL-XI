@@ -80,7 +80,7 @@ export const copy = {
     skip: "Skip",
     next: "Next",
     start: "Build your squad",
-    free: "Free to play. No sign-up.",
+    free: "Free to play. Sign in with Google or email.",
     cards: [
       { title: "Pick stocks, not players", body: "Build a 15-stock squad with 100 credits. ETFs in goal, Blue Chips at the back, Growth in midfield, High Risk up front." },
       { title: "Wear the armband", body: "Points come from real price moves. Up 1% is 10 points. Your captain scores double." },
@@ -333,7 +333,7 @@ export const copy = {
       cta: "Join league",
       already: "You're already in this league",
       open: "Open league",
-      free: "Free to play. No sign-up.",
+      free: "Free to play. Sign in with Google or email.",
     },
   },
 
@@ -409,7 +409,20 @@ export const copy = {
     signedInWith: { google: "Signed in with Google", email: "Signed in with email", wallet: "Signed in with a wallet" },
     playerId: "Player ID",
     copied: "Player ID copied",
-    signedOut: "Signed out. You can keep playing as a guest.",
+    signedOut: "Signed out.",
+    gate: {
+      eyebrow: "Free to play",
+      title: "Sign in to play",
+      body: "Use Google or email. Your squad, leagues and results are saved to your account on every device.",
+      cta: "Sign in",
+      points: ["No wallet, no fees, no pop-ups", "Squads sealed privately until kickoff", "Every result settled on Solana"],
+      home: "Back to home",
+      proof: "See the live proof",
+      failedTitle: "Sign-in isn't loading",
+      failedBody: "Check your connection and try again.",
+      retry: "Try again",
+      guest: "Play without an account",
+    },
     welcome: (name: string) => `Welcome, ${name}`,
   },
 
@@ -512,7 +525,7 @@ export const copy = {
     heroBody: "Pick 15 real stocks, name your captain and outscore your friends as prices move. Leagues run 24/7, and every point is settled on Solana.",
     heroCta: "Start playing free",
     watch: "See a live league",
-    rating: "Free to play · No sign-up · Real market prices",
+    rating: "Free to play · Sign in with Google · Real market prices",
     stats: [
       { v: "24/7", l: "Live gameweeks" },
       { v: "41", l: "Stocks to pick" },
@@ -559,7 +572,7 @@ export const copy = {
     faqTitle: "Questions",
     faq: [
       { q: "Do I need to know about stocks?", a: "No. If you know fantasy football, you know BULL-XI. Stocks go up, you score. Stocks go down, you lose points." },
-      { q: "Is it free?", a: "Yes. Free leagues use virtual squads. No sign-up needed to build your first squad." },
+      { q: "Is it free?", a: "Yes. Free leagues use virtual squads. Sign in with Google or email and build your first squad in a minute." },
       { q: "How are points scored?", a: "Every 1% a stock moves is 10 points, capped at 50. Your captain scores double. Beat the market by 0.5% for a +2 bonus." },
       { q: "When do gameweeks run?", a: "Every day. Tokenized stocks trade 24/7, so there's always a live gameweek. Flash gameweeks last one hour." },
       { q: "What are chips?", a: "One-off boosts like Triple Captain and Bench Boost. Each works once a season." },

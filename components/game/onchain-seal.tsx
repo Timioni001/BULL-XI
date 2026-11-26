@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { ExternalLink, Loader2, RotateCcw, ShieldCheck } from "lucide-react";
 import { explorer } from "@/lib/config";
 import { useAuth } from "@/lib/auth/context";
-import { useOnchainPlayer } from "@/lib/auth/player";
+import { devicePlayer, useOnchainPlayer } from "@/lib/auth/player";
 import { sealSquadOnchain } from "@/lib/data";
 import { squadIds } from "@/lib/game/rules";
 import { copy } from "@/lib/copy";
@@ -17,8 +17,8 @@ type State = { kind: "idle" } | { kind: "sealing" } | { kind: "failed"; code?: s
 
 /**
  * Under the lock seal: seals the locked squad inside MagicBlock's Private ER
- * on Solana devnet. Signed-in managers use their account; guests use a key
- * kept on this device. No fees, no pop-ups.
+ * on Solana devnet with the player's account (a device key only as a
+ * fallback). No fees, no pop-ups.
  */
 export function OnchainSeal({ locked, deadline }: { locked: LockedEntry; deadline: string | null }) {
   const auth = useAuth();
@@ -34,7 +34,7 @@ export function OnchainSeal({ locked, deadline }: { locked: LockedEntry; deadlin
     setState({ kind: "sealing" });
     try {
       const g = useGame.getState();
-      const result = await sealSquadOnchain(await player.get(), {
+      const input = {
         kind: locked.kind,
         deadline,
         managerName: g.managerName,
@@ -47,7 +47,16 @@ export function OnchainSeal({ locked, deadline }: { locked: LockedEntry; deadlin
         chip: locked.chip,
         hedgeId: locked.hedgeId,
         transferHit: locked.transferHit,
-      });
+      };
+      let result;
+      try {
+        result = await sealSquadOnchain(await player.get(), input);
+      } catch (e) {
+        // If the account can't sign (sign-in hiccup), seal with this device so the squad still counts.
+        if (player.kind !== "account" || (e as { code?: string }).code === "not-open") throw e;
+        console.warn("Account seal failed, sealing with this device:", e instanceof Error ? e.message : e);
+        result = await sealSquadOnchain(await devicePlayer(), input);
+      }
       setOnchainSeal({ ...result });
       setState({ kind: "idle" });
     } catch (e) {

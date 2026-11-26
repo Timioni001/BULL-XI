@@ -2,12 +2,12 @@
 
 import { Component, useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { PRIVY_APP_ID } from "@/lib/config";
-import { AuthContext, unavailableAuth } from "@/lib/auth/context";
+import { AuthContext, failedAuth, unavailableAuth } from "@/lib/auth/context";
 
 type Provider = ComponentType<{ children: ReactNode }>;
 const loading = { ...unavailableAuth, status: "loading" as const };
 
-/** If the sign-in SDK fails (bad App ID, blocked network), keep the game playable as a guest. */
+/** If the sign-in SDK fails (bad App ID, blocked network), report it so the gate can offer a retry. */
 class SignInBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
   if (Impl)
     return (
-      <SignInBoundary fallback={<AuthContext.Provider value={unavailableAuth}>{children}</AuthContext.Provider>}>
+      <SignInBoundary fallback={<AuthContext.Provider value={failedAuth}>{children}</AuthContext.Provider>}>
         <Impl>{children}</Impl>
       </SignInBoundary>
     );

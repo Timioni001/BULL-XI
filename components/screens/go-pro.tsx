@@ -28,7 +28,7 @@ export function GoPro() {
       <Wallet className="size-4" /> {t.connected} {wallet.slice(0, 4)}…{wallet.slice(-4)}
     </p>
   ) : (
-    <Button size="cta" className="w-full" onClick={auth.connectWallet} disabled={auth.status === "unavailable" || auth.status === "loading"}>
+    <Button size="cta" className="w-full" onClick={auth.connectWallet} disabled={auth.status === "unavailable" || auth.status === "failed" || auth.status === "loading"}>
       <Wallet /> {t.connect}
     </Button>
   );

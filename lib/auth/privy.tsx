@@ -38,7 +38,7 @@ function Bridge({ children }: { children: React.ReactNode }) {
   const { signMessage } = useSignMessage();
   const wallet = wallets[0];
   const address = wallet?.address ?? null;
-  // If sign-in never becomes ready (blocked network, domain not allowed), carry on as a guest.
+  // If sign-in never becomes ready (blocked network, domain not allowed), report it.
   const [gaveUp, setGaveUp] = useState(false);
   useEffect(() => {
     if (ready) return;
@@ -48,7 +48,7 @@ function Bridge({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<Auth>(
     () => ({
-      status: !ready ? (gaveUp ? "unavailable" : "loading") : authenticated && user ? "signedIn" : "guest",
+      status: !ready ? (gaveUp ? "failed" : "loading") : authenticated && user ? "signedIn" : "guest",
       account: authenticated && user ? toAccount(user, address) : null,
       signIn: () => login({ loginMethods: ["google", "email"] }),
       connectWallet: () => login({ loginMethods: ["wallet"], walletChainType: "solana-only" }),

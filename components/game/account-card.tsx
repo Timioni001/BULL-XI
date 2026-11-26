@@ -18,7 +18,7 @@ export function AccountCard() {
   const { status, account, signIn, signOut } = useAuth();
   const [copied, setCopied] = useState(false);
 
-  if (status === "unavailable") return null;
+  if (status === "unavailable" || status === "failed") return null;
   if (status === "loading") return <Shimmer className="h-[132px] rounded-3xl" />;
 
   if (status === "guest" || !account) {
