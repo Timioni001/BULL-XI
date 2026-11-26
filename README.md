@@ -12,7 +12,8 @@ Built for MagicBlock Solana Blitz v10. Runs on **devnet**: test SOL, real market
 | App | `https://bull-xi.timioni1490.workers.dev` |
 | Proof page (live devnet numbers) | `/proof` |
 | Program (devnet) | [`EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN`](https://explorer.solana.com/address/EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN?cluster=devnet) |
-| Demo video (80 s, recorded from the real app) | [`docs/media/bullxi-demo.mp4`](docs/media/bullxi-demo.mp4) |
+| Demo film (91 s, made in code with Remotion from real app recordings) | [`docs/media/bullxi-film.mp4`](docs/media/bullxi-film.mp4) |
+| Raw walkthrough (80 s, screen recording) | [`docs/media/bullxi-demo.mp4`](docs/media/bullxi-demo.mp4) |
 | Full devnet run with every signature | [`docs/devnet-runs/`](docs/devnet-runs/2026-11-24-e2e-v3.md) |
 
 ## Try it in 2 minutes

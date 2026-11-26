@@ -13,7 +13,7 @@ Paste into `build.magicblock.app/?stage=blitz#submit`.
 - Proof page (live devnet numbers): https://bull-xi.timioni1490.workers.dev/proof
 - GitHub: https://github.com/Timioni001/BULL-XI
 - Program (devnet): https://explorer.solana.com/address/EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN?cluster=devnet
-- Demo video: `docs/media/bullxi-demo.mp4` in the repo
+- Demo film (91 s): `docs/media/bullxi-film.mp4` in the repo (made in code with Remotion, see `video/`)
 - End-to-end devnet run with every signature: `docs/devnet-runs/`
 
 **Description (short)**
