@@ -177,7 +177,7 @@ Known trust: the relay and the crank can read sealed squads (they forward and se
 ## Deploy (Cloudflare dashboard, no local machine needed)
 
 **1. Web app.** Workers & Pages → Create → Import a repository → this repo.
-Branch `main`, build command `npm run build`, deploy command `npx wrangler deploy`, variable `NODE_VERSION=22`, project name `bullxi`.
+Branch `main`, build command `npm run build`, deploy command `npx wrangler deploy`, variable `NODE_VERSION=22`, project name `bull-xi` (must match `wrangler.jsonc`).
 
 **2. Game Worker.** Workers & Pages → Create → Import a repository → this repo again.
 Project name **`bullxi-game`** (must match `worker/wrangler.jsonc`), build command empty, deploy command `npx wrangler deploy --config worker/wrangler.jsonc`, variable `NODE_VERSION=22`.
