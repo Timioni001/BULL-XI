@@ -243,7 +243,9 @@ export type ProofStatus = "live" | "building" | "planned";
 export interface ProofStats {
   network: string;
   previewNotice: string | null;
-  counters: { pushes: number; managers: number; squads: number; settled: number };
+  counters: { pushes: number; managers: number; squads: number; settled: number; portfolios: number; leagues: number };
+  /** Test dollars held in friends league pots, and paid out to winners */
+  pots: { held: number; paidOut: number };
   priceBook: { address: string; lastPushAt: number; prices: { ticker: string; price: number }[] };
   gameweek: { id: number; kind: "daily" | "flash"; deadline: string; status: string; startedStocks: number; topGainer: string | null; golden: string | null; goldenStatus: string } | null;
   stack: { moment: string; tech: string; status: ProofStatus; note?: string }[];
@@ -306,4 +308,44 @@ export interface PlayerSigner {
   address: string;
   signTransaction: (tx: Uint8Array) => Promise<Uint8Array>;
   signMessage: (message: Uint8Array) => Promise<Uint8Array>;
+}
+
+/** Pro preview portfolio: test dollars and the squad you invested in (private in the rollup). */
+export interface PortfolioView {
+  address: string;
+  claimed: boolean;
+  /** Test dollars not invested */
+  cash: number;
+  /** Dollars put into current holdings */
+  invested: number;
+  holdings: { stockId: string; shares: number }[];
+  updatedAt: number;
+}
+
+export interface FriendsLeagueMember {
+  address: string;
+  name: string | null;
+  /** null until the member's squad is scored */
+  points: number | null;
+  status: "none" | "sealed" | "revealed" | "settled";
+}
+
+/** A friends league for one gameweek, with its pot held onchain. */
+export interface FriendsLeague {
+  id: number;
+  code: string;
+  name: string;
+  creator: string;
+  gameweek: number;
+  kind: "daily" | "flash";
+  deadline: number;
+  end: number;
+  gameweekStatus: number;
+  fee: number;
+  pot: number;
+  paidOut: number;
+  settled: boolean;
+  winner: string | null;
+  winnerPoints: number | null;
+  members: FriendsLeagueMember[];
 }

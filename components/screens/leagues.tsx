@@ -1,22 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { ChevronRight, Globe2, Loader2, Plus, Share2, Ticket, Trophy } from "lucide-react";
+import { ChevronRight, Coins, Globe2, Plus, Share2, Ticket, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
-import { createLeague, getLeagues, joinLeague, type LeagueSummary } from "@/lib/data";
+import { getLeagues, getMyFriendsLeagues, type FriendsLeague, type LeagueSummary } from "@/lib/data";
 import { copy } from "@/lib/copy";
 import { routes } from "@/lib/routes";
 import { ordinal } from "@/lib/format";
 import { useAsync } from "@/lib/hooks/use-async";
 import { useInvite } from "@/lib/hooks/use-invite";
-import { haptic } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { dur, ease } from "@/lib/motion";
 import { Button } from "@/components/ui/button";
-import { Field, Sheet, inputClass } from "@/components/ui/sheet";
+import { CreateFriendsSheet, JoinFriendsSheet } from "@/components/game/friends-sheets";
+import { useAuth } from "@/lib/auth/context";
+import { useOnchainPlayer } from "@/lib/auth/player";
 import { PageHeader, SectionTitle } from "@/components/layout/top-bar";
 import { TabBar } from "@/components/layout/tab-bar";
 import { EmptyState, ErrorState, Shimmer } from "@/components/states/states";
@@ -96,7 +97,8 @@ export function Leagues() {
       <PageHeader eyebrow={t.eyebrow} title={t.title} />
       <main className="flex flex-1 flex-col gap-3 px-4 pb-[calc(104px+env(safe-area-inset-bottom))] lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6 lg:px-0 lg:pb-10">
         <div className="flex flex-col gap-3">
-          {leagues.status === "success" && leagues.data.length > 0 && <div className="lg:hidden">{actions}</div>}
+          <div className="lg:hidden">{actions}</div>
+          <FriendsSection />
           {body}
         </div>
         <aside className="hidden flex-col gap-3 lg:flex">
@@ -107,22 +109,22 @@ export function Leagues() {
       </main>
       <TabBar />
 
-      <CreateSheet
+      <CreateFriendsSheet
         open={sheet === "create"}
         onOpenChange={(o) => !o && setSheet(null)}
-        onDone={(l) => {
+        onDone={(code) => {
           setSheet(null);
-          toast(t.created(l.name), { action: { label: t.invite, onClick: () => void invite(l.name, l.code) } });
-          router.push(routes.league(l.id));
+          toast(copy.friends.created(code));
+          router.push(routes.friends(code));
         }}
       />
-      <JoinSheet
+      <JoinFriendsSheet
         open={sheet === "join"}
         onOpenChange={(o) => !o && setSheet(null)}
-        onDone={(l) => {
+        onDone={(code, name) => {
           setSheet(null);
-          toast(t.joined(l.name));
-          router.push(routes.league(l.id));
+          toast(copy.friends.joined(name));
+          router.push(routes.friends(code));
         }}
       />
     </>
@@ -150,89 +152,56 @@ function LeagueRow({ league }: { league: LeagueSummary }) {
   );
 }
 
-function CreateSheet({ open, onOpenChange, onDone }: { open: boolean; onOpenChange: (o: boolean) => void; onDone: (l: LeagueSummary) => void }) {
-  const [name, setName] = useState("");
-  const [error, setError] = useState<string>();
-  const [busy, setBusy] = useState(false);
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return setError(t.nameRequired);
-    setBusy(true);
-    try {
-      haptic(12);
-      const l = await createLeague(name);
-      setName("");
-      onDone(l);
-    } catch {
-      setError(copy.errors.generic);
-    } finally {
-      setBusy(false);
-    }
-  };
+/** Onchain friends leagues the player is in, with their pots. */
+function FriendsSection() {
+  const auth = useAuth();
+  const player = useOnchainPlayer();
+  const [mine, setMine] = useState<FriendsLeague[] | null>(null);
+  useEffect(() => {
+    if (!player.ready) return;
+    let alive = true;
+    void (async () => {
+      const who = auth.account?.address ?? (await player.get()).address;
+      const list = await getMyFriendsLeagues(who).catch(() => []);
+      if (alive) setMine(list);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [auth.account?.address, player]);
+  const f = copy.friends;
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={t.createTitle} description={t.createBody}>
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        <Field label={t.nameLabel} error={error}>
-          <input
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setError(undefined);
-            }}
-            maxLength={32}
-            placeholder={t.namePlaceholder}
-            className={inputClass}
-            autoComplete="off"
-          />
-        </Field>
-        <Button type="submit" size="cta" disabled={busy}>
-          {busy ? <Loader2 className="animate-spin" /> : <Plus />} {t.createCta}
-        </Button>
-      </form>
-    </Sheet>
+    <section className="flex flex-col gap-2">
+      <div className="flex items-end justify-between px-1">
+        <SectionTitle title={f.section} />
+      </div>
+      <p className="-mt-1 px-1 text-[13px] text-muted-foreground">{f.sectionBody}</p>
+      {mine === null && <Shimmer className="h-20 rounded-3xl" />}
+      {mine?.length === 0 && <p className="rounded-3xl bg-surface-1 p-4 text-sm text-muted-foreground ring-1 ring-inset ring-hairline">{f.none}</p>}
+      {mine?.map((l) => <FriendsRow key={l.id} league={l} />)}
+    </section>
   );
 }
 
-function JoinSheet({ open, onOpenChange, onDone }: { open: boolean; onOpenChange: (o: boolean) => void; onDone: (l: LeagueSummary) => void }) {
-  const [code, setCode] = useState("");
-  const [error, setError] = useState<string>();
-  const [busy, setBusy] = useState(false);
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!code.trim()) return;
-    setBusy(true);
-    try {
-      haptic(12);
-      const l = await joinLeague(code);
-      setCode("");
-      onDone(l);
-    } catch {
-      setError(copy.errors.leagueNotFound(code.trim().toUpperCase()).body);
-    } finally {
-      setBusy(false);
-    }
-  };
+function FriendsRow({ league }: { league: FriendsLeague }) {
+  const f = copy.friends;
+  const state = league.settled ? f.status.settled : league.gameweekStatus >= 4 ? f.status.final : league.gameweekStatus >= 1 ? f.status.live : f.status.open;
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={t.joinTitle} description={t.joinBody}>
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        <Field label={t.codeLabel} error={error}>
-          <input
-            value={code}
-            onChange={(e) => {
-              setCode(e.target.value.toUpperCase());
-              setError(undefined);
-            }}
-            maxLength={12}
-            placeholder={t.codePlaceholder}
-            className={cn(inputClass, "font-mono uppercase tracking-widest")}
-            autoComplete="off"
-            autoCapitalize="characters"
-          />
-        </Field>
-        <Button type="submit" size="cta" disabled={busy || !code.trim()}>
-          {busy ? <Loader2 className="animate-spin" /> : <Ticket />} {t.joinCta}
-        </Button>
-      </form>
-    </Sheet>
+    <Link href={routes.friends(league.code)} className="flex items-center gap-4 rounded-3xl bg-surface-1 p-4 ring-1 ring-inset ring-hairline transition-colors hover:bg-surface-2">
+      <span className="grid size-12 place-items-center rounded-2xl bg-gold/15 ring-1 ring-inset ring-gold/30">
+        {league.fee > 0 ? <Coins className="size-5 text-gold" /> : <Users className="size-5 text-muted-foreground" />}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="line-clamp-1 block font-display text-[14px] font-black uppercase leading-tight">{league.name}</span>
+        <span className="block text-xs text-muted-foreground">
+          {f.members(league.members.length, 8)} · {state} · <span className="font-mono">{league.code}</span>
+        </span>
+      </span>
+      <span className="text-right">
+        <span className="num block font-display text-xl font-bold text-gold">${(league.settled ? league.paidOut : league.pot).toFixed(0)}</span>
+        <span className="block text-[11px] text-muted-foreground">{league.settled ? f.paid : f.pot}</span>
+      </span>
+      <ChevronRight className="size-4 text-muted-foreground" />
+    </Link>
   );
 }

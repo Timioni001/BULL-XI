@@ -455,3 +455,33 @@ export async function getManagerRecord(addr: string) {
 export async function getManagerResults(addr: string) {
   return (await import("./onchain")).getManagerResults(addr);
 }
+
+/* ------------------------ Pro preview and friends leagues ------------------------ */
+
+export async function getPortfolio(...args: Parameters<typeof import("./pro").getPortfolio>) {
+  return (await import("./pro")).getPortfolio(...args);
+}
+export async function startPro(...args: Parameters<typeof import("./pro").startPro>) {
+  return (await import("./pro")).startPro(...args);
+}
+export async function investSquad(...args: Parameters<typeof import("./pro").investSquad>) {
+  return (await import("./pro")).investSquad(...args);
+}
+export async function sellPortfolio(...args: Parameters<typeof import("./pro").sellPortfolio>) {
+  return (await import("./pro")).sellPortfolio(...args);
+}
+export async function createFriendsLeague(...args: Parameters<typeof import("./pro").createFriendsLeague>) {
+  return (await import("./pro")).createFriendsLeague(...args);
+}
+export async function joinFriendsLeague(...args: Parameters<typeof import("./pro").joinFriendsLeague>) {
+  return (await import("./pro")).joinFriendsLeague(...args);
+}
+export async function getFriendsLeague(code: string) {
+  return (await import("./pro")).getFriendsLeague(code);
+}
+export async function getMyFriendsLeagues(addr: string) {
+  return (await import("./pro")).getMyFriendsLeagues(addr);
+}
+export async function nextFriendsGameweek(kind: "daily" | "flash") {
+  return (await import("./pro")).nextGameweek(kind);
+}

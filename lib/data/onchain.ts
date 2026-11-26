@@ -24,7 +24,7 @@ import {
   type TransactionPartialSigner,
 } from "@solana/kit";
 import { config, explorer, GAME_API } from "@/lib/config";
-import { BULLXI_PROGRAM_ADDRESS, ENTRY_DISCRIMINATOR, MANAGER_DISCRIMINATOR, findConfigPda, findEntryPda, findManagerPda, getEntryDecoder, getEntrySize, getSetProfileInstructionAsync } from "@/lib/onchain/bullxi";
+import { BULLXI_PROGRAM_ADDRESS, ENTRY_DISCRIMINATOR, LEAGUE_DISCRIMINATOR, MANAGER_DISCRIMINATOR, PORTFOLIO_DISCRIMINATOR, getLeagueDecoder, getPortfolioSize, findConfigPda, findEntryPda, findManagerPda, getEntryDecoder, getEntrySize, getSetProfileInstructionAsync } from "@/lib/onchain/bullxi";
 import { DELEGATION_PROGRAM_ID, decodePriceBook, priceBookAddress } from "@/lib/onchain/price-book";
 import { PRICE_BOOK_STOCKS } from "@/lib/onchain/universe";
 import { ENTRY_STATUS, accountHome, decodeName, entryIxs, gameweekId, joinIxs, readEntry, readGameweek, readManager, sealIx, stockId, type SealInput } from "@/lib/onchain/game";
@@ -52,7 +52,7 @@ async function sponsor(): Promise<Address> {
 }
 
 /** Wraps the player's sign function (Privy) as a kit partial signer. */
-function playerSigner(p: PlayerSigner): TransactionPartialSigner {
+export function playerSigner(p: PlayerSigner): TransactionPartialSigner {
   const addr = address(p.address);
   return {
     address: addr,
@@ -69,7 +69,7 @@ function playerSigner(p: PlayerSigner): TransactionPartialSigner {
   };
 }
 
-async function relay(to: "solana" | "tee", ixs: (fee: ReturnType<typeof createNoopSigner>) => Promise<Instruction[]>): Promise<string> {
+export async function relay(to: "solana" | "tee", ixs: (fee: ReturnType<typeof createNoopSigner>) => Promise<Instruction[]>): Promise<string> {
   const fee = createNoopSigner(await sponsor());
   const rpc = createSolanaRpc(to === "solana" ? config.solanaRpc : config.teeRpc);
   const { value: blockhash } = await rpc.getLatestBlockhash().send();
@@ -93,7 +93,7 @@ async function relay(to: "solana" | "tee", ixs: (fee: ReturnType<typeof createNo
   return createSolanaRpc(config.solanaRpc).sendTransaction(out.tx as never, { encoding: "base64", preflightCommitment: "confirmed" }).send();
 }
 
-async function confirmOnSolana(sig: string, timeoutMs = 45_000) {
+export async function confirmOnSolana(sig: string, timeoutMs = 45_000) {
   const rpc = createSolanaRpc(config.solanaRpc);
   const until = Date.now() + timeoutMs;
   while (Date.now() < until) {
@@ -106,7 +106,7 @@ async function confirmOnSolana(sig: string, timeoutMs = 45_000) {
   throw new OnchainError("timeout", "Solana is slow right now. Try again in a minute.");
 }
 
-async function waitFor<T>(fn: () => Promise<T | null>, timeoutMs = 45_000): Promise<T> {
+export async function waitFor<T>(fn: () => Promise<T | null>, timeoutMs = 45_000): Promise<T> {
   const until = Date.now() + timeoutMs;
   while (Date.now() < until) {
     const v = await fn().catch(() => null);
@@ -170,7 +170,7 @@ async function readOwnEntry(p: PlayerSigner, gameweek: number) {
 }
 
 const tokens = new Map<string, { token: string; expiresAt: number }>();
-async function teeToken(p: PlayerSigner): Promise<string> {
+export async function teeToken(p: PlayerSigner): Promise<string> {
   const hit = tokens.get(p.address);
   if (hit && Date.now() < hit.expiresAt) return hit.token;
   const t = await teeLogin(config.teeRpc, address(p.address), p.signMessage);
@@ -260,7 +260,7 @@ export async function getProofStats(): Promise<ProofStats> {
   const liveId = gameweekId("flash", hour);
   const nextId = gameweekId("flash", hour + 3_600_000);
 
-  const [book, managers, squads, entries, live, next] = await Promise.all([
+  const [book, managers, squads, entries, live, next, portfolios, leagues] = await Promise.all([
     tee.getAccountInfo(bookAddr, { encoding: "base64" }).send(),
     tee.getProgramAccounts(BULLXI_PROGRAM_ADDRESS, { encoding: "base64", dataSlice: slice, filters: disc(MANAGER_DISCRIMINATOR) }).send(),
     // Every entry ever created, counted on Solana (squads inside stay private).
@@ -269,7 +269,18 @@ export async function getProofStats(): Promise<ProofStats> {
     tee.getProgramAccounts(BULLXI_PROGRAM_ADDRESS, { encoding: "base64", filters: disc(ENTRY_DISCRIMINATOR) }).send(),
     readGameweek(config.teeRpc, liveId).catch(() => null),
     readGameweek(config.teeRpc, nextId).catch(() => null),
+    // Portfolios are private in the rollup: count them on Solana, where only their existence shows.
+    base.getProgramAccounts(DELEGATION_PROGRAM_ID, { encoding: "base64", dataSlice: slice, filters: [...disc(PORTFOLIO_DISCRIMINATOR), { dataSize: BigInt(getPortfolioSize()) }] }).send().catch(() => []),
+    tee.getProgramAccounts(BULLXI_PROGRAM_ADDRESS, { encoding: "base64", filters: disc(LEAGUE_DISCRIMINATOR) }).send().catch(() => []),
   ]);
+  const ldec = getLeagueDecoder();
+  const pots = leagues.reduce(
+    (a, l) => {
+      const x = ldec.decode(Uint8Array.from(atob(l.account.data[0]), (c) => c.charCodeAt(0)));
+      return { held: a.held + Number(x.pot) / 1e6, paidOut: a.paidOut + Number(x.paidOut) / 1e6 };
+    },
+    { held: 0, paidOut: 0 },
+  );
   const pb = book.value ? decodePriceBook(Uint8Array.from(atob(book.value.data[0]), (c) => c.charCodeAt(0))) : null;
   const dec = getEntryDecoder();
   const settled = entries.filter((a) => dec.decode(Uint8Array.from(atob(a.account.data[0]), (c) => c.charCodeAt(0))).status === ENTRY_STATUS.settled).length;
@@ -281,7 +292,8 @@ export async function getProofStats(): Promise<ProofStats> {
   return {
     network: config.label,
     previewNotice: config.previewNotice,
-    counters: { pushes: pb?.updates ?? 0, managers: managers.length, squads: squads.length, settled },
+    counters: { pushes: pb?.updates ?? 0, managers: managers.length, squads: squads.length, settled, portfolios: portfolios.length, leagues: leagues.length },
+    pots,
     priceBook: {
       address: bookAddr,
       lastPushAt: (pb?.lastTs ?? 0) * 1000,
@@ -307,6 +319,8 @@ export async function getProofStats(): Promise<ProofStats> {
       { moment: "Reveal and settlement", tech: "Game Worker crank (every minute), permissionless", status: "live" },
       { moment: "Final scores on Solana", tech: "Commit from the rollup to Solana", status: "live" },
       { moment: "Squad rules and scoring", tech: "Enforced in the bullxi program", status: "live" },
+      { moment: "Pro portfolios: your squad as an investment, private", tech: "Private Ephemeral Rollup + members-only permission, priced by the onchain price book", status: "live" },
+      { moment: "Friends leagues with an onchain pot", tech: "Pot held in the league account on the Private ER, paid to the winner at full time", status: "live" },
       { moment: "No gas, no pop-ups for players", tech: "Sponsored fees + Privy accounts", status: "live", note: "Session keys planned" },
       { moment: "Prize payouts", tech: "Magic Actions", status: "planned" },
       { moment: "Entry fees and prize pool", tech: "Ephemeral SPL Token", status: "planned" },

@@ -66,8 +66,8 @@ export function ProofView() {
           </div>
         )}
 
-        <section className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {(["pushes", "managers", "squads", "settled"] as const).map((k) =>
+        <section className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3">
+          {(["pushes", "managers", "squads", "settled", "portfolios", "leagues"] as const).map((k) =>
             d ? (
               <div key={k} className="noise cut-tr rounded-[28px] bg-surface-1 p-5 ring-1 ring-inset ring-hairline">
                 <p className="text-sm text-muted-foreground">{P.counters[k]}</p>
@@ -78,6 +78,7 @@ export function ProofView() {
             ),
           )}
         </section>
+        {d && <p className="mt-3 px-1 text-sm text-muted-foreground">{P.pots("$" + d.pots.held.toFixed(0), "$" + d.pots.paidOut.toFixed(0))}</p>}
         <p className="mt-2 text-xs text-muted-foreground">{P.refreshing}</p>
 
         <section className="mt-10 grid gap-3 lg:grid-cols-2">

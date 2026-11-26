@@ -9,5 +9,7 @@
 export * from "./config";
 export * from "./entry";
 export * from "./gameweek";
+export * from "./league";
 export * from "./manager";
+export * from "./portfolio";
 export * from "./priceBook";

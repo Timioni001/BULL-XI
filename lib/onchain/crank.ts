@@ -5,6 +5,7 @@
  *   3. move live gameweeks through their TWAP snapshots
  *   4. after kickoff, ask MagicBlock VRF to draw the golden stock
  *   5. reveal sealed entries after kickoff, settle and commit them at full time
+ *   6. pay friends league pots to the winner
  * Covers daily gameweeks (20:00 UTC) and hourly flash gameweeks.
  * Runtime-agnostic; one key does it all (it is the config crank and the pusher).
  */
@@ -12,6 +13,7 @@ import { createSolanaRpc, signBytes, type KeyPairSigner } from "@solana/kit";
 import { findGameweekPda } from "./bullxi";
 import { ENTRY_STATUS, GW_STATUS, accountHome, createGameweekIxs, gameweekId, goldenDue, listEntries, readGameweek, requestGoldenIx, revealIx, scheduleTicksIx, settleIx, snapshotDue, snapshotIx } from "./game";
 import { decodePriceBook, priceBookAddress } from "./price-book";
+import { listLeagues, settleLeagueIx } from "./pro";
 import { pushOnce } from "./pusher";
 import { sendAndConfirm } from "./send";
 import { teeLogin, teeRpcUrl } from "./tee-auth";
@@ -138,6 +140,17 @@ export async function runCrank(env: CrankEnv, opts: { commit?: boolean } = {}): 
       for (const e of ready.slice(0, MAX_SETTLES_PER_RUN)) {
         await sendAndConfirm(tee, signer, [await settleIx(signer, e.address, id, e.data.authority)]);
         out.push("settled 1");
+      }
+      // Friends leagues pay out once every member's entry is scored.
+      if (ready.length === 0) {
+        for (const l of (await listLeagues(tee, id)).filter((x) => x.status === 0)) {
+          try {
+            await sendAndConfirm(tee, signer, [await settleLeagueIx(l)]);
+            out.push(`league ${l.id} paid`);
+          } catch {
+            /* entries still being scored: next minute */
+          }
+        }
       }
     }
     return out.join(", ");

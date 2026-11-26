@@ -59,10 +59,32 @@ export const BULLXI_ERROR__FORMATION = 0x1783; // 6019
 export const BULLXI_ERROR__CAPTAIN = 0x1784; // 6020
 /** Chip: That chip can't be played like this */
 export const BULLXI_ERROR__CHIP = 0x1785; // 6021
+/** AlreadyClaimed: Test dollars already claimed */
+export const BULLXI_ERROR__ALREADY_CLAIMED = 0x1786; // 6022
+/** NotEnoughCash: Not enough test dollars */
+export const BULLXI_ERROR__NOT_ENOUGH_CASH = 0x1787; // 6023
+/** TooSmall: Invest at least $15 (one dollar per stock) */
+export const BULLXI_ERROR__TOO_SMALL = 0x1788; // 6024
+/** NoPrice: A stock has no price yet */
+export const BULLXI_ERROR__NO_PRICE = 0x1789; // 6025
+/** BadFee: Entry fee must be at most $100 */
+export const BULLXI_ERROR__BAD_FEE = 0x178a; // 6026
+/** LeagueFull: This league is full */
+export const BULLXI_ERROR__LEAGUE_FULL = 0x178b; // 6027
+/** AlreadyMember: Already in this league */
+export const BULLXI_ERROR__ALREADY_MEMBER = 0x178c; // 6028
+/** NeedsPortfolio: Paid leagues need a Pro portfolio */
+export const BULLXI_ERROR__NEEDS_PORTFOLIO = 0x178d; // 6029
+/** BadAccounts: Wrong accounts passed */
+export const BULLXI_ERROR__BAD_ACCOUNTS = 0x178e; // 6030
 
 export type BullxiError =
+  | typeof BULLXI_ERROR__ALREADY_CLAIMED
   | typeof BULLXI_ERROR__ALREADY_FINAL
+  | typeof BULLXI_ERROR__ALREADY_MEMBER
+  | typeof BULLXI_ERROR__BAD_ACCOUNTS
   | typeof BULLXI_ERROR__BAD_COUNT
+  | typeof BULLXI_ERROR__BAD_FEE
   | typeof BULLXI_ERROR__BAD_NAME
   | typeof BULLXI_ERROR__BAD_SCHEDULE
   | typeof BULLXI_ERROR__BAD_VALIDATOR
@@ -72,8 +94,12 @@ export type BullxiError =
   | typeof BULLXI_ERROR__DEADLINE_PASSED
   | typeof BULLXI_ERROR__DUPLICATE
   | typeof BULLXI_ERROR__FORMATION
+  | typeof BULLXI_ERROR__LEAGUE_FULL
   | typeof BULLXI_ERROR__LINEUP_MISMATCH
+  | typeof BULLXI_ERROR__NEEDS_PORTFOLIO
+  | typeof BULLXI_ERROR__NO_PRICE
   | typeof BULLXI_ERROR__NOT_ADMIN
+  | typeof BULLXI_ERROR__NOT_ENOUGH_CASH
   | typeof BULLXI_ERROR__NOT_PUSHER
   | typeof BULLXI_ERROR__NOT_REVEALED
   | typeof BULLXI_ERROR__NOT_SEALED
@@ -82,13 +108,18 @@ export type BullxiError =
   | typeof BULLXI_ERROR__SECTOR_LIMIT
   | typeof BULLXI_ERROR__SQUAD_QUOTA
   | typeof BULLXI_ERROR__TOO_EARLY
+  | typeof BULLXI_ERROR__TOO_SMALL
   | typeof BULLXI_ERROR__UNKNOWN_STOCK;
 
 let bullxiErrorMessages: Record<BullxiError, string> | undefined;
 if (process.env["NODE_ENV"] !== "production") {
   bullxiErrorMessages = {
+    [BULLXI_ERROR__ALREADY_CLAIMED]: `Test dollars already claimed`,
     [BULLXI_ERROR__ALREADY_FINAL]: `This gameweek is already final`,
+    [BULLXI_ERROR__ALREADY_MEMBER]: `Already in this league`,
+    [BULLXI_ERROR__BAD_ACCOUNTS]: `Wrong accounts passed`,
     [BULLXI_ERROR__BAD_COUNT]: `Wrong number of stocks`,
+    [BULLXI_ERROR__BAD_FEE]: `Entry fee must be at most $100`,
     [BULLXI_ERROR__BAD_NAME]: `Names must be 1 to 24 characters`,
     [BULLXI_ERROR__BAD_SCHEDULE]: `End must be after the deadline`,
     [BULLXI_ERROR__BAD_VALIDATOR]: `That validator is not allowed`,
@@ -98,8 +129,12 @@ if (process.env["NODE_ENV"] !== "production") {
     [BULLXI_ERROR__DEADLINE_PASSED]: `The deadline has passed`,
     [BULLXI_ERROR__DUPLICATE]: `The same stock appears twice`,
     [BULLXI_ERROR__FORMATION]: `Formation is not legal`,
+    [BULLXI_ERROR__LEAGUE_FULL]: `This league is full`,
     [BULLXI_ERROR__LINEUP_MISMATCH]: `Starters and bench must be your 15 stocks`,
+    [BULLXI_ERROR__NEEDS_PORTFOLIO]: `Paid leagues need a Pro portfolio`,
+    [BULLXI_ERROR__NO_PRICE]: `A stock has no price yet`,
     [BULLXI_ERROR__NOT_ADMIN]: `Only the admin can do this`,
+    [BULLXI_ERROR__NOT_ENOUGH_CASH]: `Not enough test dollars`,
     [BULLXI_ERROR__NOT_PUSHER]: `Only the price pusher can do this`,
     [BULLXI_ERROR__NOT_REVEALED]: `Entry is not revealed yet`,
     [BULLXI_ERROR__NOT_SEALED]: `Entry is not sealed`,
@@ -108,6 +143,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BULLXI_ERROR__SECTOR_LIMIT]: `Max 3 stocks from one sector`,
     [BULLXI_ERROR__SQUAD_QUOTA]: `Squad needs 2 ETF, 5 Blue Chip, 5 Growth and 3 High Risk`,
     [BULLXI_ERROR__TOO_EARLY]: `Too early for this step`,
+    [BULLXI_ERROR__TOO_SMALL]: `Invest at least $15 (one dollar per stock)`,
     [BULLXI_ERROR__UNKNOWN_STOCK]: `Unknown stock`,
   };
 }

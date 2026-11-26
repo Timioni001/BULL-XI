@@ -7,8 +7,8 @@ import { BUDGET, MAX_PER_SECTOR, POSITIONS, canAddToSquad, emptySquad, sumCredit
  *
  * Strategy: randomized greedy. For each empty slot, the most it may spend is
  * whatever leaves enough credits to fill the remaining slots with the cheapest
- * legal stocks. Within that ceiling it prefers in-form, popular stocks that use
- * the budget well. Retries a few times, then falls back to a cheapest fill.
+ * legal stocks. Within that ceiling it prefers stocks that use the budget well,
+ * are moving up today, and add a sector the squad doesn't have yet. Retries a few times, then falls back to a cheapest fill.
  */
 export function autoPick(stocks: Stock[], current: SquadSlots, rng: () => number = Math.random): SquadSlots {
   for (let attempt = 0; attempt < 40; attempt++) {
@@ -51,8 +51,11 @@ function tryFill(stocks: Stock[], current: SquadSlots, rng: () => number, cheape
       choice = candidates.reduce((a, b) => (b.credits < a.credits ? b : a));
     } else {
       const target = Math.min(ceiling, (left / (remaining.length + 1)) * 1.12);
+      const sectorsUsed = new Set(picked.map((p) => p.sector));
       const weights = candidates.map((s) => {
-        const quality = 1 + Math.max(0, s.form) / 12 + s.ownership / 25;
+        // Real signals only: today's price move (momentum, capped) and a new sector (diversification).
+        const momentum = Math.max(-3, Math.min(5, s.change24h ?? 0)) / 10;
+        const quality = Math.max(0.2, 1 + momentum + (sectorsUsed.has(s.sector) ? 0 : 0.3));
         const fit = Math.exp(-Math.abs(s.credits - target) / 2.2);
         return quality * (0.25 + fit) * (0.5 + rng());
       });

@@ -12,6 +12,7 @@
 //!   revealed, settled with the rules in `game.rs`, and committed to Solana.
 
 pub mod game;
+pub mod pro;
 pub mod universe;
 
 use anchor_lang::prelude::*;
@@ -38,6 +39,13 @@ pub const MANAGER_SEED: &[u8] = b"manager";
 /// v3: gameweeks also hold the VRF golden stock (v2 added picked stocks and top gainer).
 pub const GAMEWEEK_SEED: &[u8] = b"gameweek_v3";
 pub const ENTRY_SEED: &[u8] = b"entry";
+pub const PORTFOLIO_SEED: &[u8] = b"portfolio";
+pub const LEAGUE_SEED: &[u8] = b"league";
+/// Test dollars every Pro preview player can claim once (micro-USD).
+pub const TEST_DOLLARS: u64 = 1_000 * 1_000_000;
+/// Friends leagues hold up to 8 managers (fits one settle transaction).
+pub const LEAGUE_MAX: usize = 8;
+pub const PORTFOLIO_MEMBERS: usize = 2;
 /// Room for growth beyond today's 41 stocks.
 pub const MAX_STOCKS: usize = 48;
 pub const NAME_LEN: usize = 24;
@@ -466,6 +474,211 @@ pub mod bullxi {
         .build_and_invoke()?;
         Ok(())
     }
+
+    /* ------------------------- Pro preview: portfolios ------------------------ */
+
+    /// Creates a player's Pro portfolio on Solana (a sponsor may pay) and
+    /// pre-funds the rent of its privacy permission.
+    pub fn create_portfolio(ctx: Context<CreatePortfolio>) -> Result<()> {
+        let p = &mut ctx.accounts.portfolio;
+        p.authority = ctx.accounts.authority.key();
+        p.bump = ctx.bumps.portfolio;
+        transfer(
+            CpiContext::new(
+                ctx.accounts.system_program.key(),
+                Transfer { from: ctx.accounts.payer.to_account_info(), to: ctx.accounts.portfolio.to_account_info() },
+            ),
+            ephemeral_rollups_sdk::ephemeral_accounts::rent(EphemeralPermission::size_of(PORTFOLIO_MEMBERS) as u32),
+        )?;
+        Ok(())
+    }
+
+    pub fn delegate_portfolio(ctx: Context<DelegatePortfolio>) -> Result<()> {
+        require_tee(ctx.remaining_accounts)?;
+        let authority = ctx.accounts.authority.key();
+        ctx.accounts.delegate_pda(
+            &ctx.accounts.payer,
+            &[PORTFOLIO_SEED, authority.as_ref()],
+            DelegateConfig { validator: Some(TEE_VALIDATOR), ..Default::default() },
+        )?;
+        Ok(())
+    }
+
+    /// Credits the one-time test dollars and makes the portfolio private:
+    /// only the player (and the game crank) can read balances and holdings.
+    pub fn claim_test_dollars(ctx: Context<ClaimTestDollars>) -> Result<()> {
+        let p = &mut ctx.accounts.portfolio;
+        require!(!p.claimed, BullError::AlreadyClaimed);
+        p.claimed = true;
+        p.cash = p.cash.saturating_add(TEST_DOLLARS);
+        p.updated_ts = Clock::get()?.unix_timestamp;
+        let (authority, bump) = (p.authority, p.bump);
+        let members = vec![
+            Member { flags: FULL_VIEW, pubkey: authority },
+            Member { flags: FULL_VIEW, pubkey: ctx.accounts.config.crank },
+        ];
+        let seeds: &[&[u8]] = &[PORTFOLIO_SEED, authority.as_ref(), &[bump]];
+        let a = &ctx.accounts;
+        if !(a.permission.owner == &PERMISSION_PROGRAM_ID && !a.permission.data_is_empty()) {
+            CreateEphemeralPermissionCpi {
+                permissioned_account: a.portfolio.to_account_info(),
+                permission: a.permission.to_account_info(),
+                payer: a.portfolio.to_account_info(),
+                vault: a.ephemeral_vault.to_account_info(),
+                magic_program: a.magic_program.to_account_info(),
+                permission_program: a.permission_program.to_account_info(),
+                args: EphemeralMembersArgs { is_private: true, members },
+            }
+            .invoke_signed(&[seeds])?;
+        }
+        Ok(())
+    }
+
+    /// Invests `amount` test dollars in the player's 15-stock squad, equal
+    /// dollars per stock, at the latest price-book prices (same rollup).
+    pub fn buy_squad(ctx: Context<TradeSquad>, squad: [u8; SQUAD_SIZE], amount: u64) -> Result<()> {
+        game::validate_squad(&squad).map_err(rule_error)?;
+        let book = &ctx.accounts.price_book;
+        let p = &mut ctx.accounts.portfolio;
+        let (bought, spent) = pro::buy_equal(&squad, amount, p.cash, &book.prices).map_err(pro_error)?;
+        for (s, n) in bought {
+            p.shares[s as usize] = p.shares[s as usize].saturating_add(n);
+        }
+        p.cash -= spent;
+        p.invested = p.invested.saturating_add(spent);
+        p.trades = p.trades.saturating_add(1);
+        p.updated_ts = Clock::get()?.unix_timestamp;
+        Ok(())
+    }
+
+    /// Sells every holding back to test dollars at the latest prices.
+    pub fn sell_all(ctx: Context<TradeSquad>) -> Result<()> {
+        let book = &ctx.accounts.price_book;
+        let p = &mut ctx.accounts.portfolio;
+        let v = pro::value(&p.shares, &book.prices);
+        p.cash = p.cash.saturating_add(v);
+        p.shares = [0; MAX_STOCKS];
+        p.invested = 0;
+        p.trades = p.trades.saturating_add(1);
+        p.updated_ts = Clock::get()?.unix_timestamp;
+        Ok(())
+    }
+
+    /* ------------------------- Friends leagues ------------------------- */
+
+    /// Creates a friends league for one gameweek on Solana. `fee` is the entry
+    /// fee in test dollars (0 = free); every fee goes into the league's pot.
+    pub fn create_league(ctx: Context<CreateLeague>, id: u32, name: String, gameweek: u32, fee: u64) -> Result<()> {
+        require!(fee <= 100 * 1_000_000, BullError::BadFee);
+        let l = &mut ctx.accounts.league;
+        l.id = id;
+        l.creator = ctx.accounts.creator.key();
+        l.bump = ctx.bumps.league;
+        l.name = fixed_name(&name)?;
+        l.gameweek = gameweek;
+        l.fee = fee;
+        l.created_ts = Clock::get()?.unix_timestamp;
+        Ok(())
+    }
+
+    pub fn delegate_league(ctx: Context<DelegateLeague>, id: u32) -> Result<()> {
+        require_tee(ctx.remaining_accounts)?;
+        ctx.accounts.delegate_pda(
+            &ctx.accounts.payer,
+            &[LEAGUE_SEED, &id.to_le_bytes()],
+            DelegateConfig { validator: Some(TEE_VALIDATOR), ..Default::default() },
+        )?;
+        Ok(())
+    }
+
+    /// Joins before the gameweek deadline. Paid leagues move the fee from the
+    /// player's portfolio into the pot, inside the rollup.
+    pub fn join_league(ctx: Context<JoinLeague>) -> Result<()> {
+        let now = Clock::get()?.unix_timestamp;
+        let g = &ctx.accounts.gameweek;
+        require!(now < g.deadline_ts && g.status == status::OPEN, BullError::DeadlinePassed);
+        let me = ctx.accounts.member.key();
+        let l = &mut ctx.accounts.league;
+        require!(l.status == 0, BullError::AlreadyFinal);
+        require!((l.count as usize) < LEAGUE_MAX, BullError::LeagueFull);
+        require!(!l.members[..l.count as usize].contains(&me), BullError::AlreadyMember);
+        if l.fee > 0 {
+            let p = ctx.accounts.portfolio.as_mut().ok_or(BullError::NeedsPortfolio)?;
+            require_keys_eq!(p.authority, me, BullError::NeedsPortfolio);
+            require!(p.cash >= l.fee, BullError::NotEnoughCash);
+            p.cash -= l.fee;
+            p.updated_ts = now;
+            l.pot = l.pot.saturating_add(l.fee);
+        }
+        let i = l.count as usize;
+        l.members[i] = me;
+        l.count += 1;
+        Ok(())
+    }
+
+    /// After full time, pays the pot to the member with the most points (ties:
+    /// first to join). Remaining accounts: each member's entry for the gameweek,
+    /// then, for paid leagues, each member's portfolio, in join order.
+    /// If nobody played, paid fees go back. Anyone can call it.
+    pub fn settle_league<'info>(ctx: Context<'info, SettleLeague<'info>>) -> Result<()> {
+        let g = &ctx.accounts.gameweek;
+        require!(g.status == status::FINAL, BullError::TooEarly);
+        let l = &mut ctx.accounts.league;
+        require!(l.status == 0, BullError::AlreadyFinal);
+        let n = l.count as usize;
+        let paid = l.fee > 0;
+        let rem = ctx.remaining_accounts;
+        require!(rem.len() == if paid { 2 * n } else { n }, BullError::BadAccounts);
+
+        let gw = l.gameweek.to_le_bytes();
+        let mut points: Vec<Option<i32>> = Vec::with_capacity(n);
+        for i in 0..n {
+            let m = l.members[i];
+            let (pda, _) = Pubkey::find_program_address(&[ENTRY_SEED, &gw, m.as_ref()], &crate::ID);
+            let info = &rem[i];
+            require_keys_eq!(info.key(), pda, BullError::BadAccounts);
+            if info.owner != &crate::ID || info.data_is_empty() {
+                points.push(None);
+                continue;
+            }
+            let e = Entry::try_deserialize(&mut &info.try_borrow_data()?[..])?;
+            match e.status {
+                entry_status::SETTLED => points.push(Some(e.points)),
+                entry_status::CREATED => points.push(None),
+                _ => return err!(BullError::TooEarly), // still being revealed or scored
+            }
+        }
+
+        let winner = pro::league_winner(&points);
+        if paid {
+            let mut credit = |i: usize, amount: u64| -> Result<()> {
+                let info = &rem[n + i];
+                let (pda, _) = Pubkey::find_program_address(&[PORTFOLIO_SEED, l.members[i].as_ref()], &crate::ID);
+                require_keys_eq!(info.key(), pda, BullError::BadAccounts);
+                let mut p: Account<Portfolio> = Account::try_from(info)?;
+                p.cash = p.cash.saturating_add(amount);
+                p.exit(&crate::ID)?;
+                Ok(())
+            };
+            match winner {
+                Some((w, _)) => credit(w, l.pot)?,
+                None => {
+                    for i in 0..n {
+                        credit(i, l.fee)?;
+                    }
+                }
+            }
+        }
+        if let Some((w, pts)) = winner {
+            l.winner = l.members[w];
+            l.winner_points = pts;
+        }
+        l.paid_out = l.pot;
+        l.pot = 0;
+        l.status = 1;
+        l.settled_ts = Clock::get()?.unix_timestamp;
+        Ok(())
+    }
 }
 
 /* ------------------------------- Helpers ------------------------------- */
@@ -518,6 +731,14 @@ fn rule_error(e: RuleError) -> Error {
         RuleError::Formation => error!(BullError::Formation),
         RuleError::Captain => error!(BullError::Captain),
         RuleError::Chip => error!(BullError::Chip),
+    }
+}
+
+fn pro_error(e: pro::ProError) -> Error {
+    match e {
+        pro::ProError::NotEnoughCash => error!(BullError::NotEnoughCash),
+        pro::ProError::TooSmall => error!(BullError::TooSmall),
+        pro::ProError::NoPrice => error!(BullError::NoPrice),
     }
 }
 
@@ -674,6 +895,47 @@ pub struct Entry {
     pub hedge: u8,
     pub transfer_hit: u8,
     pub points: i32,
+}
+
+
+#[account]
+#[derive(InitSpace)]
+pub struct Portfolio {
+    pub authority: Pubkey,
+    pub bump: u8,
+    pub claimed: bool,
+    /// Test dollars not invested, micro-USD
+    pub cash: u64,
+    /// Dollars put into the current holdings (cost basis), micro-USD
+    pub invested: u64,
+    /// Holdings per stock, micro-shares
+    pub shares: [u64; MAX_STOCKS],
+    pub trades: u32,
+    pub updated_ts: i64,
+    pub reserved: [u8; 32],
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct League {
+    pub id: u32,
+    pub creator: Pubkey,
+    pub bump: u8,
+    pub name: [u8; NAME_LEN],
+    pub gameweek: u32,
+    /// Entry fee and pot, micro-USD test dollars
+    pub fee: u64,
+    pub pot: u64,
+    pub count: u8,
+    pub members: [Pubkey; LEAGUE_MAX],
+    /// 0 = open, 1 = settled
+    pub status: u8,
+    pub winner: Pubkey,
+    pub winner_points: i32,
+    pub paid_out: u64,
+    pub created_ts: i64,
+    pub settled_ts: i64,
+    pub reserved: [u8; 32],
 }
 
 /* ------------------------------- Accounts ------------------------------- */
@@ -903,6 +1165,100 @@ pub struct SettleEntry<'info> {
     pub manager: Account<'info, Manager>,
 }
 
+
+#[derive(Accounts)]
+pub struct CreatePortfolio<'info> {
+    #[account(init, payer = payer, space = 8 + Portfolio::INIT_SPACE, seeds = [PORTFOLIO_SEED, authority.key().as_ref()], bump)]
+    pub portfolio: Box<Account<'info, Portfolio>>,
+    pub authority: Signer<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[delegate]
+#[derive(Accounts)]
+pub struct DelegatePortfolio<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub authority: Signer<'info>,
+    /// CHECK: the portfolio PDA, checked by seeds
+    #[account(mut, del, seeds = [PORTFOLIO_SEED, authority.key().as_ref()], bump)]
+    pub pda: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct ClaimTestDollars<'info> {
+    #[account(mut, seeds = [PORTFOLIO_SEED, authority.key().as_ref()], bump = portfolio.bump, has_one = authority)]
+    pub portfolio: Box<Account<'info, Portfolio>>,
+    #[account(seeds = [CONFIG_SEED], bump = config.bump)]
+    pub config: Account<'info, Config>,
+    pub authority: Signer<'info>,
+    /// CHECK: the portfolio's permission PDA under the Permission Program
+    #[account(mut, seeds = [PERMISSION_SEED, portfolio.key().as_ref()], bump, seeds::program = PERMISSION_PROGRAM_ID)]
+    pub permission: UncheckedAccount<'info>,
+    /// CHECK: Permission Program
+    #[account(address = PERMISSION_PROGRAM_ID)]
+    pub permission_program: UncheckedAccount<'info>,
+    /// CHECK: ephemeral rent vault
+    #[account(mut, address = EPHEMERAL_VAULT_ID)]
+    pub ephemeral_vault: UncheckedAccount<'info>,
+    /// CHECK: Magic Program
+    #[account(address = MAGIC_PROGRAM_ID)]
+    pub magic_program: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct TradeSquad<'info> {
+    #[account(mut, seeds = [PORTFOLIO_SEED, authority.key().as_ref()], bump = portfolio.bump, has_one = authority)]
+    pub portfolio: Box<Account<'info, Portfolio>>,
+    #[account(seeds = [PRICE_BOOK_SEED], bump = price_book.bump)]
+    pub price_book: Box<Account<'info, PriceBook>>,
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+#[instruction(id: u32)]
+pub struct CreateLeague<'info> {
+    #[account(init, payer = payer, space = 8 + League::INIT_SPACE, seeds = [LEAGUE_SEED, &id.to_le_bytes()], bump)]
+    pub league: Box<Account<'info, League>>,
+    pub creator: Signer<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[delegate]
+#[derive(Accounts)]
+#[instruction(id: u32)]
+pub struct DelegateLeague<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    /// CHECK: the league PDA, checked by seeds
+    #[account(mut, del, seeds = [LEAGUE_SEED, &id.to_le_bytes()], bump)]
+    pub pda: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct JoinLeague<'info> {
+    #[account(mut, seeds = [LEAGUE_SEED, &league.id.to_le_bytes()], bump = league.bump)]
+    pub league: Box<Account<'info, League>>,
+    #[account(seeds = [GAMEWEEK_SEED, &league.gameweek.to_le_bytes()], bump = gameweek.bump)]
+    pub gameweek: Box<Account<'info, Gameweek>>,
+    /// Needed only for paid leagues
+    #[account(mut, seeds = [PORTFOLIO_SEED, member.key().as_ref()], bump = portfolio.bump)]
+    pub portfolio: Option<Box<Account<'info, Portfolio>>>,
+    pub member: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct SettleLeague<'info> {
+    #[account(mut, seeds = [LEAGUE_SEED, &league.id.to_le_bytes()], bump = league.bump)]
+    pub league: Box<Account<'info, League>>,
+    #[account(seeds = [GAMEWEEK_SEED, &league.gameweek.to_le_bytes()], bump = gameweek.bump)]
+    pub gameweek: Box<Account<'info, Gameweek>>,
+}
+
 #[error_code]
 pub enum BullError {
     #[msg("Wrong number of stocks")]
@@ -949,6 +1305,24 @@ pub enum BullError {
     Captain,
     #[msg("That chip can't be played like this")]
     Chip,
+    #[msg("Test dollars already claimed")]
+    AlreadyClaimed,
+    #[msg("Not enough test dollars")]
+    NotEnoughCash,
+    #[msg("Invest at least $15 (one dollar per stock)")]
+    TooSmall,
+    #[msg("A stock has no price yet")]
+    NoPrice,
+    #[msg("Entry fee must be at most $100")]
+    BadFee,
+    #[msg("This league is full")]
+    LeagueFull,
+    #[msg("Already in this league")]
+    AlreadyMember,
+    #[msg("Paid leagues need a Pro portfolio")]
+    NeedsPortfolio,
+    #[msg("Wrong accounts passed")]
+    BadAccounts,
 }
 
 #[cfg(test)]
@@ -1007,6 +1381,8 @@ mod tests {
         assert!(8 + PriceBook::INIT_SPACE <= 10_240);
         assert!(8 + Gameweek::INIT_SPACE <= 10_240);
         assert!(8 + Entry::INIT_SPACE <= 10_240);
+        assert!(8 + Portfolio::INIT_SPACE <= 10_240);
+        assert!(8 + League::INIT_SPACE <= 10_240);
     }
 
     #[test]

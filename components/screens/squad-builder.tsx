@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, RotateCcw, Search, Shuffle, Sparkles } from "lucide-react";
+import { ArrowRight, ChevronRight, Lightbulb, RotateCcw, Search, Shuffle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import type { Position, Stock } from "@/lib/data/types";
 import { POSITIONS, squadIds } from "@/lib/game/rules";
@@ -21,6 +21,7 @@ import { Pitch, PitchRow } from "@/components/pitch/pitch";
 import { PitchSlot } from "@/components/pitch/pitch-slot";
 import { BudgetBar } from "@/components/game/budget-bar";
 import { SquadHints } from "@/components/game/squad-hints";
+import { ThesisSheet } from "@/components/game/thesis-sheet";
 import { CountdownInline } from "@/components/game/countdown";
 import { StockPicker } from "@/components/stock/stock-picker";
 import { StockDetailSheet } from "@/components/stock/stock-detail-sheet";
@@ -43,6 +44,7 @@ export function SquadBuilder() {
   const [picker, setPicker] = useState<{ pos: Position; idx: number } | null>(null);
   const [detail, setDetail] = useState<{ pos: Position; idx: number; stock: Stock } | null>(null);
   const [burst, setBurst] = useState(0);
+  const [thesis, setThesis] = useState(false);
 
   useEffect(() => {
     if (hydrated) completeOnboarding();
@@ -70,7 +72,8 @@ export function SquadBuilder() {
     const added = filled === 15 ? 15 : squadIds(next).length - filled;
     toast(filled === 15 ? t.shuffled : t.autoPicked(added), {
       description: t.tapToSwap,
-      action: { label: copy.common.undo, onClick: () => setSlots(before) },
+      action: { label: copy.thesis.open, onClick: () => setThesis(true) },
+      cancel: { label: copy.common.undo, onClick: () => setSlots(before) },
     });
   };
 
@@ -119,6 +122,18 @@ export function SquadBuilder() {
     <>
       <BudgetBar creditsLeft={validation.creditsLeft} size={filled} />
       <SquadHints hints={hints} complete={validation.valid} />
+      {filled === 15 && (
+        <button onClick={() => (haptic(), setThesis(true))} className="flex w-full items-center gap-3 rounded-3xl bg-surface-1 p-4 text-left ring-1 ring-inset ring-hairline transition-colors hover:bg-surface-2">
+          <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-brand-soft">
+            <Lightbulb className="size-5 text-brand" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-semibold">{copy.thesis.open}</span>
+            <span className="block text-[12px] text-muted-foreground">{copy.thesis.openBody}</span>
+          </span>
+          <ChevronRight className="size-4 text-muted-foreground" />
+        </button>
+      )}
     </>
   );
 
@@ -194,6 +209,8 @@ export function SquadBuilder() {
       </main>
 
       <BottomBar>{actions}</BottomBar>
+
+      <ThesisSheet open={thesis} onOpenChange={setThesis} squad={squad} />
 
       <StockPicker
         open={!!picker}

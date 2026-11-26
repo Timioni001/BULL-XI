@@ -16,6 +16,14 @@ import {
 } from "@solana/kit";
 import {
   BULLXI_PROGRAM_ADDRESS,
+  BUY_SQUAD_DISCRIMINATOR,
+  CLAIM_TEST_DOLLARS_DISCRIMINATOR,
+  CREATE_LEAGUE_DISCRIMINATOR,
+  CREATE_PORTFOLIO_DISCRIMINATOR,
+  DELEGATE_LEAGUE_DISCRIMINATOR,
+  DELEGATE_PORTFOLIO_DISCRIMINATOR,
+  JOIN_LEAGUE_DISCRIMINATOR,
+  SELL_ALL_DISCRIMINATOR,
   CREATE_ENTRY_DISCRIMINATOR,
   CREATE_MANAGER_DISCRIMINATOR,
   DELEGATE_ENTRY_DISCRIMINATOR,
@@ -33,10 +41,18 @@ const ALLOW: Record<RelayTarget, { disc: ReadonlyUint8Array; payerSlot: number |
     { disc: DELEGATE_MANAGER_DISCRIMINATOR, payerSlot: 0, name: "delegate_manager" },
     { disc: CREATE_ENTRY_DISCRIMINATOR, payerSlot: 2, name: "create_entry" },
     { disc: DELEGATE_ENTRY_DISCRIMINATOR, payerSlot: 0, name: "delegate_entry" },
+    { disc: CREATE_PORTFOLIO_DISCRIMINATOR, payerSlot: 2, name: "create_portfolio" },
+    { disc: DELEGATE_PORTFOLIO_DISCRIMINATOR, payerSlot: 0, name: "delegate_portfolio" },
+    { disc: CREATE_LEAGUE_DISCRIMINATOR, payerSlot: 2, name: "create_league" },
+    { disc: DELEGATE_LEAGUE_DISCRIMINATOR, payerSlot: 0, name: "delegate_league" },
   ],
   tee: [
     { disc: SEAL_ENTRY_DISCRIMINATOR, payerSlot: null, name: "seal_entry" },
     { disc: SET_PROFILE_DISCRIMINATOR, payerSlot: null, name: "set_profile" },
+    { disc: CLAIM_TEST_DOLLARS_DISCRIMINATOR, payerSlot: null, name: "claim_test_dollars" },
+    { disc: BUY_SQUAD_DISCRIMINATOR, payerSlot: null, name: "buy_squad" },
+    { disc: SELL_ALL_DISCRIMINATOR, payerSlot: null, name: "sell_all" },
+    { disc: JOIN_LEAGUE_DISCRIMINATOR, payerSlot: null, name: "join_league" },
   ],
 };
 

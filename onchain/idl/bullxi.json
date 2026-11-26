@@ -8,6 +8,244 @@
   },
   "instructions": [
     {
+      "name": "buy_squad",
+      "docs": [
+        "Invests `amount` test dollars in the player's 15-stock squad, equal",
+        "dollars per stock, at the latest price-book prices (same rollup)."
+      ],
+      "discriminator": [
+        185,
+        47,
+        102,
+        132,
+        109,
+        169,
+        234,
+        60
+      ],
+      "accounts": [
+        {
+          "name": "portfolio",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  114,
+                  116,
+                  102,
+                  111,
+                  108,
+                  105,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "price_book",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "portfolio"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "squad",
+          "type": {
+            "array": [
+              "u8",
+              15
+            ]
+          }
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "claim_test_dollars",
+      "docs": [
+        "Credits the one-time test dollars and makes the portfolio private:",
+        "only the player (and the game crank) can read balances and holdings."
+      ],
+      "discriminator": [
+        137,
+        47,
+        194,
+        22,
+        99,
+        62,
+        20,
+        16
+      ],
+      "accounts": [
+        {
+          "name": "portfolio",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  114,
+                  116,
+                  102,
+                  111,
+                  108,
+                  105,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "portfolio"
+          ]
+        },
+        {
+          "name": "permission",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  109,
+                  105,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  58
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "portfolio"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                136,
+                161,
+                10,
+                196,
+                33,
+                152,
+                1,
+                214,
+                246,
+                106,
+                29,
+                60,
+                6,
+                152,
+                192,
+                102,
+                169,
+                175,
+                212,
+                217,
+                180,
+                252,
+                231,
+                71,
+                151,
+                141,
+                209,
+                5,
+                168,
+                212,
+                103,
+                82
+              ]
+            }
+          }
+        },
+        {
+          "name": "permission_program",
+          "address": "ACLseoPoyC3cBqoUtkbjZ4aDrkurZW86v19pXz2XQnp1"
+        },
+        {
+          "name": "ephemeral_vault",
+          "writable": true,
+          "address": "MagicVau1t999999999999999999999999999999999"
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "commit_price_book",
       "docs": [
         "Commits the current price book from the rollup to Solana."
@@ -280,6 +518,79 @@
       ]
     },
     {
+      "name": "create_league",
+      "docs": [
+        "Creates a friends league for one gameweek on Solana. `fee` is the entry",
+        "fee in test dollars (0 = free); every fee goes into the league's pot."
+      ],
+      "discriminator": [
+        129,
+        229,
+        70,
+        201,
+        64,
+        57,
+        180,
+        164
+      ],
+      "accounts": [
+        {
+          "name": "league",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  101,
+                  97,
+                  103,
+                  117,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "u32"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "gameweek",
+          "type": "u32"
+        },
+        {
+          "name": "fee",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "create_manager",
       "docs": [
         "Creates a manager's public profile on Solana. A sponsor may pay."
@@ -343,6 +654,65 @@
           "type": "string"
         }
       ]
+    },
+    {
+      "name": "create_portfolio",
+      "docs": [
+        "Creates a player's Pro portfolio on Solana (a sponsor may pay) and",
+        "pre-funds the rent of its privacy permission."
+      ],
+      "discriminator": [
+        54,
+        26,
+        137,
+        113,
+        59,
+        182,
+        53,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "portfolio",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  114,
+                  116,
+                  102,
+                  111,
+                  108,
+                  105,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
     },
     {
       "name": "delegate_entry",
@@ -759,6 +1129,198 @@
       ]
     },
     {
+      "name": "delegate_league",
+      "discriminator": [
+        202,
+        150,
+        201,
+        4,
+        92,
+        45,
+        81,
+        241
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "buffer_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                201,
+                136,
+                231,
+                12,
+                208,
+                242,
+                9,
+                62,
+                12,
+                157,
+                21,
+                208,
+                113,
+                107,
+                163,
+                110,
+                224,
+                141,
+                169,
+                89,
+                158,
+                216,
+                178,
+                220,
+                222,
+                57,
+                252,
+                28,
+                156,
+                199,
+                205,
+                241
+              ]
+            }
+          }
+        },
+        {
+          "name": "delegation_record_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "delegation_metadata_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  101,
+                  97,
+                  103,
+                  117,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner_program",
+          "address": "EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN"
+        },
+        {
+          "name": "delegation_program",
+          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "u32"
+        }
+      ]
+    },
+    {
       "name": "delegate_manager",
       "docs": [
         "Hands the profile to the private rollup, where settlement updates it."
@@ -929,6 +1491,200 @@
                   103,
                   101,
                   114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner_program",
+          "address": "EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN"
+        },
+        {
+          "name": "delegation_program",
+          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "delegate_portfolio",
+      "discriminator": [
+        46,
+        130,
+        122,
+        242,
+        34,
+        183,
+        33,
+        67
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "buffer_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                201,
+                136,
+                231,
+                12,
+                208,
+                242,
+                9,
+                62,
+                12,
+                157,
+                21,
+                208,
+                113,
+                107,
+                163,
+                110,
+                224,
+                141,
+                169,
+                89,
+                158,
+                216,
+                178,
+                220,
+                222,
+                57,
+                252,
+                28,
+                156,
+                199,
+                205,
+                241
+              ]
+            }
+          }
+        },
+        {
+          "name": "delegation_record_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "delegation_metadata_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  114,
+                  116,
+                  102,
+                  111,
+                  108,
+                  105,
+                  111
                 ]
               },
               {
@@ -1301,6 +2057,112 @@
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "join_league",
+      "docs": [
+        "Joins before the gameweek deadline. Paid leagues move the fee from the",
+        "player's portfolio into the pot, inside the rollup."
+      ],
+      "discriminator": [
+        32,
+        4,
+        179,
+        25,
+        65,
+        34,
+        15,
+        127
+      ],
+      "accounts": [
+        {
+          "name": "league",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  101,
+                  97,
+                  103,
+                  117,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "league.id",
+                "account": "League"
+              }
+            ]
+          }
+        },
+        {
+          "name": "gameweek",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107,
+                  95,
+                  118,
+                  51
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "league.gameweek",
+                "account": "League"
+              }
+            ]
+          }
+        },
+        {
+          "name": "portfolio",
+          "docs": [
+            "Needed only for paid leagues"
+          ],
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  114,
+                  116,
+                  102,
+                  111,
+                  108,
+                  105,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "member"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member",
+          "signer": true
+        }
+      ],
+      "args": []
     },
     {
       "name": "process_undelegation",
@@ -2052,6 +2914,80 @@
       ]
     },
     {
+      "name": "sell_all",
+      "docs": [
+        "Sells every holding back to test dollars at the latest prices."
+      ],
+      "discriminator": [
+        100,
+        215,
+        153,
+        65,
+        230,
+        47,
+        248,
+        97
+      ],
+      "accounts": [
+        {
+          "name": "portfolio",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  114,
+                  116,
+                  102,
+                  111,
+                  108,
+                  105,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "price_book",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  105,
+                  99,
+                  101,
+                  95,
+                  98,
+                  111,
+                  111,
+                  107
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "portfolio"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "set_profile",
       "docs": [
         "Renames the manager or team. Runs on the rollup."
@@ -2221,6 +3157,80 @@
           "name": "magic_context",
           "writable": true,
           "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "settle_league",
+      "docs": [
+        "After full time, pays the pot to the member with the most points (ties:",
+        "first to join). Remaining accounts: each member's entry for the gameweek,",
+        "then, for paid leagues, each member's portfolio, in join order.",
+        "If nobody played, paid fees go back. Anyone can call it."
+      ],
+      "discriminator": [
+        6,
+        184,
+        50,
+        177,
+        242,
+        79,
+        74,
+        141
+      ],
+      "accounts": [
+        {
+          "name": "league",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  101,
+                  97,
+                  103,
+                  117,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "league.id",
+                "account": "League"
+              }
+            ]
+          }
+        },
+        {
+          "name": "gameweek",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101,
+                  119,
+                  101,
+                  101,
+                  107,
+                  95,
+                  118,
+                  51
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "league.gameweek",
+                "account": "League"
+              }
+            ]
+          }
         }
       ],
       "args": []
@@ -2466,6 +3476,19 @@
       ]
     },
     {
+      "name": "League",
+      "discriminator": [
+        65,
+        23,
+        216,
+        206,
+        217,
+        174,
+        87,
+        182
+      ]
+    },
+    {
       "name": "Manager",
       "discriminator": [
         221,
@@ -2476,6 +3499,19 @@
         142,
         113,
         56
+      ]
+    },
+    {
+      "name": "Portfolio",
+      "discriminator": [
+        94,
+        158,
+        71,
+        245,
+        122,
+        102,
+        110,
+        225
       ]
     },
     {
@@ -2602,6 +3638,51 @@
       "code": 6021,
       "name": "Chip",
       "msg": "That chip can't be played like this"
+    },
+    {
+      "code": 6022,
+      "name": "AlreadyClaimed",
+      "msg": "Test dollars already claimed"
+    },
+    {
+      "code": 6023,
+      "name": "NotEnoughCash",
+      "msg": "Not enough test dollars"
+    },
+    {
+      "code": 6024,
+      "name": "TooSmall",
+      "msg": "Invest at least $15 (one dollar per stock)"
+    },
+    {
+      "code": 6025,
+      "name": "NoPrice",
+      "msg": "A stock has no price yet"
+    },
+    {
+      "code": 6026,
+      "name": "BadFee",
+      "msg": "Entry fee must be at most $100"
+    },
+    {
+      "code": 6027,
+      "name": "LeagueFull",
+      "msg": "This league is full"
+    },
+    {
+      "code": 6028,
+      "name": "AlreadyMember",
+      "msg": "Already in this league"
+    },
+    {
+      "code": 6029,
+      "name": "NeedsPortfolio",
+      "msg": "Paid leagues need a Pro portfolio"
+    },
+    {
+      "code": 6030,
+      "name": "BadAccounts",
+      "msg": "Wrong accounts passed"
     }
   ],
   "types": [
@@ -2832,6 +3913,99 @@
       }
     },
     {
+      "name": "League",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u32"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                24
+              ]
+            }
+          },
+          {
+            "name": "gameweek",
+            "type": "u32"
+          },
+          {
+            "name": "fee",
+            "docs": [
+              "Entry fee and pot, micro-USD test dollars"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "pot",
+            "type": "u64"
+          },
+          {
+            "name": "count",
+            "type": "u8"
+          },
+          {
+            "name": "members",
+            "type": {
+              "array": [
+                "pubkey",
+                8
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "docs": [
+              "0 = open, 1 = settled"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "winner",
+            "type": "pubkey"
+          },
+          {
+            "name": "winner_points",
+            "type": "i32"
+          },
+          {
+            "name": "paid_out",
+            "type": "u64"
+          },
+          {
+            "name": "created_ts",
+            "type": "i64"
+          },
+          {
+            "name": "settled_ts",
+            "type": "i64"
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "Manager",
       "type": {
         "kind": "struct",
@@ -2889,6 +4063,69 @@
           {
             "name": "last_points",
             "type": "i32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Portfolio",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "claimed",
+            "type": "bool"
+          },
+          {
+            "name": "cash",
+            "docs": [
+              "Test dollars not invested, micro-USD"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "invested",
+            "docs": [
+              "Dollars put into the current holdings (cost basis), micro-USD"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "shares",
+            "docs": [
+              "Holdings per stock, micro-shares"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                48
+              ]
+            }
+          },
+          {
+            "name": "trades",
+            "type": "u32"
+          },
+          {
+            "name": "updated_ts",
+            "type": "i64"
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }

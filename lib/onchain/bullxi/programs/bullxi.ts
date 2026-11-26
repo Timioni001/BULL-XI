@@ -39,7 +39,9 @@ import {
   getConfigCodec,
   getEntryCodec,
   getGameweekCodec,
+  getLeagueCodec,
   getManagerCodec,
+  getPortfolioCodec,
   getPriceBookCodec,
   type Config,
   type ConfigArgs,
@@ -47,90 +49,128 @@ import {
   type EntryArgs,
   type Gameweek,
   type GameweekArgs,
+  type League,
+  type LeagueArgs,
   type Manager,
   type ManagerArgs,
+  type Portfolio,
+  type PortfolioArgs,
   type PriceBook,
   type PriceBookArgs,
 } from "../accounts";
 import {
+  getBuySquadInstructionAsync,
+  getClaimTestDollarsInstructionAsync,
   getCommitPriceBookInstructionAsync,
   getConfigureInstructionAsync,
   getCreateEntryInstructionAsync,
   getCreateGameweekInstructionAsync,
+  getCreateLeagueInstructionAsync,
   getCreateManagerInstructionAsync,
+  getCreatePortfolioInstructionAsync,
   getDelegateEntryInstructionAsync,
   getDelegateGameweekInstructionAsync,
+  getDelegateLeagueInstructionAsync,
   getDelegateManagerInstructionAsync,
+  getDelegatePortfolioInstructionAsync,
   getDelegatePriceBookInstructionAsync,
   getGoldenCallbackInstruction,
   getInitConfigInstructionAsync,
   getInitPriceBookInstructionAsync,
+  getJoinLeagueInstructionAsync,
   getProcessUndelegationInstructionAsync,
   getPushPricesInstructionAsync,
   getRequestGoldenInstructionAsync,
   getRevealEntryInstructionAsync,
   getScheduleTicksInstructionAsync,
   getSealEntryInstructionAsync,
+  getSellAllInstructionAsync,
   getSetProfileInstructionAsync,
   getSettleEntryInstruction,
+  getSettleLeagueInstruction,
   getSnapshotGameweekInstructionAsync,
   getTickGameweekInstructionAsync,
   getUndelegatePriceBookInstructionAsync,
+  parseBuySquadInstruction,
+  parseClaimTestDollarsInstruction,
   parseCommitPriceBookInstruction,
   parseConfigureInstruction,
   parseCreateEntryInstruction,
   parseCreateGameweekInstruction,
+  parseCreateLeagueInstruction,
   parseCreateManagerInstruction,
+  parseCreatePortfolioInstruction,
   parseDelegateEntryInstruction,
   parseDelegateGameweekInstruction,
+  parseDelegateLeagueInstruction,
   parseDelegateManagerInstruction,
+  parseDelegatePortfolioInstruction,
   parseDelegatePriceBookInstruction,
   parseGoldenCallbackInstruction,
   parseInitConfigInstruction,
   parseInitPriceBookInstruction,
+  parseJoinLeagueInstruction,
   parseProcessUndelegationInstruction,
   parsePushPricesInstruction,
   parseRequestGoldenInstruction,
   parseRevealEntryInstruction,
   parseScheduleTicksInstruction,
   parseSealEntryInstruction,
+  parseSellAllInstruction,
   parseSetProfileInstruction,
   parseSettleEntryInstruction,
+  parseSettleLeagueInstruction,
   parseSnapshotGameweekInstruction,
   parseTickGameweekInstruction,
   parseUndelegatePriceBookInstruction,
+  type BuySquadAsyncInput,
+  type ClaimTestDollarsAsyncInput,
   type CommitPriceBookAsyncInput,
   type ConfigureAsyncInput,
   type CreateEntryAsyncInput,
   type CreateGameweekAsyncInput,
+  type CreateLeagueAsyncInput,
   type CreateManagerAsyncInput,
+  type CreatePortfolioAsyncInput,
   type DelegateEntryAsyncInput,
   type DelegateGameweekAsyncInput,
+  type DelegateLeagueAsyncInput,
   type DelegateManagerAsyncInput,
+  type DelegatePortfolioAsyncInput,
   type DelegatePriceBookAsyncInput,
   type GoldenCallbackInput,
   type InitConfigAsyncInput,
   type InitPriceBookAsyncInput,
+  type JoinLeagueAsyncInput,
+  type ParsedBuySquadInstruction,
+  type ParsedClaimTestDollarsInstruction,
   type ParsedCommitPriceBookInstruction,
   type ParsedConfigureInstruction,
   type ParsedCreateEntryInstruction,
   type ParsedCreateGameweekInstruction,
+  type ParsedCreateLeagueInstruction,
   type ParsedCreateManagerInstruction,
+  type ParsedCreatePortfolioInstruction,
   type ParsedDelegateEntryInstruction,
   type ParsedDelegateGameweekInstruction,
+  type ParsedDelegateLeagueInstruction,
   type ParsedDelegateManagerInstruction,
+  type ParsedDelegatePortfolioInstruction,
   type ParsedDelegatePriceBookInstruction,
   type ParsedGoldenCallbackInstruction,
   type ParsedInitConfigInstruction,
   type ParsedInitPriceBookInstruction,
+  type ParsedJoinLeagueInstruction,
   type ParsedProcessUndelegationInstruction,
   type ParsedPushPricesInstruction,
   type ParsedRequestGoldenInstruction,
   type ParsedRevealEntryInstruction,
   type ParsedScheduleTicksInstruction,
   type ParsedSealEntryInstruction,
+  type ParsedSellAllInstruction,
   type ParsedSetProfileInstruction,
   type ParsedSettleEntryInstruction,
+  type ParsedSettleLeagueInstruction,
   type ParsedSnapshotGameweekInstruction,
   type ParsedTickGameweekInstruction,
   type ParsedUndelegatePriceBookInstruction,
@@ -140,8 +180,10 @@ import {
   type RevealEntryAsyncInput,
   type ScheduleTicksAsyncInput,
   type SealEntryAsyncInput,
+  type SellAllAsyncInput,
   type SetProfileAsyncInput,
   type SettleEntryInput,
+  type SettleLeagueInput,
   type SnapshotGameweekAsyncInput,
   type TickGameweekAsyncInput,
   type UndelegatePriceBookAsyncInput,
@@ -153,7 +195,10 @@ import {
   findDelegationRecordPdaPda,
   findEntryPda,
   findGameweekPda,
+  findJoinLeaguePortfolioPda,
+  findLeaguePda,
   findManagerPda,
+  findPortfolioPda,
   findPriceBookPda,
   findProgramIdentityPda,
 } from "../pdas";
@@ -165,7 +210,9 @@ export enum BullxiAccount {
   Config,
   Entry,
   Gameweek,
+  League,
   Manager,
+  Portfolio,
   PriceBook,
 }
 
@@ -210,12 +257,34 @@ export function identifyBullxiAccount(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([65, 23, 216, 206, 217, 174, 87, 182]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiAccount.League;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([221, 78, 171, 233, 213, 142, 113, 56]),
       ),
       0,
     )
   ) {
     return BullxiAccount.Manager;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([94, 158, 71, 245, 122, 102, 110, 225]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiAccount.Portfolio;
   }
   if (
     containsBytes(
@@ -235,26 +304,35 @@ export function identifyBullxiAccount(
 }
 
 export enum BullxiInstruction {
+  BuySquad,
+  ClaimTestDollars,
   CommitPriceBook,
   Configure,
   CreateEntry,
   CreateGameweek,
+  CreateLeague,
   CreateManager,
+  CreatePortfolio,
   DelegateEntry,
   DelegateGameweek,
+  DelegateLeague,
   DelegateManager,
+  DelegatePortfolio,
   DelegatePriceBook,
   GoldenCallback,
   InitConfig,
   InitPriceBook,
+  JoinLeague,
   ProcessUndelegation,
   PushPrices,
   RequestGolden,
   RevealEntry,
   ScheduleTicks,
   SealEntry,
+  SellAll,
   SetProfile,
   SettleEntry,
+  SettleLeague,
   SnapshotGameweek,
   TickGameweek,
   UndelegatePriceBook,
@@ -264,6 +342,28 @@ export function identifyBullxiInstruction(
   instruction: { data: ReadonlyUint8Array } | ReadonlyUint8Array,
 ): BullxiInstruction {
   const data = "data" in instruction ? instruction.data : instruction;
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([185, 47, 102, 132, 109, 169, 234, 60]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.BuySquad;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([137, 47, 194, 22, 99, 62, 20, 16]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.ClaimTestDollars;
+  }
   if (
     containsBytes(
       data,
@@ -312,12 +412,34 @@ export function identifyBullxiInstruction(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([129, 229, 70, 201, 64, 57, 180, 164]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.CreateLeague;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([188, 55, 132, 229, 104, 187, 203, 62]),
       ),
       0,
     )
   ) {
     return BullxiInstruction.CreateManager;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([54, 26, 137, 113, 59, 182, 53, 225]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.CreatePortfolio;
   }
   if (
     containsBytes(
@@ -345,12 +467,34 @@ export function identifyBullxiInstruction(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([202, 150, 201, 4, 92, 45, 81, 241]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.DelegateLeague;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([84, 52, 63, 96, 144, 124, 127, 202]),
       ),
       0,
     )
   ) {
     return BullxiInstruction.DelegateManager;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([46, 130, 122, 242, 34, 183, 33, 67]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.DelegatePortfolio;
   }
   if (
     containsBytes(
@@ -395,6 +539,17 @@ export function identifyBullxiInstruction(
     )
   ) {
     return BullxiInstruction.InitPriceBook;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([32, 4, 179, 25, 65, 34, 15, 127]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.JoinLeague;
   }
   if (
     containsBytes(
@@ -466,6 +621,17 @@ export function identifyBullxiInstruction(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([100, 215, 153, 65, 230, 47, 248, 97]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.SellAll;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([221, 221, 195, 121, 133, 71, 113, 170]),
       ),
       0,
@@ -483,6 +649,17 @@ export function identifyBullxiInstruction(
     )
   ) {
     return BullxiInstruction.SettleEntry;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([6, 184, 50, 177, 242, 79, 74, 141]),
+      ),
+      0,
+    )
+  ) {
+    return BullxiInstruction.SettleLeague;
   }
   if (
     containsBytes(
@@ -527,6 +704,12 @@ export type ParsedBullxiInstruction<
   TProgram extends string = "EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN",
 > =
   | ({
+      instructionType: BullxiInstruction.BuySquad;
+    } & ParsedBuySquadInstruction<TProgram>)
+  | ({
+      instructionType: BullxiInstruction.ClaimTestDollars;
+    } & ParsedClaimTestDollarsInstruction<TProgram>)
+  | ({
       instructionType: BullxiInstruction.CommitPriceBook;
     } & ParsedCommitPriceBookInstruction<TProgram>)
   | ({
@@ -539,8 +722,14 @@ export type ParsedBullxiInstruction<
       instructionType: BullxiInstruction.CreateGameweek;
     } & ParsedCreateGameweekInstruction<TProgram>)
   | ({
+      instructionType: BullxiInstruction.CreateLeague;
+    } & ParsedCreateLeagueInstruction<TProgram>)
+  | ({
       instructionType: BullxiInstruction.CreateManager;
     } & ParsedCreateManagerInstruction<TProgram>)
+  | ({
+      instructionType: BullxiInstruction.CreatePortfolio;
+    } & ParsedCreatePortfolioInstruction<TProgram>)
   | ({
       instructionType: BullxiInstruction.DelegateEntry;
     } & ParsedDelegateEntryInstruction<TProgram>)
@@ -548,8 +737,14 @@ export type ParsedBullxiInstruction<
       instructionType: BullxiInstruction.DelegateGameweek;
     } & ParsedDelegateGameweekInstruction<TProgram>)
   | ({
+      instructionType: BullxiInstruction.DelegateLeague;
+    } & ParsedDelegateLeagueInstruction<TProgram>)
+  | ({
       instructionType: BullxiInstruction.DelegateManager;
     } & ParsedDelegateManagerInstruction<TProgram>)
+  | ({
+      instructionType: BullxiInstruction.DelegatePortfolio;
+    } & ParsedDelegatePortfolioInstruction<TProgram>)
   | ({
       instructionType: BullxiInstruction.DelegatePriceBook;
     } & ParsedDelegatePriceBookInstruction<TProgram>)
@@ -562,6 +757,9 @@ export type ParsedBullxiInstruction<
   | ({
       instructionType: BullxiInstruction.InitPriceBook;
     } & ParsedInitPriceBookInstruction<TProgram>)
+  | ({
+      instructionType: BullxiInstruction.JoinLeague;
+    } & ParsedJoinLeagueInstruction<TProgram>)
   | ({
       instructionType: BullxiInstruction.ProcessUndelegation;
     } & ParsedProcessUndelegationInstruction<TProgram>)
@@ -581,11 +779,17 @@ export type ParsedBullxiInstruction<
       instructionType: BullxiInstruction.SealEntry;
     } & ParsedSealEntryInstruction<TProgram>)
   | ({
+      instructionType: BullxiInstruction.SellAll;
+    } & ParsedSellAllInstruction<TProgram>)
+  | ({
       instructionType: BullxiInstruction.SetProfile;
     } & ParsedSetProfileInstruction<TProgram>)
   | ({
       instructionType: BullxiInstruction.SettleEntry;
     } & ParsedSettleEntryInstruction<TProgram>)
+  | ({
+      instructionType: BullxiInstruction.SettleLeague;
+    } & ParsedSettleLeagueInstruction<TProgram>)
   | ({
       instructionType: BullxiInstruction.SnapshotGameweek;
     } & ParsedSnapshotGameweekInstruction<TProgram>)
@@ -601,6 +805,20 @@ export function parseBullxiInstruction<TProgram extends string>(
 ): ParsedBullxiInstruction<TProgram> {
   const instructionType = identifyBullxiInstruction(instruction);
   switch (instructionType) {
+    case BullxiInstruction.BuySquad: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.BuySquad,
+        ...parseBuySquadInstruction(instruction),
+      };
+    }
+    case BullxiInstruction.ClaimTestDollars: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.ClaimTestDollars,
+        ...parseClaimTestDollarsInstruction(instruction),
+      };
+    }
     case BullxiInstruction.CommitPriceBook: {
       assertIsInstructionWithAccounts(instruction);
       return {
@@ -629,11 +847,25 @@ export function parseBullxiInstruction<TProgram extends string>(
         ...parseCreateGameweekInstruction(instruction),
       };
     }
+    case BullxiInstruction.CreateLeague: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.CreateLeague,
+        ...parseCreateLeagueInstruction(instruction),
+      };
+    }
     case BullxiInstruction.CreateManager: {
       assertIsInstructionWithAccounts(instruction);
       return {
         instructionType: BullxiInstruction.CreateManager,
         ...parseCreateManagerInstruction(instruction),
+      };
+    }
+    case BullxiInstruction.CreatePortfolio: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.CreatePortfolio,
+        ...parseCreatePortfolioInstruction(instruction),
       };
     }
     case BullxiInstruction.DelegateEntry: {
@@ -650,11 +882,25 @@ export function parseBullxiInstruction<TProgram extends string>(
         ...parseDelegateGameweekInstruction(instruction),
       };
     }
+    case BullxiInstruction.DelegateLeague: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.DelegateLeague,
+        ...parseDelegateLeagueInstruction(instruction),
+      };
+    }
     case BullxiInstruction.DelegateManager: {
       assertIsInstructionWithAccounts(instruction);
       return {
         instructionType: BullxiInstruction.DelegateManager,
         ...parseDelegateManagerInstruction(instruction),
+      };
+    }
+    case BullxiInstruction.DelegatePortfolio: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.DelegatePortfolio,
+        ...parseDelegatePortfolioInstruction(instruction),
       };
     }
     case BullxiInstruction.DelegatePriceBook: {
@@ -683,6 +929,13 @@ export function parseBullxiInstruction<TProgram extends string>(
       return {
         instructionType: BullxiInstruction.InitPriceBook,
         ...parseInitPriceBookInstruction(instruction),
+      };
+    }
+    case BullxiInstruction.JoinLeague: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.JoinLeague,
+        ...parseJoinLeagueInstruction(instruction),
       };
     }
     case BullxiInstruction.ProcessUndelegation: {
@@ -727,6 +980,13 @@ export function parseBullxiInstruction<TProgram extends string>(
         ...parseSealEntryInstruction(instruction),
       };
     }
+    case BullxiInstruction.SellAll: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.SellAll,
+        ...parseSellAllInstruction(instruction),
+      };
+    }
     case BullxiInstruction.SetProfile: {
       assertIsInstructionWithAccounts(instruction);
       return {
@@ -739,6 +999,13 @@ export function parseBullxiInstruction<TProgram extends string>(
       return {
         instructionType: BullxiInstruction.SettleEntry,
         ...parseSettleEntryInstruction(instruction),
+      };
+    }
+    case BullxiInstruction.SettleLeague: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BullxiInstruction.SettleLeague,
+        ...parseSettleLeagueInstruction(instruction),
       };
     }
     case BullxiInstruction.SnapshotGameweek: {
@@ -786,13 +1053,27 @@ export type BullxiPluginAccounts = {
     SelfFetchFunctions<EntryArgs, Entry>;
   gameweek: ReturnType<typeof getGameweekCodec> &
     SelfFetchFunctions<GameweekArgs, Gameweek>;
+  league: ReturnType<typeof getLeagueCodec> &
+    SelfFetchFunctions<LeagueArgs, League>;
   manager: ReturnType<typeof getManagerCodec> &
     SelfFetchFunctions<ManagerArgs, Manager>;
+  portfolio: ReturnType<typeof getPortfolioCodec> &
+    SelfFetchFunctions<PortfolioArgs, Portfolio>;
   priceBook: ReturnType<typeof getPriceBookCodec> &
     SelfFetchFunctions<PriceBookArgs, PriceBook>;
 };
 
 export type BullxiPluginInstructions = {
+  buySquad: (
+    input: BuySquadAsyncInput,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getBuySquadInstructionAsync> &
+    SelfPlanAndSendFunctions;
+  claimTestDollars: (
+    input: ClaimTestDollarsAsyncInput,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getClaimTestDollarsInstructionAsync> &
+    SelfPlanAndSendFunctions;
   commitPriceBook: (
     input: MakeOptional<CommitPriceBookAsyncInput, "payer">,
     config?: { programAddress?: Address | HasAddress },
@@ -813,10 +1094,20 @@ export type BullxiPluginInstructions = {
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getCreateGameweekInstructionAsync> &
     SelfPlanAndSendFunctions;
+  createLeague: (
+    input: MakeOptional<CreateLeagueAsyncInput, "payer">,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getCreateLeagueInstructionAsync> &
+    SelfPlanAndSendFunctions;
   createManager: (
     input: MakeOptional<CreateManagerAsyncInput, "payer">,
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getCreateManagerInstructionAsync> &
+    SelfPlanAndSendFunctions;
+  createPortfolio: (
+    input: MakeOptional<CreatePortfolioAsyncInput, "payer">,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getCreatePortfolioInstructionAsync> &
     SelfPlanAndSendFunctions;
   delegateEntry: (
     input: MakeOptional<DelegateEntryAsyncInput, "payer">,
@@ -828,10 +1119,20 @@ export type BullxiPluginInstructions = {
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getDelegateGameweekInstructionAsync> &
     SelfPlanAndSendFunctions;
+  delegateLeague: (
+    input: MakeOptional<DelegateLeagueAsyncInput, "payer">,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getDelegateLeagueInstructionAsync> &
+    SelfPlanAndSendFunctions;
   delegateManager: (
     input: MakeOptional<DelegateManagerAsyncInput, "payer">,
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getDelegateManagerInstructionAsync> &
+    SelfPlanAndSendFunctions;
+  delegatePortfolio: (
+    input: MakeOptional<DelegatePortfolioAsyncInput, "payer">,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getDelegatePortfolioInstructionAsync> &
     SelfPlanAndSendFunctions;
   delegatePriceBook: (
     input: MakeOptional<DelegatePriceBookAsyncInput, "payer">,
@@ -852,6 +1153,11 @@ export type BullxiPluginInstructions = {
     input: InitPriceBookAsyncInput,
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getInitPriceBookInstructionAsync> &
+    SelfPlanAndSendFunctions;
+  joinLeague: (
+    input: JoinLeagueAsyncInput,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getJoinLeagueInstructionAsync> &
     SelfPlanAndSendFunctions;
   processUndelegation: (
     input: MakeOptional<ProcessUndelegationAsyncInput, "payer">,
@@ -883,6 +1189,10 @@ export type BullxiPluginInstructions = {
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getSealEntryInstructionAsync> &
     SelfPlanAndSendFunctions;
+  sellAll: (
+    input: SellAllAsyncInput,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getSellAllInstructionAsync> & SelfPlanAndSendFunctions;
   setProfile: (
     input: SetProfileAsyncInput,
     config?: { programAddress?: Address | HasAddress },
@@ -892,6 +1202,10 @@ export type BullxiPluginInstructions = {
     input: MakeOptional<SettleEntryInput, "payer">,
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getSettleEntryInstruction> & SelfPlanAndSendFunctions;
+  settleLeague: (
+    input: SettleLeagueInput,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getSettleLeagueInstruction> & SelfPlanAndSendFunctions;
   snapshotGameweek: (
     input: SnapshotGameweekAsyncInput,
     config?: { programAddress?: Address | HasAddress },
@@ -910,14 +1224,17 @@ export type BullxiPluginInstructions = {
 };
 
 export type BullxiPluginPdas = {
+  portfolio: typeof findPortfolioPda;
   priceBook: typeof findPriceBookPda;
+  config: typeof findConfigPda;
   entry: typeof findEntryPda;
   gameweek: typeof findGameweekPda;
-  config: typeof findConfigPda;
+  league: typeof findLeaguePda;
   manager: typeof findManagerPda;
   bufferPda: typeof findBufferPdaPda;
   delegationRecordPda: typeof findDelegationRecordPdaPda;
   delegationMetadataPda: typeof findDelegationMetadataPdaPda;
+  joinLeaguePortfolio: typeof findJoinLeaguePortfolioPda;
   programIdentity: typeof findProgramIdentityPda;
 };
 
@@ -940,10 +1257,28 @@ export function bullxiProgram(
           config: addSelfFetchFunctions(client, getConfigCodec()),
           entry: addSelfFetchFunctions(client, getEntryCodec()),
           gameweek: addSelfFetchFunctions(client, getGameweekCodec()),
+          league: addSelfFetchFunctions(client, getLeagueCodec()),
           manager: addSelfFetchFunctions(client, getManagerCodec()),
+          portfolio: addSelfFetchFunctions(client, getPortfolioCodec()),
           priceBook: addSelfFetchFunctions(client, getPriceBookCodec()),
         },
         instructions: {
+          buySquad: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getBuySquadInstructionAsync(input, {
+                programAddress:
+                  instructionConfig?.programAddress ?? config.programAddress,
+              }),
+            ),
+          claimTestDollars: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getClaimTestDollarsInstructionAsync(input, {
+                programAddress:
+                  instructionConfig?.programAddress ?? config.programAddress,
+              }),
+            ),
           commitPriceBook: (input, instructionConfig) =>
             addSelfPlanAndSendFunctions(
               client,
@@ -982,10 +1317,32 @@ export function bullxiProgram(
                   instructionConfig?.programAddress ?? config.programAddress,
               }),
             ),
+          createLeague: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getCreateLeagueInstructionAsync(
+                { ...input, payer: input.payer ?? client.payer },
+                {
+                  programAddress:
+                    instructionConfig?.programAddress ?? config.programAddress,
+                },
+              ),
+            ),
           createManager: (input, instructionConfig) =>
             addSelfPlanAndSendFunctions(
               client,
               getCreateManagerInstructionAsync(
+                { ...input, payer: input.payer ?? client.payer },
+                {
+                  programAddress:
+                    instructionConfig?.programAddress ?? config.programAddress,
+                },
+              ),
+            ),
+          createPortfolio: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getCreatePortfolioInstructionAsync(
                 { ...input, payer: input.payer ?? client.payer },
                 {
                   programAddress:
@@ -1015,10 +1372,32 @@ export function bullxiProgram(
                 },
               ),
             ),
+          delegateLeague: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getDelegateLeagueInstructionAsync(
+                { ...input, payer: input.payer ?? client.payer },
+                {
+                  programAddress:
+                    instructionConfig?.programAddress ?? config.programAddress,
+                },
+              ),
+            ),
           delegateManager: (input, instructionConfig) =>
             addSelfPlanAndSendFunctions(
               client,
               getDelegateManagerInstructionAsync(
+                { ...input, payer: input.payer ?? client.payer },
+                {
+                  programAddress:
+                    instructionConfig?.programAddress ?? config.programAddress,
+                },
+              ),
+            ),
+          delegatePortfolio: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getDelegatePortfolioInstructionAsync(
                 { ...input, payer: input.payer ?? client.payer },
                 {
                   programAddress:
@@ -1057,6 +1436,14 @@ export function bullxiProgram(
             addSelfPlanAndSendFunctions(
               client,
               getInitPriceBookInstructionAsync(input, {
+                programAddress:
+                  instructionConfig?.programAddress ?? config.programAddress,
+              }),
+            ),
+          joinLeague: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getJoinLeagueInstructionAsync(input, {
                 programAddress:
                   instructionConfig?.programAddress ?? config.programAddress,
               }),
@@ -1118,6 +1505,14 @@ export function bullxiProgram(
                   instructionConfig?.programAddress ?? config.programAddress,
               }),
             ),
+          sellAll: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getSellAllInstructionAsync(input, {
+                programAddress:
+                  instructionConfig?.programAddress ?? config.programAddress,
+              }),
+            ),
           setProfile: (input, instructionConfig) =>
             addSelfPlanAndSendFunctions(
               client,
@@ -1136,6 +1531,14 @@ export function bullxiProgram(
                     instructionConfig?.programAddress ?? config.programAddress,
                 },
               ),
+            ),
+          settleLeague: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getSettleLeagueInstruction(input, {
+                programAddress:
+                  instructionConfig?.programAddress ?? config.programAddress,
+              }),
             ),
           snapshotGameweek: (input, instructionConfig) =>
             addSelfPlanAndSendFunctions(
@@ -1166,8 +1569,18 @@ export function bullxiProgram(
             ),
         },
         pdas: {
+          portfolio: (seeds, pdaConfig) =>
+            findPortfolioPda(seeds, {
+              programAddress:
+                pdaConfig?.programAddress ?? config.programAddress,
+            }),
           priceBook: (pdaConfig) =>
             findPriceBookPda({
+              programAddress:
+                pdaConfig?.programAddress ?? config.programAddress,
+            }),
+          config: (pdaConfig) =>
+            findConfigPda({
               programAddress:
                 pdaConfig?.programAddress ?? config.programAddress,
             }),
@@ -1181,8 +1594,8 @@ export function bullxiProgram(
               programAddress:
                 pdaConfig?.programAddress ?? config.programAddress,
             }),
-          config: (pdaConfig) =>
-            findConfigPda({
+          league: (seeds, pdaConfig) =>
+            findLeaguePda(seeds, {
               programAddress:
                 pdaConfig?.programAddress ?? config.programAddress,
             }),
@@ -1203,6 +1616,11 @@ export function bullxiProgram(
             }),
           delegationMetadataPda: (seeds, pdaConfig) =>
             findDelegationMetadataPdaPda(seeds, {
+              programAddress:
+                pdaConfig?.programAddress ?? config.programAddress,
+            }),
+          joinLeaguePortfolio: (seeds, pdaConfig) =>
+            findJoinLeaguePortfolioPda(seeds, {
               programAddress:
                 pdaConfig?.programAddress ?? config.programAddress,
             }),

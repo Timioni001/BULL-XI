@@ -11,6 +11,7 @@ export const routes = {
   leagues: "/app/leagues",
   league: (id: string) => `/app/league?id=${encodeURIComponent(id)}`,
   join: (code: string) => `/join?code=${encodeURIComponent(code)}`,
+  friends: (code: string) => `/app/friends?code=${encodeURIComponent(code)}`,
   transfers: "/app/transfers",
   chips: "/app/chips",
   history: "/app/history",
