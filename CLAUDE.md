@@ -129,7 +129,7 @@ Starting XI = 11 stocks. Bench = 4 (ordered, auto-sub only if a stock is halted)
 
 ## 8. Phase 2: MagicBlock integration map
 
-Every piece must be load-bearing. Built so far: price book on the Private ER (checkpoint 1); sealed squads with members-only permissions, onchain scoring, settlement committed to Solana, public profiles (checkpoint 2); top gainer and auto-subs onchain, live table from revealed onchain squads, live /proof (checkpoint 3); VRF golden stock, MagicBlock cranks for snapshots, hourly flash gameweeks, device key as a sealing fallback (checkpoint 4); sign-in required before playing, responsive from phone to desktop (checkpoint 5). Everything runs on the devnet TEE so one transaction can read squads and prices.
+Every piece must be load-bearing. Built so far: price book on the Private ER (checkpoint 1); sealed squads with members-only permissions, onchain scoring, settlement committed to Solana, public profiles (checkpoint 2); top gainer and auto-subs onchain, live table from revealed onchain squads, live /proof (checkpoint 3); VRF golden stock, MagicBlock cranks for snapshots, hourly flash gameweeks, device key as a sealing fallback (checkpoint 4); sign-in required before playing, responsive from phone to desktop (checkpoint 5); Pro preview portfolios with test dollars (private in the TEE), friends leagues with an onchain pot paid to the winner, and a squad thesis from real data (checkpoint 6). Everything runs on the devnet TEE so one transaction can read squads and prices.
 
 | UX moment | MagicBlock tech |
 |---|---|

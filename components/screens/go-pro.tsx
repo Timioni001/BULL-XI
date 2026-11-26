@@ -76,7 +76,8 @@ export function GoPro() {
   });
   const holdingsValue = holdings.reduce((a, h) => a + h.value, 0);
   const total = (pf?.cash ?? 0) + holdingsValue;
-  const gain = holdingsValue - (pf?.invested ?? 0);
+  const rawGain = holdingsValue - (pf?.invested ?? 0);
+  const gain = Math.abs(rawGain) < 0.005 ? 0 : rawGain;
   const gainPct = pf?.invested ? (gain / pf.invested) * 100 : 0;
 
   let cta: React.ReactNode;
@@ -135,7 +136,7 @@ export function GoPro() {
               <div className="mt-4 grid grid-cols-3 gap-2 text-sm">
                 <Stat label={t.cash} value={money(pf.cash)} />
                 <Stat label={t.invested} value={money(pf.invested)} />
-                <Stat label={t.gain} value={pf.invested ? `${gain >= 0 ? "+" : "-"}${money(Math.abs(gain))}` : "-"} sub={pf.invested ? signedPct(gainPct) : undefined} tone={pf.invested ? (gain >= 0 ? "up" : "down") : undefined} />
+                <Stat label={t.gain} value={pf.invested ? `${gain >= 0 ? "+" : "-"}${money(Math.abs(gain))}` : "-"} sub={pf.invested ? signedPct(gainPct) : undefined} tone={pf.invested && gain !== 0 ? (gain > 0 ? "up" : "down") : undefined} />
               </div>
               <p className="mt-3 text-[11px] text-muted-foreground">{t.privateNote}</p>
             </motion.section>

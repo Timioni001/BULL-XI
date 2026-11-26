@@ -12,17 +12,20 @@ Built for MagicBlock Solana Blitz v10. Runs on **devnet**: test SOL, real market
 | App | `https://bull-xi.timioni1490.workers.dev` |
 | Proof page (live devnet numbers) | `/proof` |
 | Program (devnet) | [`EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN`](https://explorer.solana.com/address/EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN?cluster=devnet) |
-| Demo film (91 s, made in code with Remotion from real app recordings) | [`docs/media/bullxi-film.mp4`](docs/media/bullxi-film.mp4) |
+| Demo film (2 min, made in code with Remotion from real app recordings) | [`docs/media/bullxi-film.mp4`](docs/media/bullxi-film.mp4) |
 | Raw walkthrough (80 s, screen recording) | [`docs/media/bullxi-demo.mp4`](docs/media/bullxi-demo.mp4) |
-| Full devnet run with every signature | [`docs/devnet-runs/`](docs/devnet-runs/2026-11-24-e2e-v3.md) |
+| Full devnet runs with every signature | [game loop](docs/devnet-runs/2026-11-24-e2e-v3.md) · [Pro + friends leagues](docs/devnet-runs/2026-11-26-pro-leagues.md) |
 
 ## Try it in 2 minutes
 
 1. Open the app, tap **Start playing free**, then **Auto-pick** and **Pick your team**.
 2. Tap **Lock squad**. Within a few seconds you'll see **Sealed on Solana**: your squad is now inside MagicBlock's Private ER. You sign in with Google or email first; no wallet, no SOL, no pop-ups.
 3. Switch the deadline to **Flash** before locking to play the hourly gameweek: it kicks off on the hour and settles an hour later. Then **Watch live**.
-4. Open **/proof** to see the live counters, this hour's gameweek and its VRF golden stock.
-5. Short on time? Add `?demo=1` for a 10x replay of a gameweek.
+4. Tap **Why this squad** under the budget bar: every pick explained from real data (what the company does, its role, today's and this week's move).
+5. Profile, then **Go Pro**: claim $1,000 test dollars and **Invest $250**. Your 15 picks are bought equally at the onchain price into a portfolio only you can read.
+6. Leagues, then **Create league** with a $5 entry fee, and send the 6-character code to a friend. At full time the pot is paid to the winner onchain.
+7. Open **/proof** to see the live counters, this hour's gameweek and its VRF golden stock.
+8. Short on time? Add `?demo=1` for a 10x replay of a gameweek.
 
 ---
 
@@ -36,6 +39,9 @@ Built for MagicBlock Solana Blitz v10. Runs on **devnet**: test SOL, real market
 - **Onchain rules and scoring.** Squad rules (15 stocks, 2/5/5/3, 100 credits, max 3 per sector, formation, captain) and scoring (TWAP move, captain, chips, bonuses, auto-subs) run in the program.
 - **Settlement on Solana.** At full time each squad is scored and the result plus the manager's season record are committed to Solana.
 - **Sign in with Google or email, then no SOL and no pop-ups.** Privy creates a Solana account for every player automatically and it signs game actions silently. If that account can't sign, a key kept on the device seals the squad as a fallback. A sponsor key pays fees for an allowlist of game instructions only.
+- **Pro preview: your picks become your investments.** Claim $1,000 of test dollars, then invest any amount in your squad: equal dollars per stock, priced by the onchain price book. The portfolio (cash, cost basis, shares) lives in the Private ER with a members-only permission, so only you can read it. Sell back to cash any time. Devnet preview with test tokens priced from real market data.
+- **Friends leagues with an onchain pot.** Create a league for the next hourly or daily gameweek with a $0, $5 or $10 entry fee and share a 6-character code. Fees move from each member's portfolio into the league account; at full time `settle_league` pays the whole pot to the highest score (ties: first to join), or refunds if nobody played.
+- **Why this squad.** Auto-pick now uses real signals only (today's price move, new sectors, budget fit), and a thesis sheet explains every pick: what the company does, its role in the formation, its cost, and real moves for today and the past week. Not financial advice, and it says so.
 - **Live table.** During a gameweek the app scores every revealed squad from the onchain opening TWAP and live prices, the same maths as settlement.
 - **Demo mode.** `?demo=1` replays a gameweek at 10x with a simulated league, for quick looks.
 
@@ -82,8 +88,8 @@ The relay only co-signs these instructions, and the sponsor may only appear as t
 
 | Where | Allowed |
 |---|---|
-| Solana | `create_manager`, `delegate_manager`, `create_entry`, `delegate_entry` |
-| TEE | `seal_entry`, `set_profile` |
+| Solana | `create_manager`, `delegate_manager`, `create_entry`, `delegate_entry`, `create_portfolio`, `delegate_portfolio`, `create_league`, `delegate_league` |
+| TEE | `seal_entry`, `set_profile`, `claim_test_dollars`, `buy_squad`, `sell_all`, `join_league` |
 
 Solana's public devnet RPC blocks Cloudflare Workers, so Solana-side transactions are returned co-signed and the browser sends them.
 
@@ -100,6 +106,8 @@ Solana's public devnet RPC blocks Cloudflare Workers, so Solana-side transaction
 | `Gameweek` | `gameweek_v3`, id | TEE | Deadline, end, window, opening and closing TWAP, picked stocks, top gainer, VRF golden stock |
 | `Entry` | `entry`, gameweek, player | TEE (private until kickoff) | Squad, XI, bench, captain, vice, chip, points |
 | `Manager` | `manager`, player | TEE, committed to Solana | Name, team, gameweeks, season points, best week |
+| `Portfolio` | `portfolio`, player | TEE (private: player + crank only) | Test-dollar cash, cost basis, micro-shares of each stock |
+| `League` | `league`, id | TEE | Name, gameweek, entry fee, pot, up to 8 members, winner, amount paid out |
 
 | Instruction | Who | Layer |
 |---|---|---|
@@ -110,6 +118,9 @@ Solana's public devnet RPC blocks Cloudflare Workers, so Solana-side transaction
 | `snapshot_gameweek`, `tick_gameweek` | Anyone, or a MagicBlock crank (`schedule_ticks`) | TEE |
 | `request_golden` → `golden_callback` | Anyone after kickoff → MagicBlock VRF (scoped identity only) | TEE |
 | `reveal_entry`, `settle_entry` | Anyone after the right time (crank) | TEE |
+| `create_portfolio`, `delegate_portfolio`, `create_league`, `delegate_league` | Player (sponsored) | Solana |
+| `claim_test_dollars`, `buy_squad`, `sell_all`, `join_league` | Player (sponsored) | TEE |
+| `settle_league` | Anyone after full time (crank) | TEE |
 
 Rules live in `onchain/programs/bullxi/src/game.rs` and mirror `lib/game/rules.ts`. Both are unit tested, and `scripts/onchain/live-check.ts` checks that the app's live score equals the onchain settled score.
 
@@ -132,6 +143,13 @@ From the end-to-end run on Nov 24 ([full log](docs/devnet-runs/2026-11-24-e2e-v3
 | App live score equals onchain settled score | Pass | `scripts/onchain/live-check.ts` |
 | A browser seals from the app in ~8 s with no wallet or SOL (device-key path) | Pass | Playwright run, demo video |
 | Sign-in is required before playing (Google or email via Privy) | Pass | Playwright: gate shown, Privy modal opens |
+| Pro portfolio opened for a player with 0 SOL (sponsored) | Pass | [create + delegate portfolio](https://explorer.solana.com/tx/gjD718bovb4fvZH96basJcfxGVuo17nEd9PGz2NnuqPxYHt8ATH25CrZd8n3wSoAFAFKD3UfgH1GGLEa3jF2Gos?cluster=devnet) |
+| $1,000 test dollars claimed; portfolio made private | Pass | [claim_test_dollars](https://explorer.solana.com/tx/2YEPBMwfYAYFXMp8QG8FkwY3tZ6M9dgVX6EsJ3132NPSRzYeUfsDZWDFZwzH7b6Xu9Bx8LEDxazSDdrUJvkF7C5W?cluster=custom&customUrl=https%3A%2F%2Fdevnet-tee.magicblock.app) |
+| $300 invested equally across a 15-stock squad at the onchain price | Pass | [buy_squad](https://explorer.solana.com/tx/4e7v4WJ1RE3gfrXQodnKzxAKzTXkwCcmnu9DDfykK4PSffif9mwCEasBbsXHDUTqMsVmRUPzuJBeh2yW1TP6Jgi4?cluster=custom&customUrl=https%3A%2F%2Fdevnet-tee.magicblock.app) |
+| Stranger can't read a Pro portfolio | Pass | log |
+| $10 friends league: two players join, pot $20 held onchain | Pass | [join A](https://explorer.solana.com/tx/3RcxGcsroqHDcdcq9VJXhFzGBJeMLgcf8LYYnx852RoreGo3brk9XJakxKZGsaz96eW3nPdyB9zDjG2aaqqVs2uB?cluster=custom&customUrl=https%3A%2F%2Fdevnet-tee.magicblock.app) · [join B](https://explorer.solana.com/tx/5cRcatPctsfUAH4wha6dX3QLnsx4P4c6tD8A99PyPBKjBfbRsPGznug9j9XPRuDXnEEuvR2Q8pxDNd4gvwWrhZcr?cluster=custom&customUrl=https%3A%2F%2Fdevnet-tee.magicblock.app) |
+| Pot paid to the winner's portfolio at full time ($990 to $1,010) | Pass | [settle_league](https://explorer.solana.com/tx/2pmbK77LDXemXZd6JsyfcujNDHpmHbUjxNZspzvU5L48ijVfYa6H6gCRwQRxyL83SrHCNTtLZKbKJmxXp7DYm8y5?cluster=custom&customUrl=https%3A%2F%2Fdevnet-tee.magicblock.app) |
+| Same flows from the app UI (claim, invest, create a $5 league) | Pass | Playwright recording, demo film |
 
 Rust: 15 unit tests (squad rules, scoring, TWAP, top gainer, auto-subs, golden stock). TypeScript: 57 (rules, relay allowlist, price book encoding).
 
@@ -140,11 +158,13 @@ Rust: 15 unit tests (squad rules, scoring, TWAP, top gainer, auto-subs, golden s
 | Risk | Mitigation |
 |---|---|
 | Copying a rival's squad before kickoff | Squads live in the TEE with a members-only permission (player + crank). Base-layer accounts never hold the squad before kickoff |
-| Draining the fee sponsor | `/relay` co-signs only 6 game instructions, the sponsor may only be the fee payer, max 4 instructions, player signature required. Devnet-only key |
+| Draining the fee sponsor | `/relay` co-signs only 14 game instructions, the sponsor may only be the fee payer, max 4 instructions, player signature required. Devnet-only key |
 | Forged VRF result | `#[vrf_callback]` only accepts our program's scoped VRF identity; a duplicate callback has no effect |
 | Gaming the price with one trade | Points use time-weighted average prices over 10% windows, from a price book written every minute |
 | Crank going down | Every step is permissionless: MagicBlock cranks, the Worker, or anyone can advance it. Cranks are armed per gameweek |
 | Illegal squads via direct calls | Squad, budget, sector, formation and captain rules are enforced in `seal_entry`, not only in the app |
+| Spending someone else's test dollars | `buy_squad`, `sell_all` and `join_league` require the portfolio owner's signature (PDA seeded by the signer); `settle_league` checks every entry and portfolio address against its seeds and can only credit league members |
+| Peeking at holdings | Portfolios sit in the TEE with a members-only permission (owner + crank) |
 | Price source | One source (xStocks reference price via Jupiter). Mainnet would add a second source and sanity bounds |
 
 Known trust: the relay and the crank can read sealed squads (they forward and settle them). The pusher key decides prices; mainnet would move this to an oracle.
@@ -160,6 +180,7 @@ Known trust: the relay and the crank can read sealed squads (they forward and se
 | VRF | Verifiable randomness: a random number anyone can check wasn't rigged |
 | Crank | A scheduled task that calls a program on a timer |
 | Commit | Writing the rollup's latest state back to Solana |
+| Test dollars | Devnet-only play money in a Pro portfolio, priced from real market data. Not real money |
 
 ## Live on devnet
 
