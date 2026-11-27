@@ -230,7 +230,7 @@ function Stat({ label, value, sub, tone }: { label: string; value: string; sub?:
     <div className="rounded-2xl bg-surface-2 px-3 py-2.5 ring-1 ring-inset ring-hairline">
       <p className="text-[11px] text-muted-foreground">{label}</p>
       <p className={cn("num mt-0.5 font-semibold", tone === "up" && "text-bull", tone === "down" && "text-bear")}>{value}</p>
-      {sub && <p className={cn("num text-[11px] font-semibold", tone === "up" ? "text-bull" : "text-bear")}>{sub}</p>}
+      {sub && <p className={cn("num text-[11px] font-semibold", tone === "up" ? "text-bull" : tone === "down" ? "text-bear" : "text-muted-foreground")}>{sub}</p>}
     </div>
   );
 }

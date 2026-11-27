@@ -1,49 +1,128 @@
-# BULL-XI
+<p align="center"><img src="docs/images/hero.png" alt="BULL-XI: pick stocks, lock them in, win the round" width="100%" /></p>
 
-**A fantasy league for tokenized stocks, running on Solana and MagicBlock's Private Ephemeral Rollup.**
-Players pick 15 real stocks (xStocks), seal their squad privately before the deadline, and are scored onchain from time-weighted prices. Results are committed to Solana.
+<h1 align="center">BULL-XI</h1>
 
-Built for MagicBlock Solana Blitz v10. Runs on **devnet**: test SOL, real market prices, $0 infrastructure.
+<p align="center"><b>A real-time stock-picking competition on Solana, built on MagicBlock.</b><br/>
+Build a portfolio of 15 tokenized stocks, seal it privately before the round opens, and compete on live prices. New rounds every hour, every result settled onchain.</p>
 
-![App screens: build a squad, seal it, watch live, public profile](docs/images/app-screens.png)
+<p align="center">
+<a href="https://bull-xi.timioni1490.workers.dev">Live app</a> ·
+<a href="https://bull-xi.timioni1490.workers.dev/proof">Live proof</a> ·
+<a href="docs/media/bullxi-film.mp4">Demo film</a> ·
+<a href="https://explorer.solana.com/address/EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN?cluster=devnet">Program on devnet</a> ·
+<a href="docs/devnet-runs/">Devnet run logs</a>
+</p>
 
-| | |
-|---|---|
-| App | `https://bull-xi.timioni1490.workers.dev` |
-| Proof page (live devnet numbers) | `/proof` |
-| Program (devnet) | [`EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN`](https://explorer.solana.com/address/EZi2Raxa2hba9Bt5jYKf6nUkbQ4xgZeHbuBxjVJTCPXN?cluster=devnet) |
-| Demo film (2 min, made in code with Remotion from real app recordings) | [`docs/media/bullxi-film.mp4`](docs/media/bullxi-film.mp4) |
-| Raw walkthrough (80 s, screen recording) | [`docs/media/bullxi-demo.mp4`](docs/media/bullxi-demo.mp4) |
-| Full devnet runs with every signature | [game loop](docs/devnet-runs/2026-11-24-e2e-v3.md) · [Pro + friends leagues](docs/devnet-runs/2026-11-26-pro-leagues.md) |
-
-## Try it in 2 minutes
-
-1. Open the app, tap **Start playing free**, then **Auto-pick** and **Pick your team**.
-2. Tap **Lock squad**. Within a few seconds you'll see **Sealed on Solana**: your squad is now inside MagicBlock's Private ER. You sign in with Google or email first; no wallet, no SOL, no pop-ups.
-3. Switch the deadline to **Flash** before locking to play the hourly gameweek: it kicks off on the hour and settles an hour later. Then **Watch live**.
-4. Tap **Why this squad** under the budget bar: every pick explained from real data (what the company does, its role, today's and this week's move).
-5. Profile, then **Go Pro**: claim $1,000 test dollars and **Invest $250**. Your 15 picks are bought equally at the onchain price into a portfolio only you can read.
-6. Leagues, then **Create league** with a $5 entry fee, and send the 6-character code to a friend. At full time the pot is paid to the winner onchain.
-7. Open **/proof** to see the live counters, this hour's gameweek and its VRF golden stock.
-8. Short on time? Add `?demo=1` for a 10x replay of a gameweek.
+<p align="center"><sub>Built for MagicBlock Solana Blitz v10 (Entertainment Finance). Devnet preview with test tokens priced from real market data.</sub></p>
 
 ---
 
-## What it does
+## Contents
 
-- **A gameweek every hour.** Daily (20:00 UTC) and hourly flash gameweeks run onchain, so anyone can play a full cycle in about an hour.
-- **Golden stock (MagicBlock VRF).** At kickoff a random stock among those started that week is drawn onchain; it scores double for everyone who has it.
-- **The rollup runs its own clock (MagicBlock cranks).** Scheduled tasks on the TEE advance each gameweek through its TWAP snapshots.
-- **Real prices.** 41 xStocks priced from the xStocks reference price (Jupiter API, free). The app polls every 3 s; a Worker writes the same prices onchain every minute.
-- **Sealed squads.** A locked squad lives in MagicBlock's **Private ER (TEE)** with a members-only permission. Rivals can't read it until kickoff.
-- **Onchain rules and scoring.** Squad rules (15 stocks, 2/5/5/3, 100 credits, max 3 per sector, formation, captain) and scoring (TWAP move, captain, chips, bonuses, auto-subs) run in the program.
-- **Settlement on Solana.** At full time each squad is scored and the result plus the manager's season record are committed to Solana.
-- **Sign in with Google or email, then no SOL and no pop-ups.** Privy creates a Solana account for every player automatically and it signs game actions silently. If that account can't sign, a key kept on the device seals the squad as a fallback. A sponsor key pays fees for an allowlist of game instructions only.
-- **Pro preview: your picks become your investments.** Claim $1,000 of test dollars, then invest any amount in your squad: equal dollars per stock, priced by the onchain price book. The portfolio (cash, cost basis, shares) lives in the Private ER with a members-only permission, so only you can read it. Sell back to cash any time. Devnet preview with test tokens priced from real market data.
-- **Friends leagues with an onchain pot.** Create a league for the next hourly or daily gameweek with a $0, $5 or $10 entry fee and share a 6-character code. Fees move from each member's portfolio into the league account; at full time `settle_league` pays the whole pot to the highest score (ties: first to join), or refunds if nobody played.
-- **Why this squad.** Auto-pick now uses real signals only (today's price move, new sectors, budget fit), and a thesis sheet explains every pick: what the company does, its role in the formation, its cost, and real moves for today and the past week. Not financial advice, and it says so.
-- **Live table.** During a gameweek the app scores every revealed squad from the onchain opening TWAP and live prices, the same maths as settlement.
-- **Demo mode.** `?demo=1` replays a gameweek at 10x with a simulated league, for quick looks.
+1. [Overview](#overview)
+2. [How to use](#how-to-use)
+3. [Features](#features)
+4. [MagicBlock integration](#magicblock-integration)
+5. [Architecture](#architecture)
+6. [How a round works](#how-a-round-works)
+7. [Pro preview and league pots](#pro-preview-and-league-pots)
+8. [Sponsored actions](#sponsored-actions)
+9. [The program](#the-program)
+10. [Verified on devnet](#verified-on-devnet)
+11. [Security](#security)
+12. [Live addresses](#live-addresses)
+13. [Run, test and deploy](#run-test-and-deploy)
+14. [Limits and roadmap](#limits-and-roadmap)
+15. [Glossary](#glossary)
+
+---
+
+## Overview
+
+Tokenized stocks (xStocks) trade around the clock on Solana, but most people never touch them. BULL-XI turns them into a competition anyone can follow: pick 15 stocks within a fixed budget, choose one to count double, lock the selection before the round opens, and score points from real price moves.
+
+The app borrows the language of fantasy sports (squad, captain, gameweek) because millions of people already understand it. Under that familiar surface, every step that matters runs onchain:
+
+| What a player sees | What happens onchain |
+|---|---|
+| Lock your squad | The selection is sealed inside MagicBlock's Private Ephemeral Rollup (TEE). No one else can read it until the round opens |
+| Points move live | Prices are written to an onchain price book every minute; scores use time-weighted averages |
+| A bonus stock is drawn | MagicBlock VRF picks it verifiably at the start of the round |
+| The round ends | MagicBlock cranks advance the round; the program scores every squad and commits results to Solana |
+| Go Pro | Your picks become a private portfolio of test dollars, bought at the onchain price |
+| Play friends for a pot | Entry fees sit in a league account onchain and are paid to the winner at full time |
+
+**Who it is for:** people who enjoy fantasy sports and want an approachable way into markets, and traders who want a social, competitive way to play tokenized stocks.
+
+---
+
+## How to use
+
+**Try it in two minutes:** open the [live app](https://bull-xi.timioni1490.workers.dev), sign in with Google or email, tap **Auto-pick**, then **Lock squad**. Switch the deadline to **Flash** to play the hourly round.
+
+<img src="docs/images/howto-build.png" alt="How to use: build your portfolio" width="100%" />
+
+<img src="docs/images/howto-play.png" alt="How to use: lock, watch, settle" width="100%" />
+
+<img src="docs/images/howto-pro.png" alt="How to use: Pro and friends leagues" width="100%" />
+
+| Step | Where in the app | What to look for |
+|---|---|---|
+| 1. Sign in | Any app page | Google or email. No wallet app, no SOL |
+| 2. Build | Squad | **Auto-pick** builds a legal 15-stock squad; tap any stock to swap |
+| 3. Understand | Squad, **Why this squad** | A rationale for each pick from real data, no forecasts |
+| 4. Captain | Pick team | Starting 11, captain (x2) and vice-captain |
+| 5. Lock | Deadline | **Sealed on Solana** within seconds, with an explorer link |
+| 6. Watch | Live | Live points, league rank, the VRF bonus stock (★) |
+| 7. Results | Profile, History | Scores settled and committed to Solana |
+| 8. Verify | `/proof` | Live onchain counters, the current round, addresses |
+| 9. Pro | Profile, **Go Pro** | Claim $1,000 test dollars, **Invest $250**, see holdings |
+| 10. Leagues | Leagues, **Create league** | Choose a round and entry fee, share the 6-character code |
+
+Short on time? Add `?demo=1` to the app URL for a 10x replay of a round with a simulated league.
+
+---
+
+## Features
+
+**Competition**
+- **Rounds every hour and every day.** Hourly flash rounds and a daily round (20:00 UTC) run onchain, so a full cycle fits in an hour.
+- **41 real stocks.** xStocks priced from the xStocks reference price (Jupiter Price API, free). The app refreshes every 3 seconds.
+- **Rules enforced onchain.** 15 stocks (2 ETF, 5 Blue Chip, 5 Growth, 3 High Risk), 100 credits, max 3 per sector, legal formation, captain and vice. Scoring (time-weighted move x 10, caps, captain, chips, bonuses, auto-subs) runs in the program and is mirrored in TypeScript with parity tests.
+- **Bonus stock (VRF).** At the start of each round MagicBlock VRF draws one of the stocks started that round; it scores double for everyone holding it.
+- **Live table.** During a round the app scores every revealed squad from the onchain opening price and live prices, the same maths as settlement.
+
+**Guidance**
+- **Why this squad.** Auto-pick uses real signals only (today's price move, sector spread, budget fit). A rationale sheet explains each pick: what the company does, its role, its cost, and real moves today and this week. It is explicit that it is not financial advice.
+
+**Pro preview and leagues**
+- **Your picks become your investments.** Claim $1,000 of test dollars and invest any amount, split equally across your 15 stocks at the onchain price. The portfolio lives privately in the TEE. Sell back to cash any time.
+- **Friends leagues with an onchain pot.** Create a league for the next hourly or daily round with a $0, $5 or $10 entry fee and share a 6-character code. At full time the program pays the pot to the top score.
+
+**Access**
+- **Sign in with Google or email.** Privy creates a Solana account automatically and signs game actions in the background. A sponsored relay pays network fees for an allowlist of game instructions, so players never need SOL or a wallet app.
+- **Fits any screen.** Designed for phones (390 px) and checked from 320 px phones to 1920 px monitors.
+
+---
+
+## MagicBlock integration
+
+Every piece is load-bearing and live on devnet.
+
+| Need | MagicBlock technology | Status |
+|---|---|---|
+| Squads hidden until the round opens | Private Ephemeral Rollup (TEE) + members-only permission | Live |
+| Private portfolios and league pots | Private Ephemeral Rollup (TEE) + members-only permission | Live |
+| Prices and time-weighted scoring | Price book on the Private ER, written every minute | Live |
+| Bonus stock draw | VRF (scoped callback identity, ephemeral queue) | Live |
+| Round snapshots on a timer | Cranks (ScheduleTask on the rollup) | Live |
+| Results on Solana | Commit from the rollup | Live |
+| Reveal and settlement | Permissionless instructions, Worker crank as backup | Live |
+| Prize payouts as onchain actions | Magic Actions | Planned |
+| Real-money entry fees | Ephemeral SPL Token / Private Payments | Planned |
+| Season badges | SOAR | Planned |
+
+Everything game-related lives on **one rollup (the TEE)**, so a single transaction can read a squad, the round and the price book together. Why our own price book: MagicBlock's pricing oracle only accepts its own signer, and its public feed list has no equities.
 
 ---
 
@@ -54,33 +133,46 @@ Built for MagicBlock Solana Blitz v10. Runs on **devnet**: test SOL, real market
 | Part | Where | What it does |
 |---|---|---|
 | **App** | Cloudflare Workers Static Assets (`wrangler.jsonc`) | Next.js static export. No server code. Talks to Jupiter, the Worker, devnet and the TEE directly |
-| **Game Worker** | Cloudflare Worker `bullxi-game` (`worker/`) | Cron every minute: push prices, snapshot TWAPs, reveal, settle. `POST /relay` co-signs allowlisted game transactions |
-| **bullxi program** | Solana devnet, accounts delegated to the MagicBlock TEE (`onchain/`) | Price book, gameweeks, sealed entries, managers, scoring, settlement |
+| **Game Worker** | Cloudflare Worker `bullxi-game` (`worker/`) | Cron every minute: push prices, snapshot rounds, request VRF, reveal, settle, pay league pots. `POST /relay` co-signs allowlisted game transactions |
+| **bullxi program** | Solana devnet, accounts delegated to the MagicBlock TEE (`onchain/`) | Price book, rounds, sealed entries, managers, portfolios, leagues, scoring, settlement |
 | **Sign-in** | Privy (free tier) | Google and email accounts get a Solana key automatically; Phantom, Solflare and Backpack also work |
 
-Everything game-related lives on **one rollup (the TEE)** so a single transaction can read a squad, the gameweek and the price book together.
+Total infrastructure cost: **$0** (Cloudflare free tier, Solana devnet, MagicBlock devnet, free price API).
 
 ---
 
-## A gameweek onchain
+## How a round works
 
-![Gameweek lifecycle](docs/images/gameweek.png)
+![Round lifecycle](docs/images/gameweek.png)
 
 1. **Seal.** The app creates the player's profile and entry on Solana (sponsored), delegates them to the TEE, then seals the squad there. A permission lets only the player and the crank read it.
-2. **Kickoff.** At the deadline a MagicBlock crank snapshots the price book, every squad is revealed, and MagicBlock VRF draws the golden stock.
-3. **Opening TWAP.** After the first 10% of the gameweek, the average price per stock is fixed.
-4. **Full time.** The closing TWAP is fixed over the last 10%, and the program finds the top gainer among every stock started that week.
-5. **Settle and commit.** Each squad is scored with `game.rs` and committed to Solana with the manager's updated season.
+2. **Kickoff.** At the deadline a MagicBlock crank snapshots the price book, squads are revealed, and MagicBlock VRF draws the bonus stock.
+3. **Opening price.** After the first 10% of the round, the time-weighted average price per stock is fixed.
+4. **Full time.** The closing average is fixed over the last 10%, and the program finds the top gainer among every stock started that round.
+5. **Settle and commit.** Each squad is scored with `game.rs` and committed to Solana with the manager's updated season. League pots are paid out.
 
-Daily gameweeks have a 20:00 UTC deadline and last 24 hours; flash gameweeks start every hour and last one. TWAP snapshots run on MagicBlock cranks scheduled on the rollup (`tick_gameweek`); the Worker also calls them as a backup and handles reveal, the VRF request and settlement. Every one of these steps is permissionless.
+Daily rounds have a 20:00 UTC deadline and last 24 hours; flash rounds start every hour and last one. Every step is permissionless.
 
-### The price book and TWAP
+### The price book
 
 ![Price book](docs/images/pricebook.png)
 
-One 1.6 KB account holds the latest price of every stock and a running `price x seconds` sum. Any window's TWAP is `(cum_end - cum_start) / (t_end - t_start)`, so a 24-hour gameweek needs only four snapshots.
+One 1.6 KB account holds the latest price of every stock and a running `price x seconds` sum. Any window's time-weighted average is `(cum_end - cum_start) / (t_end - t_start)`, so a 24-hour round needs only four snapshots.
 
-### Sponsored actions
+---
+
+## Pro preview and league pots
+
+![Pro preview and league pots](docs/images/money.png)
+
+- **Portfolio.** `claim_test_dollars` credits $1,000 once and makes the portfolio private (owner and crank only). `buy_squad` splits any amount equally across the 15 stocks at the live price-book price in the same transaction and records the cost basis. `sell_all` returns everything to cash at the live price.
+- **League.** `create_league` sets the round, name and entry fee (up to $100). `join_league` moves the fee from the member's portfolio into the league account before the deadline (up to 8 members). After full time, `settle_league` reads every member's settled entry and pays the whole pot to the top score; ties go to the first to join, and fees are refunded if nobody played.
+
+All amounts are test dollars on devnet, priced from real market data. Real money is the next milestone (see [Limits and roadmap](#limits-and-roadmap)).
+
+---
+
+## Sponsored actions
 
 ![Relay](docs/images/relay.png)
 
@@ -126,9 +218,9 @@ Rules live in `onchain/programs/bullxi/src/game.rs` and mirror `lib/game/rules.t
 
 ---
 
-## What's verified on devnet
+## Verified on devnet
 
-From the end-to-end run on Nov 24 ([full log](docs/devnet-runs/2026-11-24-e2e-v3.md)): a brand-new player with no SOL, a 5-minute test gameweek, program v3.
+Two full end-to-end runs with every signature: [game loop](docs/devnet-runs/2026-11-24-e2e-v3.md) and [Pro + friends leagues](docs/devnet-runs/2026-11-26-pro-leagues.md).
 
 | Check | Result | Evidence |
 |---|---|---|
@@ -151,9 +243,9 @@ From the end-to-end run on Nov 24 ([full log](docs/devnet-runs/2026-11-24-e2e-v3
 | Pot paid to the winner's portfolio at full time ($990 to $1,010) | Pass | [settle_league](https://explorer.solana.com/tx/2pmbK77LDXemXZd6JsyfcujNDHpmHbUjxNZspzvU5L48ijVfYa6H6gCRwQRxyL83SrHCNTtLZKbKJmxXp7DYm8y5?cluster=custom&customUrl=https%3A%2F%2Fdevnet-tee.magicblock.app) |
 | Same flows from the app UI (claim, invest, create a $5 league) | Pass | Playwright recording, demo film |
 
-Rust: 15 unit tests (squad rules, scoring, TWAP, top gainer, auto-subs, golden stock). TypeScript: 57 (rules, relay allowlist, price book encoding).
+---
 
-## Threat model
+## Security
 
 | Risk | Mitigation |
 |---|---|
@@ -167,24 +259,9 @@ Rust: 15 unit tests (squad rules, scoring, TWAP, top gainer, auto-subs, golden s
 | Peeking at holdings | Portfolios sit in the TEE with a members-only permission (owner + crank) |
 | Price source | One source (xStocks reference price via Jupiter). Mainnet would add a second source and sanity bounds |
 
-Known trust: the relay and the crank can read sealed squads (they forward and settle them). The pusher key decides prices; mainnet would move this to an oracle.
+---
 
-## Glossary
-
-| Term | Plain English |
-|---|---|
-| xStock | A tokenized share that tracks a real stock (NVDAx tracks Nvidia) |
-| TWAP | Time-weighted average price: the average over a window, so one odd trade can't swing points |
-| Ephemeral Rollup (ER) | A fast, free MagicBlock runtime that takes over Solana accounts for a while and commits results back |
-| Private ER / TEE | An ER running in secure hardware; accounts can be readable only by chosen members |
-| VRF | Verifiable randomness: a random number anyone can check wasn't rigged |
-| Crank | A scheduled task that calls a program on a timer |
-| Commit | Writing the rollup's latest state back to Solana |
-| Test dollars | Devnet-only play money in a Pro portfolio, priced from real market data. Not real money |
-
-## Live on devnet
-
-![Proof page](docs/images/proof.png)
+## Live addresses
 
 | What | Address |
 |---|---|
@@ -193,37 +270,13 @@ Known trust: the relay and the crank can read sealed squads (they forward and se
 | Game config | [`5orhWwHuxps7KWzsbCrNKdo9dYFMjvc9WkzcH6dKjQxk`](https://explorer.solana.com/address/5orhWwHuxps7KWzsbCrNKdo9dYFMjvc9WkzcH6dKjQxk?cluster=devnet) |
 | TEE validator | `MTEWGuqxUpYZGFJQcp8tLN7x5v9BSeoFHYWQQ3n3xzo` (`devnet-tee.magicblock.app`) |
 
-`/proof` in the app reads these live: price updates, managers, squads, settled results and today's gameweek.
+`/proof` in the app reads these live: price updates, managers, squads, settled results, portfolios, leagues, pots and the current round.
 
 ---
 
-## Deploy (Cloudflare dashboard, no local machine needed)
+## Run, test and deploy
 
-**1. Web app.** Workers & Pages → Create → Import a repository → this repo.
-Branch `main`, build command `npm run build`, deploy command `npx wrangler deploy`, variable `NODE_VERSION=22`, project name `bull-xi` (must match `wrangler.jsonc`).
-
-**2. Game Worker.** Workers & Pages → Create → Import a repository → this repo again.
-Project name **`bullxi-game`** (must match `worker/wrangler.jsonc`), build command empty, deploy command `npx wrangler deploy --config worker/wrangler.jsonc`, variable `NODE_VERSION=22`.
-
-**3. Its key.** Open `bullxi-game` → Settings → Variables and Secrets → Add → type **Secret**, name `PUSHER_KEY`, value = the `[12,34,...]` line of the pusher key. Save, then Deployments → Retry deployment.
-
-**4. Check.** `https://bullxi-game.timioni1490.workers.dev/health` shows `"ok": true` within two minutes. The app expects the Worker at that URL (`GAME_API` in `lib/config.ts`).
-
-From a terminal instead: `npx wrangler login`, `npm run deploy:web`, `npx wrangler secret put PUSHER_KEY --config worker/wrangler.jsonc`, `npm run deploy:worker`.
-
-### Keys (devnet only)
-
-| Key | Role |
-|---|---|
-| `deployer` `6hxtk7…Y3uT` | Program upgrade authority, admin of the price book and config |
-| `pusher` `NdtGUb…BgrWy` | The Worker's key: price pusher, crank, fee sponsor (`PUSHER_KEY`) |
-| `program` | Program address keypair |
-
-Keys never go in the repo. Scripts read them from `~/.config/solana/bullxi/` (or `BULLXI_KEYS_DIR`).
-
----
-
-## Run locally
+### Run locally
 
 ```bash
 npm install
@@ -238,7 +291,7 @@ npm run check            # lint + typecheck + tests + static build
 | `?mock=slow` / `error` / `empty` | Loading, error and empty states |
 | `NEXT_PUBLIC_PRIVY_APP_ID=off` | Build without sign-in |
 
-## Onchain scripts
+### Onchain scripts
 
 ```bash
 npm run onchain:test           # Rust tests: price book maths and every game rule
@@ -248,11 +301,36 @@ npm run onchain:client         # regenerate the typed @solana/kit client from th
 npm run onchain:schedule -- 8  # create the next 8 daily gameweeks
 npm run onchain:crank          # what the Worker cron does, locally (add -- --loop)
 npm run onchain:read           # price book on the TEE and on Solana
-npx tsx scripts/onchain/e2e.ts         # 5-minute gameweek end to end: seal, privacy, reveal, TWAP, settle, commit
+npx tsx scripts/onchain/e2e.ts         # 5-minute round end to end: seal, privacy, reveal, TWAP, settle, commit
+npx tsx scripts/onchain/pro-e2e.ts     # Pro + friends league end to end: portfolios, buy, pot, payout
 npx tsx scripts/onchain/live-check.ts  # app live score vs onchain settled score
 ```
 
-## Repo map
+### Deploy (Cloudflare dashboard, no local machine needed)
+
+**1. Web app.** Workers & Pages → Create → Import a repository → this repo.
+Branch `main`, build command `npm run build`, deploy command `npx wrangler deploy`, variable `NODE_VERSION=22`, project name `bull-xi` (must match `wrangler.jsonc`).
+
+**2. Game Worker.** Workers & Pages → Create → Import a repository → this repo again.
+Project name **`bullxi-game`** (must match `worker/wrangler.jsonc`), build command empty, deploy command `npx wrangler deploy --config worker/wrangler.jsonc`, variable `NODE_VERSION=22`.
+
+**3. Its key.** Open `bullxi-game` → Settings → Variables and Secrets → Add → type **Secret**, name `PUSHER_KEY`, value = the `[12,34,...]` line of the pusher key. Save, then Deployments → Retry deployment.
+
+**4. Check.** `https://bullxi-game.timioni1490.workers.dev/health` shows `"ok": true` within two minutes. The app expects the Worker at that URL (`GAME_API` in `lib/config.ts`).
+
+From a terminal instead: `npx wrangler login`, `npm run deploy:web`, `npx wrangler secret put PUSHER_KEY --config worker/wrangler.jsonc`, `npm run deploy:worker`.
+
+#### Keys (devnet only)
+
+| Key | Role |
+|---|---|
+| `deployer` `6hxtk7…Y3uT` | Program upgrade authority, admin of the price book and config |
+| `pusher` `NdtGUb…BgrWy` | The Worker's key: price pusher, crank, fee sponsor (`PUSHER_KEY`) |
+| `program` | Program address keypair |
+
+Keys never go in the repo. Scripts read them from `~/.config/solana/bullxi/` (or `BULLXI_KEYS_DIR`).
+
+### Repo map
 
 ```
 app/, components/        Next.js app (static export)
@@ -266,27 +344,40 @@ scripts/onchain/         deploy, schedule, crank, e2e and inspection scripts
 docs/                    diagrams (docs/diagrams, rendered to docs/images), stock list
 ```
 
-## MagicBlock map
+The demo film is made in code with Remotion from real app recordings: see [`video/README.md`](video/README.md). README visuals are rendered from `docs/diagrams/` with `node scripts/docs/render-diagrams.mjs`; screenshots come from `scripts/docs/capture-screens.cjs`.
 
-| Need | Tech | Status |
-|---|---|---|
-| Squads hidden until kickoff | Private ER (TEE) + members-only permission | Live |
-| Prices and TWAP for scoring | Price book on the Private ER | Live |
-| Golden stock draw | VRF (scoped identity, ephemeral queue) | Live |
-| TWAP snapshots on a timer | MagicBlock cranks (ScheduleTask) | Live |
-| Reveal, settlement | Permissionless instructions, Worker crank | Live |
-| Results on Solana | Commit from the rollup | Live |
-| No gas, no pop-ups | Sponsored relay + Privy | Live (session keys planned) |
-| Prize payouts | Magic Actions | Planned |
-| Entry fees and prize pool | Ephemeral SPL Token | Planned |
-| Season badges | SOAR | Planned |
+---
 
-Why our own price book: MagicBlock's pricing oracle only accepts its own signer, and its feed list has no stocks.
+## Limits and roadmap
 
-## Known limits
-
+**Current limits**
 - Devnet only. Mainnet is a one-line change in `lib/config.ts` (`NETWORK`), plus real funding.
-- Gameweeks are created ahead from a script (the Worker can't write to Solana's public devnet RPC). Daily through Dec 2, hourly flash for three days at a time.
-- With a plain payer the rollup allows 10 commits per delegated account, so each manager can settle 10 gameweeks before re-delegation.
+- One price source (xStocks reference price via Jupiter). Mainnet would add a second source and sanity bounds.
+- Rounds are created ahead from a script (the Worker can't write to Solana's public devnet RPC): daily through Dec 2, hourly for three days at a time.
+- With a plain payer the rollup allows 10 commits per delegated account, so each manager can settle 10 rounds before re-delegation.
 - The relay sees a squad when it forwards the seal (like the crank). Other players cannot.
-- Mini-league tables for private leagues are still local; the onchain table is everyone in the gameweek.
+- Pro uses test dollars held as balances in the portfolio account, not tokens.
+
+**Next**
+1. Real-money Pro: USDC deposits buying real xStocks into a vault the player owns, with identity checks and country rules where required.
+2. Entry fees and payouts as SPL tokens through Ephemeral SPL Token and Magic Actions.
+3. Session keys for in-round changes, SOAR season badges, and a second price source.
+
+---
+
+## Glossary
+
+| Term | Plain English |
+|---|---|
+| xStock | A tokenized share that tracks a real stock (NVDAx tracks Nvidia) |
+| TWAP | Time-weighted average price: the average over a window, so one odd trade can't swing points |
+| Ephemeral Rollup (ER) | A fast, free MagicBlock runtime that takes over Solana accounts for a while and commits results back |
+| Private ER / TEE | An ER running in secure hardware; accounts can be readable only by chosen members |
+| VRF | Verifiable randomness: a random number anyone can check wasn't rigged |
+| Crank | A scheduled task that calls a program on a timer |
+| Commit | Writing the rollup's latest state back to Solana |
+| Test dollars | Devnet-only play money in a Pro portfolio, priced from real market data. Not real money |
+
+---
+
+<sub>BULL-XI is a devnet preview. Test tokens and test dollars have no monetary value. Past results don't guarantee future returns. You can lose money when investing for real.</sub>

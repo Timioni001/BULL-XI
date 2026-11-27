@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>BULL-XI how to use</title>
+<!-- Source for docs/images/hero.png and docs/images/howto-*.png. Render with: node scripts/docs/render-diagrams.mjs -->
+<style>
+  @font-face { font-family: "Geist"; src: url("../../node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff2") format("woff2"); font-weight: 400; }
+  @font-face { font-family: "Geist"; src: url("../../node_modules/geist/dist/fonts/geist-sans/Geist-SemiBold.woff2") format("woff2"); font-weight: 600; }
+  @font-face { font-family: "Geist"; src: url("../../node_modules/geist/dist/fonts/geist-sans/Geist-Bold.woff2") format("woff2"); font-weight: 700; }
+  @font-face { font-family: "Geist Mono"; src: url("../../node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.woff2") format("woff2"); font-weight: 400; }
+  @font-face { font-family: "Archivo"; src: url("../../node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #e9e9e6; font-family: Geist, sans-serif; color: #111; padding: 40px; display: grid; gap: 40px; }
+  .d { background: #fafafa; width: 1400px; padding: 52px 56px 56px; border-radius: 28px; position: relative; overflow: hidden; }
+  h1 { font-family: Archivo; font-stretch: 125%; font-weight: 800; font-size: 34px; text-transform: uppercase; letter-spacing: -0.01em; }
+  .sub { color: #6b6b6b; font-size: 17px; margin-top: 8px; max-width: 900px; }
+  .eyebrow { font-family: "Geist Mono"; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: #ff5b1f; margin-bottom: 10px; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 40px; }
+  .step .phone { width: 100%; aspect-ratio: 390 / 844; border-radius: 34px; overflow: hidden; background: #fff; box-shadow: 0 0 0 8px #141414, 0 0 0 9px #3a3a3c, 0 30px 60px -24px rgba(0,0,0,.45); }
+  .step .phone img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: top; }
+  .step .n { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 99px; background: #111; color: #fff; font-weight: 700; font-size: 14px; margin-top: 30px; }
+  .step h3 { font-size: 20px; font-weight: 700; margin-top: 10px; letter-spacing: -0.01em; }
+  .step p { font-size: 15px; color: #555; margin-top: 6px; line-height: 1.45; }
+  .chip { display: inline-block; margin-top: 10px; font-family: "Geist Mono"; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 99px; background: #161618; color: #ff8a5c; }
+  .chip.g { background: #e7f8f1; color: #0c8a5a; }
+  /* hero */
+  #hero { background: #0b0b0b; color: #fff; height: 760px; }
+  #hero .logo { width: 64px; height: 64px; filter: invert(1); }
+  #hero .t { font-family: Archivo; font-stretch: 125%; font-weight: 800; font-size: 60px; line-height: .95; letter-spacing: -0.02em; text-transform: uppercase; margin-top: 26px; }
+  #hero .t span { color: #ff5b1f; }
+  #hero .s { font-size: 20px; color: rgba(255,255,255,.72); margin-top: 22px; max-width: 560px; line-height: 1.45; }
+  #hero .pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; max-width: 560px; }
+  #hero .pills span { font-family: "Geist Mono"; font-size: 13px; letter-spacing: .06em; padding: 8px 14px; border-radius: 99px; border: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.85); }
+  #hero .note { position: absolute; left: 56px; bottom: 44px; font-family: "Geist Mono"; font-size: 13px; color: rgba(255,255,255,.45); letter-spacing: .04em; }
+  #hero .ph { position: absolute; width: 250px; aspect-ratio: 390/844; border-radius: 34px; overflow: hidden; box-shadow: 0 0 0 8px #1c1c1e, 0 0 0 9px #48484a, 0 40px 80px -20px rgba(0,0,0,.8); }
+  #hero .ph img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  #hero .glow { position: absolute; right: -120px; top: -160px; width: 900px; height: 900px; background: radial-gradient(closest-side, rgba(255,91,31,.28), transparent 70%); }
+</style>
+</head>
+<body>
+
+<!-- ================================ Hero ================================ -->
+<section class="d" id="hero">
+  <div class="glow"></div>
+  <img class="logo" src="../../public/logo.png" alt="" />
+  <div class="t">Pick stocks.<br/>Lock them in.<br/><span>Win the round.</span></div>
+  <p class="s">A real-time stock-picking competition on Solana. Portfolios sealed in MagicBlock's Private Ephemeral Rollup, scored from live prices, settled onchain every hour.</p>
+  <div class="pills"><span>Private ER (TEE)</span><span>Cranks</span><span>VRF</span><span>Commit to Solana</span><span>41 xStocks</span></div>
+  <p class="note">Devnet preview with test tokens priced from real market data.</p>
+  <div class="ph" style="right:420px; top:170px; transform: rotate(-6deg); width:230px;"><img src="../images/screens/02-squad.png" /></div>
+  <div class="ph" style="right:160px; top:80px; transform: rotate(3deg); width:250px;"><img src="../images/screens/06-live.png" /></div>
+  <div class="ph" style="right:-40px; top:330px; transform: rotate(9deg); width:220px;"><img src="../images/screens/09-pro.png" /></div>
+</section>
+
+<!-- ============================ How to: build ============================ -->
+<section class="d" id="howto-build">
+  <div class="eyebrow">How to use · 1 of 3</div>
+  <h1>Build your portfolio</h1>
+  <p class="sub">From sign-in to a legal 15-stock squad in under a minute.</p>
+  <div class="steps">
+    <div class="step"><div class="phone"><img src="../images/screens/01-signin.png" /></div><span class="n">1</span><h3>Sign in</h3><p>Google or email. An account is created for you; the game covers network fees.</p><span class="chip g">Privy · sponsored fees</span></div>
+    <div class="step"><div class="phone"><img src="../images/screens/02-squad.png" /></div><span class="n">2</span><h3>Auto-pick 15 stocks</h3><p>2 ETF, 5 Blue Chip, 5 Growth, 3 High Risk within 100 credits, max 3 per sector. Tap any stock to swap it.</p><span class="chip">Rules enforced onchain</span></div>
+    <div class="step"><div class="phone"><img src="../images/screens/03-thesis.png" /></div><span class="n">3</span><h3>Read why</h3><p>"Why this squad" explains each pick: what the company does, its role, its cost, and real moves today and this week.</p><span class="chip g">Real data, no forecasts</span></div>
+    <div class="step"><div class="phone"><img src="../images/screens/04-captain.png" /></div><span class="n">4</span><h3>Choose your captain</h3><p>Pick the starting 11 and the stock that counts double. A vice-captain steps in if the captain is halted.</p><span class="chip">Captain x2</span></div>
+  </div>
+</section>
+
+<!-- ============================ How to: play ============================ -->
+<section class="d" id="howto-play">
+  <div class="eyebrow">How to use · 2 of 3</div>
+  <h1>Lock, watch, settle</h1>
+  <p class="sub">Every step from here is onchain: sealed in the Private ER, scored from the onchain price book, settled to Solana.</p>
+  <div class="steps">
+    <div class="step"><div class="phone"><img src="../images/screens/05-sealed.png" /></div><span class="n">5</span><h3>Lock before kickoff</h3><p>The squad is sealed inside MagicBlock's TEE with a members-only permission. Rivals can't read it until the round opens.</p><span class="chip">Private Ephemeral Rollup</span></div>
+    <div class="step"><div class="phone"><img src="../images/screens/06-live.png" /></div><span class="n">6</span><h3>Watch it live</h3><p>Points move with prices. A bonus stock drawn by VRF scores double. Hourly and daily rounds run on MagicBlock cranks.</p><span class="chip">VRF · Cranks</span></div>
+    <div class="step"><div class="phone"><img src="../images/screens/07-results.png" /></div><span class="n">7</span><h3>Settled on Solana</h3><p>At full time the program scores every squad from time-weighted prices and commits the result and season record.</p><span class="chip">Commit to Solana</span></div>
+    <div class="step"><div class="phone"><img src="../images/screens/08-proof.png" /></div><span class="n">8</span><h3>Verify everything</h3><p>/proof reads live from devnet: price updates, squads, settled results, portfolios, leagues and pots.</p><span class="chip g">Nothing mocked</span></div>
+  </div>
+</section>
+
+<!-- ======================== How to: Pro and leagues ======================== -->
+<section class="d" id="howto-pro">
+  <div class="eyebrow">How to use · 3 of 3</div>
+  <h1>Pro and friends leagues</h1>
+  <p class="sub">Your picks become your investments, and friends compete for an onchain prize pool. Test dollars on devnet.</p>
+  <div class="steps">
+    <div class="step"><div class="phone"><img src="../images/screens/09-pro.png" /></div><span class="n">9</span><h3>Invest your squad</h3><p>Claim $1,000 test dollars and invest any amount, split equally across your 15 stocks at the onchain price.</p><span class="chip">buy_squad · price book</span></div>
+    <div class="step"><div class="phone"><img src="../images/screens/10-holdings.png" /></div><span class="n">10</span><h3>Own the holdings</h3><p>Shares, value and daily move per stock. The portfolio is private in the TEE. Sell back to cash any time.</p><span class="chip">Members-only portfolio</span></div>
+    <div class="step"><div class="phone"><img src="../images/screens/11-create-league.png" /></div><span class="n">11</span><h3>Create a league</h3><p>Pick the next hourly or daily round and an entry fee. Share the 6-character code with friends.</p><span class="chip">Up to 8 managers</span></div>
+    <div class="step"><div class="phone"><img src="../images/screens/12-league-pot.png" /></div><span class="n">12</span><h3>Winner takes the pot</h3><p>Fees sit in the league account onchain. At full time settle_league pays the whole pot to the top score.</p><span class="chip">Onchain prize pool</span></div>
+  </div>
+</section>
+
+</body>
+</html>

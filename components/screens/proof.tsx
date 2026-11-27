@@ -71,7 +71,7 @@ export function ProofView() {
             d ? (
               <div key={k} className="noise cut-tr rounded-[28px] bg-surface-1 p-5 ring-1 ring-inset ring-hairline">
                 <p className="text-sm text-muted-foreground">{P.counters[k]}</p>
-                <p className="num mt-3 font-display text-5xl font-bold">{d.counters[k].toLocaleString("en-US")}</p>
+                <p className="num mt-3 font-display text-[clamp(1.75rem,9vw,3rem)] font-bold leading-none">{d.counters[k].toLocaleString("en-US")}</p>
               </div>
             ) : (
               <Shimmer key={k} className="h-[132px] rounded-[28px]" />

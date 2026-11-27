@@ -64,7 +64,7 @@
       <text x="24" y="530">● Price book: 41 prices + running price x time sums</text>
       <text x="24" y="554">● Gameweeks: TWAPs, top gainer, VRF golden stock</text>
       <text x="24" y="578">● Entries: squads sealed with a members-only permission</text>
-      <text x="24" y="602">● Managers: public season record</text>
+      <text x="24" y="602">● Managers, Pro portfolios (private), league pots</text>
       <text x="24" y="626" fill="#ff8a5c">● MagicBlock cranks tick each gameweek on a timer</text>
     </g>
 
@@ -192,7 +192,7 @@
       <path d="M120,440 L994,440" stroke="#111" stroke-width="2" stroke-dasharray="2 6" marker-end="url(#r)"/>
     </g>
   </svg>
-  <p class="sub" style="margin-top:14px">Why 5b: Solana's public devnet RPC blocks requests from Cloudflare Workers. Allowed instructions: create and delegate a profile or an entry (Solana), seal a squad or rename (TEE).</p>
+  <p class="sub" style="margin-top:14px">Why 5b: Solana's public devnet RPC blocks requests from Cloudflare Workers. Allowed instructions: create and delegate a profile, entry, portfolio or league (Solana); seal a squad, rename, claim test dollars, buy or sell the squad, join a league (TEE).</p>
 </section>
 
 <!-- ============================== Price book ============================== -->
@@ -222,6 +222,46 @@
       <text x="560" y="292" fill="#444">+2 beats SPYx · +2 top gainer · golden ×2 · captain ×2</text>
     </g>
   </svg>
+</section>
+
+
+<!-- ================================ Money flow ================================ -->
+<section class="d" id="money">
+  <h1>Pro preview and league pots</h1>
+  <p class="sub">Test dollars only on devnet. Every balance lives in the Private ER; every price comes from the onchain price book.</p>
+  <style>
+    .flow { display: grid; grid-template-columns: 1fr 96px 1fr 96px 1fr 96px 1fr; align-items: center; margin-top: 34px; }
+    .box { background: #fff; border: 1px solid #d9d9d6; border-radius: 20px; padding: 18px 20px; min-height: 128px; }
+    .box.dark { background: #161618; color: #fff; border-color: #161618; }
+    .box .k { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #6b6b6b; }
+    .box.dark .k { color: #ff8a5c; }
+    .box .v { font-size: 20px; font-weight: 700; margin-top: 8px; }
+    .box .x { font-size: 14px; color: #555; margin-top: 6px; line-height: 1.4; }
+    .box.dark .x { color: #cfcfcf; }
+    .arr { text-align: center; font-family: "Geist Mono"; font-size: 11px; color: #ff5b1f; }
+    .arr b { display: block; font-size: 26px; color: #111; font-weight: 400; }
+    .row-title { font-family: "Geist Mono"; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: #6b6b6b; margin-top: 34px; }
+  </style>
+  <p class="row-title">Your picks become your investments</p>
+  <div class="flow">
+    <div class="box"><div class="k">claim_test_dollars</div><div class="v">$1,000</div><div class="x">Once per player. Makes the portfolio private (owner + crank only).</div></div>
+    <div class="arr"><b>→</b></div>
+    <div class="box dark"><div class="k">Portfolio · TEE</div><div class="v">Cash</div><div class="x">Readable only by its owner. Sponsored, no SOL needed.</div></div>
+    <div class="arr"><b>→</b>buy_squad</div>
+    <div class="box"><div class="k">Price book · TEE</div><div class="v">Live price</div><div class="x">Equal dollars per stock, shares = dollars / price, same transaction.</div></div>
+    <div class="arr"><b>→</b></div>
+    <div class="box dark"><div class="k">Holdings · TEE</div><div class="v">15 stocks</div><div class="x">Cost basis kept. sell_all returns everything to cash at the live price.</div></div>
+  </div>
+  <p class="row-title">Friends leagues with an onchain pot</p>
+  <div class="flow">
+    <div class="box"><div class="k">create_league</div><div class="v">Fee $0 to $100</div><div class="x">For one hourly or daily round. 6-character code.</div></div>
+    <div class="arr"><b>→</b>join_league</div>
+    <div class="box dark"><div class="k">League pot · TEE</div><div class="v">Fees held</div><div class="x">Each member's fee moves from their portfolio. Up to 8 members.</div></div>
+    <div class="arr"><b>→</b>full time</div>
+    <div class="box"><div class="k">settle_league</div><div class="v">Top score wins</div><div class="x">Reads every member's settled entry. Ties go to the first to join.</div></div>
+    <div class="arr"><b>→</b></div>
+    <div class="box dark"><div class="k">Winner · TEE</div><div class="v">Pot paid</div><div class="x">Credited to the winner's portfolio. Refunds if nobody played.</div></div>
+  </div>
 </section>
 
 </body>
